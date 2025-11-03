@@ -38,6 +38,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTeachers, Teacher } from "@/hooks/useTeachers";
 import { PermissionButton } from '@/components/permission-button';
+import { Mail } from 'lucide-react';
+import { toast as sonnerToast } from 'sonner';
+import { DialogDescription } from '@/components/ui/dialog';
 
 // Définition du type de clé de tri
 type SortKey = keyof Enseignant;
@@ -60,6 +63,12 @@ interface EnhancedTeacher extends Teacher {
   grade: string;
   createdAt: Date;
   updatedAt: Date;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string | null;
+  } | null;
 }
 
 // Composant Card pour les enseignants
@@ -247,6 +256,9 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
   } | null>(null);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [selectedTeacherInfo, setSelectedTeacherInfo] = useState<EnhancedTeacher | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState('');
 
   // Validation des champs
   const validateField = (name: string, value: string) => {
@@ -528,7 +540,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
             category="enseignants"
             action="create"
             onClick={handleAdd}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-primary hover:bg-primary/50 text-black"
           >
             Ajouter un enseignant
           </PermissionButton>
@@ -692,7 +704,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
         {/* Dialog des informations de l'enseignant */}
         <Dialog open={showInfoDialog} onOpenChange={setShowInfoDialog}>
-          <DialogContent className="bg-white text-black max-w-2xl">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold">
                 Informations de l&apos;enseignant
@@ -705,25 +717,25 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                   <h3 className="font-semibold text-lg border-b pb-2">Informations personnelles</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-xs text-gray-500">Nom complet</Label>
+                      <Label className="text-xs text-muted-foreground">Nom complet</Label>
                       <p className="font-medium">{selectedTeacherInfo.titre} {selectedTeacherInfo.prenom} {selectedTeacherInfo.nom}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Email</Label>
-                      <p className="font-medium">{selectedTeacherInfo.email}</p>
+                      <Label className="text-xs text-muted-foreground">Email</Label>
+                      <p className="font-medium break-all">{selectedTeacherInfo.email}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Téléphone</Label>
+                      <Label className="text-xs text-muted-foreground">Téléphone</Label>
                       <p className="font-medium">{selectedTeacherInfo.telephone}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Type</Label>
+                      <Label className="text-xs text-muted-foreground">Type</Label>
                       <Badge variant={selectedTeacherInfo.type === 'PERMANENT' ? 'default' : 'secondary'}>
                         {selectedTeacherInfo.type}
                       </Badge>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Grade</Label>
+                      <Label className="text-xs text-muted-foreground">Grade</Label>
                       <Badge variant="outline">{selectedTeacherInfo.grade}</Badge>
                     </div>
                   </div>
@@ -732,20 +744,16 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 {/* Informations de connexion */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg border-b pb-2">Compte utilisateur</h3>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                     <div className="flex items-start gap-3">
-                      <svg className="h-5 w-5 text-blue-600 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                      </svg>
+                      <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                       <div className="flex-1">
-                        <p className="font-medium text-blue-900">Identifiants de connexion</p>
-                        <p className="text-sm text-blue-700 mt-1">
-                          <strong>Email :</strong> {selectedTeacherInfo.email}
-                           <strong>PASSWORD : password123</strong>
-                        </p>
-                        <p className="text-sm text-blue-700 mt-1">
+                        <p className="font-semibold text-sm mb-2">Identifiants de connexion</p>
+                        <div className="space-y-1 text-sm">
+                          <p><strong>Email :</strong> <span className="font-bold">{selectedTeacherInfo.email}</span></p>
+                          <p><strong>Mot de passe initial :</strong> <span className="font-bold">password123</span></p>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
                           L&apos;enseignant peut se connecter avec son email et modifier son mot de passe depuis son profil.
                         </p>
                       </div>
@@ -754,8 +762,8 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 </div>
 
                 {/* Note sur le mot de passe */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-xs text-yellow-800">
+                <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-200">
                     💡 <strong>Réinitialisation du mot de passe :</strong> Si l&apos;enseignant a oublié son mot de passe, 
                     vous pouvez le réinitialiser depuis la page de gestion des utilisateurs.
                   </p>
@@ -763,12 +771,116 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
               </div>
             )}
             
-            <DialogFooter>
+            <DialogFooter className="flex gap-2 sm:justify-between">
+              <Button 
+                onClick={() => {
+                  setEmailRecipient(selectedTeacherInfo?.email || '');
+                  setShowSendEmailDialog(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={!selectedTeacherInfo?.user}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Envoyer identifiants
+              </Button>
               <Button 
                 onClick={() => setShowInfoDialog(false)}
                 variant="outline"
               >
                 Fermer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'envoi des identifiants par email */}
+        <Dialog open={showSendEmailDialog} onOpenChange={setShowSendEmailDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Envoyer les identifiants</DialogTitle>
+              <DialogDescription>
+                Enseignant: {selectedTeacherInfo?.titre} {selectedTeacherInfo?.prenom} {selectedTeacherInfo?.nom}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-blue-600" />
+                  <p className="font-semibold text-sm">Informations à envoyer</p>
+                </div>
+                <div className="space-y-1 text-sm">
+                  <p>Email de connexion: <span className="font-bold"><strong>{selectedTeacherInfo?.email}</strong></span></p>
+                  <p>Mot de passe initial: <span className="font-bold"><strong>password123</strong></span></p>
+                  <p>Type: <span className="font-bold"><strong>{selectedTeacherInfo?.type}</strong></span></p>
+                  <p>Grade: <span className="font-bold"><strong>{selectedTeacherInfo?.grade}</strong></span></p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="recipientEmail">Email du destinataire *</Label>
+                <Input
+                  id="recipientEmail"
+                  type="email"
+                  placeholder="enseignant@example.com"
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Un email professionnel sera envoyé avec les identifiants de connexion et les instructions.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSendEmailDialog(false);
+                  setEmailRecipient('');
+                }}
+                disabled={isSendingEmail}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!emailRecipient) {
+                    sonnerToast.error('Veuillez entrer l\'email du destinataire');
+                    return;
+                  }
+
+                  if (!selectedTeacherInfo?.id) {
+                    sonnerToast.error('Enseignant non sélectionné');
+                    return;
+                  }
+
+                  setIsSendingEmail(true);
+
+                  try {
+                    const response = await fetch(`/api/school-admin/enseignants/${selectedTeacherInfo.id}/send-credentials`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ recipientEmail: emailRecipient })
+                    });
+
+                    if (response.ok) {
+                      sonnerToast.success('Identifiants envoyés par email avec succès');
+                      setShowSendEmailDialog(false);
+                      setEmailRecipient('');
+                    } else {
+                      const error = await response.json();
+                      sonnerToast.error(error.error || 'Erreur lors de l\'envoi');
+                    }
+                  } catch (error) {
+                    console.error('Erreur:', error);
+                    sonnerToast.error('Erreur lors de l\'envoi de l\'email');
+                  } finally {
+                    setIsSendingEmail(false);
+                  }
+                }}
+                disabled={isSendingEmail || !emailRecipient}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSendingEmail ? 'Envoi...' : 'Envoyer'}
               </Button>
             </DialogFooter>
           </DialogContent>

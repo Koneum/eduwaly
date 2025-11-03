@@ -21,21 +21,99 @@ export default async function StudentCoursesPage({
     include: {
       user: true,
       filiere: true,
-      school: true
+      school: true,
+      evaluations: {
+        include: {
+          module: true
+        }
+      }
     }
   })
 
   if (!student) redirect('/auth/login')
 
-  // Cours mockup
-  const courses = [
-    { id: 1, name: "Mathématiques", teacher: "Prof. Dupont", average: 16.5, progress: 75, resources: 12, color: "bg-blue-500" },
-    { id: 2, name: "Français", teacher: "Prof. Martin", average: 15.2, progress: 80, resources: 10, color: "bg-green-500" },
-    { id: 3, name: "Anglais", teacher: "Prof. Smith", average: 17.0, progress: 70, resources: 8, color: "bg-purple-500" },
-    { id: 4, name: "Histoire", teacher: "Prof. Bernard", average: 14.8, progress: 65, resources: 15, color: "bg-orange-500" },
-    { id: 5, name: "Physique", teacher: "Prof. Dubois", average: 15.5, progress: 72, resources: 11, color: "bg-cyan-500" },
-    { id: 6, name: "SVT", teacher: "Prof. Leroy", average: 16.0, progress: 78, resources: 9, color: "bg-teal-500" },
-  ]
+  // Récupérer les modules de la filière de l'étudiant
+  const modules = await prisma.module.findMany({
+    where: {
+      schoolId: student.schoolId,
+      OR: [
+        { filiereId: student.filiereId },
+        { isUeCommune: true }
+      ]
+    },
+    include: {
+      emplois: {
+        where: {
+          niveau: student.niveau
+        },
+        include: {
+          enseignant: true
+        },
+        take: 1
+      },
+      documents: true,
+      homework: true
+    }
+  })
+
+  // Calculer les statistiques pour chaque module
+  const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-cyan-500", "bg-teal-500", "bg-pink-500", "bg-indigo-500"]
+  
+  const courses = modules.map((module, index) => {
+    // Calculer la moyenne pour ce module
+    const moduleEvaluations = student.evaluations.filter(e => e.moduleId === module.id)
+    const totalWeighted = moduleEvaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0)
+    const totalCoef = moduleEvaluations.reduce((sum, e) => sum + e.coefficient, 0)
+    const average = totalCoef > 0 ? (totalWeighted / totalCoef).toFixed(1) : 0
+
+    // Calculer la progression (pourcentage de devoirs rendus)
+    const moduleHomework = module.homework.filter(h => h.dueDate >= new Date())
+    const submittedHomework = student.evaluations.filter(e => e.moduleId === module.id && e.type === 'DEVOIR')
+    const progress = moduleHomework.length > 0 ? Math.round((submittedHomework.length / moduleHomework.length) * 100) : 0
+
+    // Enseignant principal
+    const teacher = module.emplois[0]?.enseignant 
+      ? `${module.emplois[0].enseignant.titre} ${module.emplois[0].enseignant.prenom} ${module.emplois[0].enseignant.nom}`
+      : 'Non assigné'
+
+    return {
+      id: module.id,
+      name: module.nom,
+      teacher,
+      average: Number(average),
+      progress,
+      resources: module.documents.length,
+      color: colors[index % colors.length],
+      type: module.type
+    }
+  })
+
+  // Récupérer les documents récents
+  const recentDocuments = await prisma.document.findMany({
+    where: {
+      module: {
+        OR: [
+          { filiereId: student.filiereId },
+          { isUeCommune: true }
+        ]
+      }
+    },
+    include: {
+      module: true
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+    take: 5
+  })
+
+  // Calculer le temps écoulé pour chaque document
+  const now = Date.now()
+  const documentsWithTime = recentDocuments.map(doc => {
+    const timeAgo = Math.floor((now - new Date(doc.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+    const dateText = timeAgo === 0 ? "Aujourd'hui" : timeAgo === 1 ? "Hier" : `Il y a ${timeAgo}j`
+    return { ...doc, dateText }
+  })
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -84,32 +162,37 @@ export default async function StudentCoursesPage({
           <CardDescription>Documents et supports de cours disponibles</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { title: "Cours Chapitre 5 - Algèbre", subject: "Mathématiques", date: "Il y a 2j", size: "2.3 MB" },
-              { title: "Fiche de révision - Grammaire", subject: "Français", date: "Il y a 3j", size: "1.8 MB" },
-              { title: "Exercices - Past Simple", subject: "Anglais", date: "Il y a 5j", size: "1.2 MB" },
-            ].map((resource, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{resource.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">{resource.subject}</Badge>
-                      <span className="text-xs text-muted-foreground">{resource.date}</span>
-                      <span className="text-xs text-muted-foreground">• {resource.size}</span>
+          {documentsWithTime.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Aucune ressource disponible</h3>
+              <p className="text-muted-foreground">Les documents de cours seront ajoutés par vos enseignants</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {documentsWithTime.map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">{doc.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">{doc.module?.nom || 'Module'}</Badge>
+                        <span className="text-xs text-muted-foreground">{doc.dateText}</span>
+                      </div>
                     </div>
                   </div>
+                  <Button variant="ghost" size="sm" asChild>
+                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                      <Download className="h-4 w-4" />
+                    </a>
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm">
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

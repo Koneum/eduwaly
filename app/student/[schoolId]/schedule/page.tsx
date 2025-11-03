@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, MapPin } from "lucide-react"
+import { Clock, MapPin, Calendar } from "lucide-react"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
@@ -25,15 +25,109 @@ export default async function StudentSchedulePage({
 
   if (!student) redirect('/auth/login')
 
-  // Emploi du temps mockup
-  const schedule = [
-    { time: "08:00 - 09:00", subject: "Mathématiques", teacher: "Prof. Dupont", room: "Salle 201", status: "completed" },
-    { time: "09:00 - 10:00", subject: "Français", teacher: "Prof. Martin", room: "Salle 105", status: "completed" },
-    { time: "10:15 - 11:15", subject: "Anglais", teacher: "Prof. Smith", room: "Salle 302", status: "current" },
-    { time: "11:15 - 12:15", subject: "Histoire", teacher: "Prof. Bernard", room: "Salle 108", status: "upcoming" },
-    { time: "14:00 - 15:00", subject: "Physique", teacher: "Prof. Dubois", room: "Lab 1", status: "upcoming" },
-    { time: "15:00 - 16:00", subject: "SVT", teacher: "Prof. Leroy", room: "Lab 2", status: "upcoming" },
-  ]
+  // Récupérer l'emploi du temps du jour
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  const dayNames = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI']
+  const currentDay = dayNames[today.getDay()]
+
+  const emploiDuTemps = await prisma.emploiDuTemps.findMany({
+    where: {
+      schoolId: student.schoolId,
+      niveau: student.niveau,
+      OR: [
+        { filiereId: student.filiereId },
+        { ueCommune: true }
+      ],
+      dateDebut: { lte: tomorrow },
+      dateFin: { gte: today },
+      joursCours: {
+        contains: currentDay
+      }
+    },
+    include: {
+      module: true,
+      enseignant: true
+    },
+    orderBy: {
+      heureDebut: 'asc'
+    }
+  })
+
+  // Déterminer le statut de chaque cours
+  const now = new Date()
+  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+  
+  const schedule = emploiDuTemps.map(cours => {
+    let status = 'upcoming'
+    if (currentTime > cours.heureFin) {
+      status = 'completed'
+    } else if (currentTime >= cours.heureDebut && currentTime <= cours.heureFin) {
+      status = 'current'
+    }
+    
+    return {
+      time: `${cours.heureDebut} - ${cours.heureFin}`,
+      subject: cours.module.nom,
+      teacher: `${cours.enseignant.titre} ${cours.enseignant.prenom} ${cours.enseignant.nom}`,
+      room: cours.salle,
+      status,
+      type: cours.module.type
+    }
+  })
+
+  // Statistiques de la semaine
+  const startOfWeek = new Date(today)
+  startOfWeek.setDate(today.getDate() - today.getDay() + 1)
+  const endOfWeek = new Date(startOfWeek)
+  endOfWeek.setDate(startOfWeek.getDate() + 7)
+
+  const weekSchedule = await prisma.emploiDuTemps.findMany({
+    where: {
+      schoolId: student.schoolId,
+      niveau: student.niveau,
+      OR: [
+        { filiereId: student.filiereId },
+        { ueCommune: true }
+      ],
+      dateDebut: { lte: endOfWeek },
+      dateFin: { gte: startOfWeek }
+    },
+    include: {
+      module: true
+    }
+  })
+
+  const totalHoursWeek = weekSchedule.reduce((sum, cours) => {
+    const [startH, startM] = cours.heureDebut.split(':').map(Number)
+    const [endH, endM] = cours.heureFin.split(':').map(Number)
+    const hours = (endH * 60 + endM - startH * 60 - startM) / 60
+    return sum + hours
+  }, 0)
+
+  const uniqueModules = new Set(weekSchedule.map(c => c.moduleId)).size
+
+  // Calculer le taux de présence
+  const totalAbsences = await prisma.absence.count({
+    where: { studentId: student.id }
+  })
+  const totalSessions = await prisma.attendance.count({
+    where: {
+      module: {
+        OR: [
+          { filiereId: student.filiereId },
+          { isUeCommune: true }
+        ]
+      }
+    }
+  })
+  const attendanceRate = totalSessions > 0 ? Math.round(((totalSessions - totalAbsences) / totalSessions) * 100) : 100
+
+  // Prochain cours
+  const nextCourse = schedule.find(c => c.status === 'upcoming') || schedule.find(c => c.status === 'current')
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -48,8 +142,15 @@ export default async function StudentSchedulePage({
           <CardDescription>Vos cours de la journée</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {schedule.map((item, idx) => (
+          {schedule.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Aucun cours aujourd&apos;hui</h3>
+              <p className="text-muted-foreground">Profitez de votre journée libre !</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {schedule.map((item, idx) => (
               <div
                 key={idx}
                 className={`flex items-center gap-4 p-4 border rounded-lg ${
@@ -97,7 +198,8 @@ export default async function StudentSchedulePage({
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -107,18 +209,24 @@ export default async function StudentSchedulePage({
             <CardTitle>Prochain Cours</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-foreground">Histoire</p>
-              <p className="text-muted-foreground">Prof. Bernard</p>
-              <div className="flex items-center gap-2 mt-3">
-                <Clock className="h-4 w-4 text-primary" />
-                <p className="text-sm font-medium">11:15 - 12:15</p>
+            {nextCourse ? (
+              <div className="space-y-2">
+                <p className="text-2xl font-bold text-foreground">{nextCourse.subject}</p>
+                <p className="text-muted-foreground">{nextCourse.teacher}</p>
+                <div className="flex items-center gap-2 mt-3">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">{nextCourse.time}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-medium">{nextCourse.room}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <p className="text-sm font-medium">Salle 108</p>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-muted-foreground">Aucun cours à venir aujourd&apos;hui</p>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
@@ -129,15 +237,15 @@ export default async function StudentSchedulePage({
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Heures cette semaine</span>
-              <span className="font-bold text-foreground">24h</span>
+              <span className="font-bold text-foreground">{Math.round(totalHoursWeek)}h</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Matières</span>
-              <span className="font-bold text-foreground">8</span>
+              <span className="font-bold text-foreground">{uniqueModules}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Taux de présence</span>
-              <span className="font-bold text-green-600">96%</span>
+              <span className="font-bold text-green-600">{attendanceRate}%</span>
             </div>
           </CardContent>
         </Card>

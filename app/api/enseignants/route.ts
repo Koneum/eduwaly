@@ -19,6 +19,14 @@ export async function GET() {
         schoolId: user.schoolId
       },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         emplois: {
           include: {
             module: {
@@ -46,6 +54,13 @@ export async function GET() {
       type: enseignant.type,
       email: enseignant.email,
       telephone: enseignant.telephone,
+      userId: enseignant.userId,
+      user: enseignant.user ? {
+        id: enseignant.user.id,
+        name: enseignant.user.name,
+        email: enseignant.user.email,
+        avatar: enseignant.user.image
+      } : null,
       emplois: enseignant.emplois.map(emploi => ({
         id: emploi.id,
         dateDebut: emploi.dateDebut,

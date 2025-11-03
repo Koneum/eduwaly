@@ -9,6 +9,13 @@ export interface Teacher {
   email: string;
   type: string;
   grade: string;
+  userId?: string | null;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string | null;
+  } | null;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import PDFDocument from 'pdfkit';
+// import PDFDocument from 'pdfkit'; // Package non installé - nécessite: npm install pdfkit
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = await Promise.resolve(params.id);
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -15,6 +15,15 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    // Fonctionnalité temporairement désactivée - nécessite pdfkit
+    return NextResponse.json({
+      error: 'Génération PDF temporairement désactivée',
+      info: 'Pour activer cette fonctionnalité, installez le package pdfkit: npm install pdfkit',
+      details: 'Cette fonctionnalité sera disponible dans une prochaine mise à jour'
+    }, { status: 501 })
+
+    /* Code commenté - nécessite pdfkit
 
     const enseignant = await prisma.enseignant.findUnique({
       where: { id },
@@ -149,6 +158,7 @@ export async function GET(
         }));
       });
     });
+    */
   } catch (error) {
     console.error('Erreur lors de la génération du PDF:', error);
     return NextResponse.json(

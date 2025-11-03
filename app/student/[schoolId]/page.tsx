@@ -6,6 +6,7 @@ import { BookOpen, Calendar, FileText, TrendingUp, CheckCircle2, DollarSign } fr
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 
 export default async function StudentDashboard({ 
   params 
@@ -29,6 +30,17 @@ export default async function StudentDashboard({
       },
       scholarships: {
         where: { isActive: true }
+      },
+      evaluations: {
+        include: { module: true }
+      },
+      absences: true,
+      submissions: {
+        include: {
+          homework: {
+            include: { module: true }
+          }
+        }
       }
     }
   })
@@ -39,12 +51,66 @@ export default async function StudentDashboard({
   const totalPaid = student.payments.reduce((sum, p) => sum + Number(p.amountPaid), 0)
   const balance = totalDue - totalPaid
 
+  // Calculer la moyenne générale
+  const totalWeightedSum = student.evaluations.reduce((sum, evaluation) => sum + (evaluation.note * evaluation.coefficient), 0)
+  const totalCoef = student.evaluations.reduce((sum, evaluation) => sum + evaluation.coefficient, 0)
+  const generalAverage = totalCoef > 0 ? (totalWeightedSum / totalCoef).toFixed(1) : '0.0'
+
+  // Récupérer l'emploi du temps de cette semaine
+  const now = new Date()
+  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1))
+  const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7))
+  
+  const weekSchedule = await prisma.emploiDuTemps.count({
+    where: {
+      schoolId: student.schoolId,
+      niveau: student.niveau,
+      OR: [
+        { filiereId: student.filiereId },
+        { ueCommune: true }
+      ],
+      dateDebut: { lte: endOfWeek },
+      dateFin: { gte: startOfWeek }
+    }
+  })
+
+  // Compter les devoirs non soumis
+  const allHomework = await prisma.homework.findMany({
+    where: {
+      module: {
+        OR: [
+          { filiereId: student.filiereId },
+          { isUeCommune: true }
+        ]
+      },
+      dueDate: { gte: new Date() }
+    },
+    select: { id: true }
+  })
+  
+  const submittedIds = student.submissions.map(s => s.homeworkId)
+  const pendingHomework = allHomework.filter(h => !submittedIds.includes(h.id)).length
+
+  // Calculer le taux de présence
+  const totalAbsences = student.absences.length
+  const totalSessions = await prisma.attendance.count({
+    where: {
+      module: {
+        OR: [
+          { filiereId: student.filiereId },
+          { isUeCommune: true }
+        ]
+      }
+    }
+  })
+  const attendanceRate = totalSessions > 0 ? Math.round(((totalSessions - totalAbsences) / totalSessions) * 100) : 100
+
   // Stats
   const stats = [
-    { label: "Moyenne Générale", value: "15.8/20", icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },
-    { label: "Cours cette semaine", value: "24", icon: Calendar, color: "text-blue-600", bg: "bg-blue-100" },
-    { label: "Devoirs à rendre", value: "3", icon: FileText, color: "text-orange-600", bg: "bg-orange-100" },
-    { label: "Taux de présence", value: "96%", icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-100" },
+    { label: "Moyenne Générale", value: `${generalAverage}/20`, icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },
+    { label: "Cours cette semaine", value: weekSchedule.toString(), icon: Calendar, color: "text-blue-600", bg: "bg-blue-100" },
+    { label: "Devoirs à rendre", value: pendingHomework.toString(), icon: FileText, color: "text-orange-600", bg: "bg-orange-100" },
+    { label: "Taux de présence", value: `${attendanceRate}%`, icon: CheckCircle2, color: "text-purple-600", bg: "bg-purple-100" },
   ]
 
   return (
@@ -181,21 +247,29 @@ export default async function StudentDashboard({
               <CardTitle>Actions Rapides</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full justify-start" variant="outline">
-                <Calendar className="h-4 w-4 mr-2" />
-                Voir emploi du temps
+              <Button className="w-full justify-start" variant="outline" asChild>
+                <Link href={`/student/${schoolId}/schedule`}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Voir emploi du temps
+                </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <FileText className="h-4 w-4 mr-2" />
-                Mes devoirs
+              <Button className="w-full justify-start" variant="outline" asChild>
+                <Link href={`/student/${schoolId}/homework`}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Mes devoirs
+                </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <BookOpen className="h-4 w-4 mr-2" />
-                Ressources de cours
+              <Button className="w-full justify-start" variant="outline" asChild>
+                <Link href={`/student/${schoolId}/courses`}>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Ressources de cours
+                </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <DollarSign className="h-4 w-4 mr-2" />
-                Effectuer un paiement
+              <Button className="w-full justify-start" variant="outline" asChild>
+                <Link href={`/student/${schoolId}/payments`}>
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Effectuer un paiement
+                </Link>
               </Button>
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
-import * as XLSX from 'xlsx'
+// import * as XLSX from 'xlsx' // Package non installé - nécessite: npm install xlsx
 
 // POST - Importer des salles/classes depuis Excel/CSV
 export async function POST(request: Request) {
@@ -43,6 +43,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
 
+    // Fonctionnalité temporairement désactivée - nécessite l'installation de xlsx
+    return NextResponse.json({
+      error: 'Fonctionnalité d\'import temporairement désactivée',
+      info: 'Pour activer cette fonctionnalité, installez le package xlsx: npm install xlsx @types/xlsx',
+      details: 'Cette fonctionnalité sera disponible dans une prochaine mise à jour'
+    }, { status: 501 })
+
+    /* Code d'import commenté - nécessite xlsx
     // Parser le fichier Excel/CSV
     const buffer = await file.arrayBuffer()
     const workbook = XLSX.read(buffer)
@@ -108,6 +116,7 @@ export async function POST(request: Request) {
       count,
       errors: errors.length > 0 ? errors : undefined
     })
+    */
 
   } catch (error) {
     console.error('Erreur POST import rooms:', error)
