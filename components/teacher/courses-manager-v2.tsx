@@ -1,0 +1,272 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { BookOpen, FileText, Trash2, Loader2 } from "lucide-react"
+import { toast } from 'sonner'
+import { FileUpload, UploadedFile } from "@/components/ui/file-upload"
+
+interface Module {
+  id: string
+  nom: string
+  type: string
+  vh: number
+  semestre: string
+  filiere: {
+    nom: string
+  } | null
+}
+
+interface Document {
+  id: string
+  title: string
+  fileName: string
+  fileUrl: string
+  mimeType: string
+  fileSize: number
+  category: string
+  createdAt: string
+}
+
+interface CoursesManagerProps {
+  modules: Module[]
+  schoolId: string
+}
+
+export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerProps) {
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null)
+  const [isManageDialogOpen, setIsManageDialogOpen] = useState(false)
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  const handleManageDocuments = async (mod: Module) => {
+    setSelectedModule(mod)
+    setIsManageDialogOpen(true)
+    await loadDocuments(mod.id)
+  }
+
+  const loadDocuments = async (moduleId: string) => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/documents?moduleId=${moduleId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setDocuments(data)
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors du chargement des documents')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUploadComplete = async (files: UploadedFile[]) => {
+    if (!selectedModule) return
+
+    setUploading(true)
+    try {
+      // Créer les documents dans la base de données
+      const promises = files.map(file =>
+        fetch('/api/documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: file.name,
+            fileName: file.name,
+            fileUrl: file.url,
+            mimeType: file.type,
+            fileSize: file.size,
+            moduleId: selectedModule.id,
+            category: 'COURSE'
+          })
+        })
+      )
+
+      await Promise.all(promises)
+      
+      toast.success(`${files.length} document(s) ajouté(s) avec succès`)
+      await loadDocuments(selectedModule.id)
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'ajout des documents')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return
+
+    try {
+      const response = await fetch(`/api/documents/${docId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setDocuments(documents.filter(d => d.id !== docId))
+        toast.success('Document supprimé')
+      } else {
+        throw new Error('Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la suppression')
+    }
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  }
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Mes Cours</h1>
+          <p className="text-muted-foreground mt-2">Consultez vos cours et gérez les ressources pédagogiques</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {modules.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-muted-foreground">Aucun cours assigné pour le moment</p>
+          </div>
+        ) : (
+          modules.map((mod) => (
+            <Card key={mod.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{mod.nom}</CardTitle>
+                    <CardDescription>{mod.filiere?.nom || 'Sans filière'}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Type</span>
+                  <span className="font-medium">{mod.type}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Volume horaire</span>
+                  <span className="font-medium">{mod.vh}h</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Semestre</span>
+                  <span className="font-medium">{mod.semestre}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4"
+                  onClick={() => handleManageDocuments(mod)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Gérer les documents
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Dialog Gérer Documents */}
+      <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
+          <DialogHeader>
+            <DialogTitle>Gérer les documents - {selectedModule?.nom}</DialogTitle>
+            <DialogDescription>
+              Ajoutez ou supprimez des documents pour ce cours
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Upload de fichiers */}
+            <div>
+              <Label>Ajouter des ressources pédagogiques</Label>
+              <FileUpload
+                onUpload={handleUploadComplete}
+                onError={(error) => toast.error(error)}
+                category="any"
+                folder={`courses/${selectedModule?.id}`}
+                multiple={true}
+                disabled={uploading}
+              />
+              {uploading && (
+                <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enregistrement en cours...
+                </p>
+              )}
+            </div>
+
+            {/* Liste des documents */}
+            <div className="space-y-2">
+              <Label>Documents existants</Label>
+              {loading ? (
+                <div className="text-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                </div>
+              ) : documents.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Aucun document pour le moment
+                </p>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50"
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <FileText className="h-5 w-5 text-primary" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{doc.title || doc.fileName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doc.mimeType} • {formatFileSize(doc.fileSize)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(doc.fileUrl, '_blank')}
+                        >
+                          Voir
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteDocument(doc.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}

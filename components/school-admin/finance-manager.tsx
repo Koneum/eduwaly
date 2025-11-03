@@ -1,0 +1,592 @@
+'use client'
+
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Search, Printer, Download, Filter, FileText, FileSpreadsheet } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+interface Student {
+  id: string
+  firstName: string
+  lastName: string
+  classe: {
+    name: string
+  }
+}
+
+interface Payment {
+  id: string
+  amount: number
+  amountPaid: number
+  status: string
+  dueDate: Date
+  paidAt: Date | null
+  paymentMethod: string | null
+  student: Student
+}
+
+interface FinanceManagerProps {
+  payments: Payment[]
+}
+
+export default function FinanceManager({ payments }: FinanceManagerProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy] = useState('date')
+
+  // Filtrer et trier les paiements
+  const filteredPayments = payments
+    .filter(payment => {
+      const studentName = `${payment.student.firstName} ${payment.student.lastName}`.toLowerCase()
+      const matchesSearch = studentName.includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || payment.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date') {
+        return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
+      } else if (sortBy === 'amount') {
+        return Number(b.amount) - Number(a.amount)
+      } else if (sortBy === 'name') {
+        return `${a.student.firstName} ${a.student.lastName}`.localeCompare(
+          `${b.student.firstName} ${b.student.lastName}`
+        )
+      }
+      return 0
+    })
+
+  // Calculer les statistiques
+  const stats = {
+    total: payments.reduce((sum, p) => sum + Number(p.amount), 0),
+    paid: payments
+      .filter(p => p.status === 'PAID')
+      .reduce((sum, p) => sum + Number(p.amountPaid), 0),
+    pending: payments
+      .filter(p => p.status === 'PENDING')
+      .reduce((sum, p) => sum + Number(p.amount), 0),
+    overdue: payments
+      .filter(p => p.status === 'OVERDUE')
+      .reduce((sum, p) => sum + Number(p.amount), 0),
+  }
+
+  // Imprimer un reçu
+  const printReceipt = (payment: Payment) => {
+    const receiptWindow = window.open('', '_blank')
+    if (!receiptWindow) return
+
+    const receiptHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Reçu de Paiement - ${payment.id}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #333;
+              padding-bottom: 20px;
+            }
+            .header h1 {
+              margin: 0;
+              color: #333;
+            }
+            .info-section {
+              margin: 20px 0;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px 0;
+              border-bottom: 1px solid #eee;
+            }
+            .label {
+              font-weight: bold;
+              color: #666;
+            }
+            .value {
+              color: #333;
+            }
+            .amount-section {
+              margin-top: 30px;
+              padding: 20px;
+              background: #f5f5f5;
+              border-radius: 8px;
+            }
+            .total {
+              font-size: 24px;
+              font-weight: bold;
+              text-align: right;
+              color: #333;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #666;
+              font-size: 12px;
+            }
+            @media print {
+              body { padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>REÇU DE PAIEMENT</h1>
+            <p>Code d'inscription: ${payment.id}</p>
+          </div>
+          
+          <div class="info-section">
+            <div class="info-row">
+              <span class="label">Étudiant:</span>
+              <span class="value">${payment.student.firstName} ${payment.student.lastName}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Classe:</span>
+              <span class="value">${payment.student.classe.name}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Date d'échéance:</span>
+              <span class="value">${new Date(payment.dueDate).toLocaleDateString('fr-FR')}</span>
+            </div>
+            ${payment.paidAt ? `
+            <div class="info-row">
+              <span class="label">Date de paiement:</span>
+              <span class="value">${new Date(payment.paidAt).toLocaleDateString('fr-FR')}</span>
+            </div>
+            ` : ''}
+            ${payment.paymentMethod ? `
+            <div class="info-row">
+              <span class="label">Méthode de paiement:</span>
+              <span class="value">${payment.paymentMethod}</span>
+            </div>
+            ` : ''}
+            <div class="info-row">
+              <span class="label">Statut:</span>
+              <span class="value">${payment.status}</span>
+            </div>
+          </div>
+
+          <div class="amount-section">
+            <div class="info-row">
+              <span class="label">Montant dû:</span>
+              <span class="value">${Number(payment.amount).toLocaleString()} FCFA</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Montant payé:</span>
+              <span class="value">${Number(payment.amountPaid).toLocaleString()} FCFA</span>
+            </div>
+            <div class="total">
+              Total: ${Number(payment.amountPaid).toLocaleString()} FCFA
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            <p>Merci pour votre paiement</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `
+
+    receiptWindow.document.write(receiptHTML)
+    receiptWindow.document.close()
+  }
+
+  // Exporter en Excel (CSV avec séparateur point-virgule pour Excel)
+  const exportToExcel = () => {
+    const headers = ['Date', 'Étudiant', 'Classe', 'Montant', 'Payé', 'Statut', 'Méthode']
+    const rows = filteredPayments.map(p => [
+      new Date(p.dueDate).toLocaleDateString('fr-FR'),
+      `${p.student.firstName} ${p.student.lastName}`,
+      p.student.classe.name,
+      Number(p.amount).toLocaleString(),
+      Number(p.amountPaid).toLocaleString(),
+      p.status === 'PAID' ? 'Payé' : p.status === 'PENDING' ? 'En attente' : 'En retard',
+      p.paymentMethod || '-'
+    ])
+
+    const csvContent = [
+      headers.join(';'),
+      ...rows.map(row => row.join(';'))
+    ].join('\n')
+
+    const BOM = '\uFEFF' // UTF-8 BOM pour Excel
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `paiements_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+  }
+
+  // Exporter en PDF
+  const exportToPDF = () => {
+    const pdfWindow = window.open('', '_blank')
+    if (!pdfWindow) return
+
+    const pdfHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Liste des Paiements</title>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              margin: 0;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 3px solid #333;
+              padding-bottom: 20px;
+            }
+            .header h1 {
+              margin: 0 0 10px 0;
+              color: #333;
+              font-size: 28px;
+            }
+            .header p {
+              margin: 5px 0;
+              color: #666;
+              font-size: 14px;
+            }
+            .stats {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 20px;
+              margin-bottom: 30px;
+            }
+            .stat-card {
+              padding: 15px;
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              text-align: center;
+            }
+            .stat-label {
+              font-size: 12px;
+              color: #666;
+              margin-bottom: 5px;
+            }
+            .stat-value {
+              font-size: 20px;
+              font-weight: bold;
+              color: #333;
+            }
+            .stat-value.green { color: #10b981; }
+            .stat-value.orange { color: #f59e0b; }
+            .stat-value.red { color: #ef4444; }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            th, td {
+              padding: 12px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+            }
+            th {
+              background-color: #f5f5f5;
+              font-weight: bold;
+              color: #333;
+            }
+            tr:hover {
+              background-color: #f9f9f9;
+            }
+            .badge {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-weight: 500;
+            }
+            .badge-paid { background-color: #d1fae5; color: #065f46; }
+            .badge-pending { background-color: #fef3c7; color: #92400e; }
+            .badge-overdue { background-color: #fee2e2; color: #991b1b; }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #666;
+              font-size: 12px;
+              border-top: 1px solid #ddd;
+              padding-top: 20px;
+            }
+            @media print {
+              body { padding: 20px; }
+              .stats { page-break-inside: avoid; }
+              table { page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>LISTE DES PAIEMENTS</h1>
+            <p>Rapport généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            <p>Total de ${filteredPayments.length} paiement(s)</p>
+          </div>
+          
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-label">Total Attendu</div>
+              <div class="stat-value">${stats.total.toLocaleString()} FCFA</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Payé</div>
+              <div class="stat-value green">${stats.paid.toLocaleString()} FCFA</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">En Attente</div>
+              <div class="stat-value orange">${stats.pending.toLocaleString()} FCFA</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">En Retard</div>
+              <div class="stat-value red">${stats.overdue.toLocaleString()} FCFA</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Étudiant</th>
+                <th>Classe</th>
+                <th style="text-align: right;">Montant</th>
+                <th style="text-align: right;">Payé</th>
+                <th>Statut</th>
+                <th>Méthode</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredPayments.map(p => `
+                <tr>
+                  <td>${new Date(p.dueDate).toLocaleDateString('fr-FR')}</td>
+                  <td>${p.student.firstName} ${p.student.lastName}</td>
+                  <td>${p.student.classe.name}</td>
+                  <td style="text-align: right;">${Number(p.amount).toLocaleString()} FCFA</td>
+                  <td style="text-align: right;">${Number(p.amountPaid).toLocaleString()} FCFA</td>
+                  <td>
+                    <span class="badge badge-${p.status === 'PAID' ? 'paid' : p.status === 'PENDING' ? 'pending' : 'overdue'}">
+                      ${p.status === 'PAID' ? 'Payé' : p.status === 'PENDING' ? 'En attente' : 'En retard'}
+                    </span>
+                  </td>
+                  <td>${p.paymentMethod || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Document confidentiel - Usage interne uniquement</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `
+
+    pdfWindow.document.write(pdfHTML)
+    pdfWindow.document.close()
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats rapides */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Attendu</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total.toLocaleString()} FCFA</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Payé</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success">{stats.paid.toLocaleString()} FCFA</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">En Attente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-[var(--chart-5)]">{stats.pending.toLocaleString()} FCFA</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">En Retard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.overdue.toLocaleString()} FCFA</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filtres et actions */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle>Liste des Paiements</CardTitle>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Exporter
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={exportToPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Exporter en PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToExcel}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Exporter en Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Barre de recherche et filtres */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher un étudiant..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="PAID">Payé</SelectItem>
+                <SelectItem value="PENDING">En attente</SelectItem>
+                <SelectItem value="OVERDUE">En retard</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Trier par date</SelectItem>
+                <SelectItem value="amount">Trier par montant</SelectItem>
+                <SelectItem value="name">Trier par nom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tableau des paiements */}
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Étudiant</TableHead>
+                  <TableHead>Classe</TableHead>
+                  <TableHead>Date d&apos;échéance</TableHead>
+                  <TableHead className="text-right">Montant</TableHead>
+                  <TableHead className="text-right">Payé</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      Aucun paiement trouvé
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredPayments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-medium">
+                        {payment.student.firstName} {payment.student.lastName}
+                      </TableCell>
+                      <TableCell>{payment.student.classe.name}</TableCell>
+                      <TableCell>
+                        {new Date(payment.dueDate).toLocaleDateString('fr-FR')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {Number(payment.amount).toLocaleString()} FCFA
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {Number(payment.amountPaid).toLocaleString()} FCFA
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            payment.status === 'PAID' ? 'default' :
+                            payment.status === 'PENDING' ? 'secondary' : 'destructive'
+                          }
+                        >
+                          {payment.status === 'PAID' ? 'Payé' :
+                           payment.status === 'PENDING' ? 'En attente' : 'En retard'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => printReceipt(payment)}
+                          disabled={payment.status !== 'PAID'}
+                        >
+                          <Printer className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="text-sm text-muted-foreground">
+            Affichage de {filteredPayments.length} paiement{filteredPayments.length > 1 ? 's' : ''} sur {payments.length}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

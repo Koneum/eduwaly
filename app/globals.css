@@ -1,26 +1,292 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  /* Schooly Custom Colors */
+  --color-solar-yellow: #FFC300;
+  --color-deep-blue: #2C3E50;
+  --color-royal-blue: #0066CC;
+  --color-success-green: #10B981;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.625rem;
+  
+  /* MODE CLAIR - Schooly Design System */
+  --background: #E0E4EB; /* Blanc neige */
+  --foreground: #37404F; /* Bleu Profond */
+  
+  /* Cards */
+  --card: #BFC6D4; /* Fond Blanc */
+  --card2: #E0E4EB; /* Fond Blanc */
+  --card-foreground: #37404F; /* Bleu Profond */
+  --card-border: #37404F; /* Bordure Bleu Profond */
+  
+  /* Popover/Dialogs */
+  --popover: #F0F1F5;
+  --popover-foreground: #37404F;
+  
+  /* Primary - Jaune Solaire */
+  --primary: #FFC300; /* Jaune Solaire */
+  --primary-foreground: #37404F; /* Texte Bleu Profond sur Jaune */
+  
+  /* Secondary */
+  --secondary: #F5F5F5; /* Gris très clair */
+  --secondary-foreground: #667085;
+  
+  /* Muted */
+  --muted: #F5F5F5;
+  --muted-foreground: #4E5766; /* Gris moyen */
+  
+  /* Accent - Active state */
+  --accent: #FFC300; /* Jaune Solaire */
+  --accent-foreground: #2C3E50;
+  
+  /* Destructive */
+  --destructive: #EF4444;
+  --destructive-foreground: #F5F5F5;
+  
+  /* Borders & Inputs */
+  --border: #E5E7EB; /* Gris Clair */
+  --input: #E5E7EB; /* Bordure Gris Clair */
+  --input-bg: #FFFFFF; /* Fond Blanc */
+  --ring: #FFC300; /* Focus ring Jaune */
+  
+  /* Charts - Jaune Solaire dominant */
+  --chart-1: #FFC300; /* Jaune Solaire */
+  --chart-2: #2C3E50; /* Bleu Profond */
+  --chart-3: #0066CC; /* Bleu Roi */
+  --chart-4: #10B981; /* Vert succès */
+  --chart-5: #F59E0B; /* Orange */
+  
+  /* Sidebar - Bleu Profond */
+  --sidebar: #2C3E50; /* Fond Bleu Profond */
+  --sidebar-foreground: #FFFFFF; /* Texte Blanc */
+  --sidebar-primary: #FFC300; /* Jaune Solaire */
+  --sidebar-primary-foreground: #2C3E50; /* Texte Bleu sur Jaune */
+  --sidebar-accent: #34495E; /* Bleu légèrement plus clair */
+  --sidebar-accent-foreground: #F0F1F5;
+  --sidebar-border: #34495E;
+  --sidebar-ring: #FFC300;
+  
+  /* Links */
+  --link: #0066CC; /* Bleu Roi */
+  --link-hover: #0052A3;
+  
+  /* Success indicator */
+  --success: #10B981; /* Vert */
+}
+
+.dark {
+  /* MODE SOMBRE - Schooly Design System */
+  --background: #37404f; /* Gris Foncé */
+  --foreground: #FBF5DF; /* Blanc */
+  
+  /* Cards - Bleu Clair pour relief */
+  --card: #3A5A78; /* Bleu Clair */
+  --card2: #202531; /* Bleu Clair */
+  --card-foreground: #E0E4EB;
+  --card-border: #E5E7EB;
+  
+  /* Popover/Dialogs */
+  --popover: #1F2937;
+  --popover-foreground: #FFFFFF;
+  
+  /* Primary - Jaune Solaire (identique) */
+  --primary: #FFC300; /* Jaune Solaire */
+  --primary-foreground: #2C3E50; /* Texte Bleu Profond sur Jaune */
+  
+  /* Secondary */
+  --secondary: #374151; /* Gris moyen */
+  --secondary-foreground: #FFFFFF;
+  
+  /* Muted */
+  --muted: #374151;
+  --muted-foreground: #9CA3AF; /* Gris clair */
+  
+  /* Accent - Active state */
+  --accent: #FFC300; /* Jaune Solaire */
+  --accent-foreground: #2C3E50;
+  
+  /* Destructive */
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Borders & Inputs */
+  --border: #E5E7EB; /* Gris Clair */
+  --input: #E5E7EB; /* Bordure Gris Clair */
+  --input-bg: #4B5563; /* Fond Gris Moyen */
+  --ring: #FFC300; /* Focus ring Jaune */
+  
+  /* Charts - Jaune Solaire dominant */
+  --chart-1: #FFC300; /* Jaune Solaire */
+  --chart-2: #FFFFFF; /* Blanc pour légende */
+  --chart-3: #0066CC; /* Bleu Roi */
+  --chart-4: #10B981; /* Vert succès */
+  --chart-5: #F59E0B; /* Orange */
+  
+  /* Sidebar - Gris Foncé */
+  --sidebar: #121212; /* Fond Gris Foncé */
+  --sidebar-foreground: #FFFFFF; /* Texte Blanc */
+  --sidebar-primary: #FFC300; /* Jaune Solaire */
+  --sidebar-primary-foreground: #2C3E50; /* Texte Bleu sur Jaune */
+  --sidebar-accent: #1F2937; /* Gris légèrement plus clair */
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #374151;
+  --sidebar-ring: #FFC300;
+  
+  /* Links */
+  --link: #0066CC; /* Bleu Roi (identique) */
+  --link-hover: #0052A3;
+  
+  /* Success indicator */
+  --success: #10B981; /* Vert (identique) */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+  }
+  
+  /* Titres avec Poppins */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+  
+  /* Liens avec Bleu Roi */
+  a {
+    color: var(--link);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Boutons Jaune Solaire */
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: #E6B000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(255, 195, 0, 0.3);
+  }
+  
+  /* Cards avec bordure Bleu Profond (mode clair) */
+  .card-schooly {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  
+  /* Inputs avec style Schooly */
+  .input-schooly {
+    border: 1px solid var(--input);
+    background-color: var(--input-bg);
+    color: var(--foreground);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+  }
+  
+  .input-schooly:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.1);
+  }
+  
+  /* Sidebar active item */
+  .sidebar-active {
+    background-color: var(--sidebar-accent);
+    color: var(--sidebar-primary);
+    font-weight: 600;
+  }
+  
+  /* Success badge */
+  .badge-success {
+    background-color: var(--success);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  /* Chart labels avec Open Sans */
+  .chart-label {
+    font-family: var(--font-open-sans), 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--chart-2);
+  }
+  
+  /* App title avec Poppins Bold */
+  .app-title {
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--foreground);
+  }
+  
+  .dark .app-title {
+    color: var(--primary); /* Jaune Solaire en mode sombre */
+  }
 }
