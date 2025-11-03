@@ -140,11 +140,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const id = resolvedParams.id;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
