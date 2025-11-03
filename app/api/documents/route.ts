@@ -80,14 +80,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Vérifier que le module appartient à l'école
-    const module = await prisma.module.findFirst({
+    const moduleRecord = await prisma.module.findFirst({
       where: {
         id: moduleId,
         schoolId: user.schoolId,
       },
     })
 
-    if (!module) {
+    if (!moduleRecord) {
       return NextResponse.json(
         { error: 'Module non trouvé' },
         { status: 404 }

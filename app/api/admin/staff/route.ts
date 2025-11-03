@@ -127,7 +127,7 @@ export async function POST(request: Request) {
     }
 
     // Mettre à jour l'utilisateur avec le rôle et schoolId
-    const user = await prisma.user.update({
+    const createdUser = await prisma.user.update({
       where: { id: userId },
       data: {
         role,
@@ -139,8 +139,8 @@ export async function POST(request: Request) {
     // Créer les permissions si fournies
     if (permissions && Array.isArray(permissions)) {
       await prisma.userPermission.createMany({
-        data: permissions.map((perm: any) => ({
-          userId: user.id,
+        data: permissions.map((perm: { permissionId: string; canView?: boolean; canCreate?: boolean; canEdit?: boolean; canDelete?: boolean }) => ({
+          userId: createdUser.id,
           permissionId: perm.permissionId,
           canView: perm.canView || false,
           canCreate: perm.canCreate || false,
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
 
     // Récupérer l'utilisateur avec ses permissions
     const staffWithPermissions = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { id: createdUser.id },
       include: {
         permissions: {
           include: {

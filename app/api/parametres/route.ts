@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth-utils';
 
 export async function GET() {
   try {
-    const parametres = await prisma.parametre.findFirst();
+    const user = await getAuthUser();
+    if (!user || !user.schoolId) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
+    const parametres = await prisma.parametre.findFirst({
+      where: { schoolId: user.schoolId }
+    });
     return NextResponse.json(parametres || {});
   } catch (error) {
     console.error('Erreur lors de la récupération des paramètres:', error);
@@ -16,6 +24,11 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    const user = await getAuthUser();
+    if (!user || !user.schoolId) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const data = await request.json();
 
     // Vérifier les champs requis
@@ -26,28 +39,32 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Mettre à jour ou créer les paramètres
-    const parametres = await prisma.parametre.upsert({
-      where: {
-        id: '1' // On utilise un ID fixe car on n'a qu'un seul enregistrement
-      },
-      update: {
-        chefDepartement: data.chefDepartement,
-        titre: data.titre,
-        grade: data.grade,
-        synchroniserDate: data.synchroniserDate ?? true,
-        updatedAt: new Date()
-      },
-      create: {
-        id: '1',
-        chefDepartement: data.chefDepartement,
-        titre: data.titre,
-        grade: data.grade,
-        synchroniserDate: data.synchroniserDate ?? true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+    // Chercher les paramètres existants pour cette école
+    const existing = await prisma.parametre.findFirst({
+      where: { schoolId: user.schoolId }
     });
+
+    // Mettre à jour ou créer les paramètres
+    const parametres = existing
+      ? await prisma.parametre.update({
+          where: { id: existing.id },
+          data: {
+            chefDepartement: data.chefDepartement,
+            titre: data.titre,
+            grade: data.grade,
+            synchroniserDate: data.synchroniserDate ?? true,
+            updatedAt: new Date()
+          }
+        })
+      : await prisma.parametre.create({
+          data: {
+            schoolId: user.schoolId,
+            chefDepartement: data.chefDepartement,
+            titre: data.titre,
+            grade: data.grade,
+            synchroniserDate: data.synchroniserDate ?? true
+          }
+        });
 
     return NextResponse.json(parametres);
   } catch (error) {

@@ -218,7 +218,7 @@ export async function POST(
       startDate.setDate(startDate.getDate() - daysToSubtract);
     }
     
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
     // Créer un tableau pour stocker les modules par semaine
     const modulesBySemaine: { [key: string]: any[] } = {};
@@ -253,7 +253,7 @@ export async function POST(
       }
       
       // Ajouter toutes les semaines entre le début et la fin
-      let currentLundi = new Date(debutLundi);
+      const currentLundi = new Date(debutLundi);
       while (currentLundi <= finLundi) {
         const weekEnd = new Date(currentLundi);
         weekEnd.setDate(currentLundi.getDate() + 4); // Du lundi au vendredi
@@ -298,7 +298,7 @@ export async function POST(
         const finEmploi = new Date(emploi.dateFin);
         
         // Afficher les emplois du temps dans les semaines correspondantes
-        let weekStart = new Date(startDate);
+        const weekStart = new Date(startDate);
         while (weekStart <= endDate) {
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekEnd.getDate() + 4); // Du lundi au vendredi (5 jours)

@@ -121,16 +121,13 @@ export async function PUT(
       );
     }
 
-    // Récupérer le module pour vérifier la filière
-    const module = await prisma.module.findUnique({
+    // Vérifier que le module existe et récupérer sa filière
+    const moduleRecord = await prisma.module.findUnique({
       where: { id: data.moduleId }
-    });
+    })
 
-    if (!module) {
-      return NextResponse.json(
-        { error: 'Module non trouvé' },
-        { status: 404 }
-      );
+    if (!moduleRecord) {
+      return NextResponse.json({ error: 'Module non trouvé' }, { status: 404 })
     }
 
     // Vérifier que les jours de cours sont au format JSON valide
@@ -140,7 +137,7 @@ export async function PUT(
       if (!Array.isArray(joursCours)) {
         throw new Error('Le format des jours de cours est invalide');
       }
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Le format des jours de cours est invalide' },
         { status: 400 }
@@ -205,7 +202,7 @@ export async function PUT(
       data: {
         moduleId: data.moduleId,
         enseignantId: data.enseignantId,
-        filiereId: module.filiereId,
+        filiereId: moduleRecord.filiereId,
         anneeUnivId: data.anneeUnivId,
         dateDebut,
         dateFin,

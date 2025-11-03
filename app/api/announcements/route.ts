@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     
     // Construire la requête selon le rôle
-    let where: any = {
+    const where: any = {
       isActive: true,
       OR: [
         { expiresAt: null },

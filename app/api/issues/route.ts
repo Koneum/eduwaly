@@ -15,14 +15,17 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status')
 
     // Construire la requête
-    const where: any = {}
+    const where: {
+      schoolId?: string
+      status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+    } = {}
     
     if (schoolId) {
       where.schoolId = schoolId
     }
     
-    if (status) {
-      where.status = status
+    if (status && ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status)) {
+      where.status = status as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
     }
 
     // Récupérer les rapports
@@ -31,9 +34,6 @@ export async function GET(req: NextRequest) {
       include: {
         school: {
           select: { name: true },
-        },
-        reportedBy: {
-          select: { name: true, email: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -75,15 +75,14 @@ export async function POST(req: NextRequest) {
         priority,
         category,
         schoolId,
-        reportedById: user.id as string,
+        reportedBy: user.id as string,
+        reporterName: user.name,
+        reporterEmail: user.email,
         status: 'OPEN',
       },
       include: {
         school: {
           select: { name: true },
-        },
-        reportedBy: {
-          select: { name: true, email: true },
         },
       },
     })
@@ -116,9 +115,14 @@ export async function PATCH(req: NextRequest) {
       )
     }
 
-    const updateData: any = {}
-    if (status) {
-      updateData.status = status
+    const updateData: {
+      status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+      resolvedAt?: Date
+      resolution?: string
+    } = {}
+    
+    if (status && ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status)) {
+      updateData.status = status as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
       if (status === 'RESOLVED') {
         updateData.resolvedAt = new Date()
       }
@@ -132,9 +136,6 @@ export async function PATCH(req: NextRequest) {
       include: {
         school: {
           select: { name: true },
-        },
-        reportedBy: {
-          select: { name: true, email: true },
         },
       },
     })

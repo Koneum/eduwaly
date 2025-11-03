@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
 import { generateStudentEmail } from '@/lib/email-utils'
 import { generateEnrollmentId } from '@/lib/enrollment-utils'
+import { checkQuota } from '@/lib/subscription/quota-middleware'
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,17 @@ export async function POST(request: NextRequest) {
     // Vérifier que l'utilisateur a accès à cette école
     if (user.role === 'SCHOOL_ADMIN' && user.schoolId !== schoolId) {
       return NextResponse.json({ error: 'Accès refusé à cette école' }, { status: 403 })
+    }
+
+    // Vérifier le quota d'étudiants
+    const quotaCheck = await checkQuota(schoolId, 'students')
+    if (!quotaCheck.allowed) {
+      return NextResponse.json({
+        error: 'Limite atteinte',
+        message: quotaCheck.message,
+        current: quotaCheck.current,
+        limit: quotaCheck.limit
+      }, { status: 403 })
     }
 
     // Récupérer les infos de l'école pour générer l'email

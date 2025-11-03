@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const module = await prisma.module.findUnique({
+    const moduleRecord = await prisma.module.findUnique({
       where: { id },
       include: {
         filiere: true,
@@ -28,14 +28,14 @@ export async function GET(
       }
     });
 
-    if (!module) {
+    if (!moduleRecord) {
       return NextResponse.json(
         { error: 'Module non trouvé' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(module);
+    return NextResponse.json(moduleRecord);
   } catch (error) {
     console.error('Erreur lors de la récupération du module:', error);
     return NextResponse.json(
@@ -86,7 +86,7 @@ export async function PUT(
       );
     }
 
-    const module = await prisma.module.update({
+    const updatedModule = await prisma.module.update({
       where: { id },
       data: {
         nom: data.nom,
@@ -101,7 +101,7 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(module);
+    return NextResponse.json(updatedModule);
   } catch (error) {
     console.error('Erreur lors de la mise à jour du module:', error);
     return NextResponse.json(

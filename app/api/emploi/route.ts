@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const schoolId = url.searchParams.get('schoolId');
 
     // Si schoolId est fourni, filtrer par école
-    let whereClause: any = {};
+    const whereClause: any = {};
     
     if (schoolId) {
       whereClause.schoolId = schoolId;
@@ -124,16 +124,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Récupérer le module pour vérifier la filière
-    const module = await prisma.module.findUnique({
+    // Vérifier que le module existe et récupérer sa filière
+    const moduleRecord = await prisma.module.findUnique({
       where: { id: data.moduleId }
-    });
+    })
 
-    if (!module) {
-      return NextResponse.json(
-        { error: 'Module non trouvé' },
-        { status: 404 }
-      );
+    if (!moduleRecord) {
+      return NextResponse.json({ error: 'Module non trouvé' }, { status: 404 })
     }
 
     // Vérifier que les jours de cours sont au format JSON valide
@@ -205,7 +202,7 @@ export async function POST(request: Request) {
         schoolId: data.schoolId,
         moduleId: data.moduleId,
         enseignantId: data.enseignantId,
-        filiereId: module.filiereId,
+        filiereId: moduleRecord.filiereId,
         anneeUnivId: data.anneeUnivId,
         dateDebut,
         dateFin,

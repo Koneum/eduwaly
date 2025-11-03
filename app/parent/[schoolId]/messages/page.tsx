@@ -44,7 +44,7 @@ export default async function ParentMessagesPage({
         </p>
       </div>
 
-      <MessagingInterface currentUserId={user.id} schoolId={''} />
+      <MessagingInterface currentUserId={user.id} schoolId={schoolId} />
     </div>
   )
 }

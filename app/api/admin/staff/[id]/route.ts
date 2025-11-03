@@ -93,12 +93,14 @@ export async function PUT(
     const updateData: {
       name?: string
       email?: string
-      role?: string
+      role?: 'MANAGER' | 'PERSONNEL' | 'ASSISTANT' | 'SECRETARY'
     } = {}
 
     if (name) updateData.name = name
     if (email) updateData.email = email
-    if (role) updateData.role = role
+    if (role && ['MANAGER', 'PERSONNEL', 'ASSISTANT', 'SECRETARY'].includes(role)) {
+      updateData.role = role as 'MANAGER' | 'PERSONNEL' | 'ASSISTANT' | 'SECRETARY'
+    }
 
     const user = await prisma.user.update({
       where: { id },

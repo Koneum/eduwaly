@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
       schoolId,
       moduleId,
       enseignantId,
-      filiereId,
       niveau,
       salle,
       heureDebut,
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
     } = body
 
     // Validation
-    if (!schoolId || !moduleId || !enseignantId || !filiereId || !niveau || !salle || !heureDebut || !heureFin || !joursCours || !Array.isArray(joursCours) || !semestre) {
+    if (!schoolId || !moduleId || !enseignantId || !niveau || !salle || !heureDebut || !heureFin || !joursCours || !Array.isArray(joursCours) || !semestre) {
       return NextResponse.json(
         { error: 'Tous les champs sont requis' },
         { status: 400 }
@@ -53,17 +52,20 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Vérifier que le module existe
-    const module = await prisma.module.findFirst({
+    // Vérifier que le module existe et récupérer sa filière
+    const moduleRecord = await prisma.module.findFirst({
       where: {
         id: moduleId,
         schoolId: schoolId,
       },
     })
 
-    if (!module) {
+    if (!moduleRecord) {
       return NextResponse.json({ error: 'Module non trouvé' }, { status: 404 })
     }
+
+    // Utiliser la filière du module
+    const filiereId = moduleRecord.filiereId
 
     // Vérifier que l'enseignant existe
     const enseignant = await prisma.enseignant.findFirst({
@@ -77,16 +79,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Enseignant non trouvé' }, { status: 404 })
     }
 
-    // Vérifier que la filière existe
-    const filiere = await prisma.filiere.findFirst({
-      where: {
-        id: filiereId,
-        schoolId: schoolId,
-      },
-    })
+    // Vérifier que la filière existe (si elle est définie)
+    if (filiereId) {
+      const filiere = await prisma.filiere.findFirst({
+        where: {
+          id: filiereId,
+          schoolId: schoolId,
+        },
+      })
 
-    if (!filiere) {
-      return NextResponse.json({ error: 'Filière non trouvée' }, { status: 404 })
+      if (!filiere) {
+        return NextResponse.json({ error: 'Filière non trouvée' }, { status: 404 })
+      }
     }
 
     // Vérifier les conflits d'horaires pour l'enseignant
@@ -127,7 +131,7 @@ export async function POST(req: NextRequest) {
     // Créer l'emploi du temps
     const emploi = await prisma.emploiDuTemps.create({
       data: {
-        titre: `${module.nom} - ${niveau}`,
+        titre: `${moduleRecord.nom} - ${niveau}`,
         schoolId,
         moduleId,
         enseignantId,
@@ -137,7 +141,7 @@ export async function POST(req: NextRequest) {
         heureDebut,
         heureFin,
         joursCours: JSON.stringify(joursCours),
-        vh: vh || module.vh,
+        vh: vh || moduleRecord.vh,
         semestre: semestre || 'S1',
         dateDebut: dateDebut ? new Date(dateDebut) : new Date(),
         dateFin: dateFin ? new Date(dateFin) : new Date(new Date().setMonth(new Date().getMonth() + 6)),
