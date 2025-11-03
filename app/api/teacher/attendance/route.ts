@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     })
 
     // Si une date est spécifiée, récupérer les présences
-    let attendances = []
+    let attendances: Array<{ id: string; studentId: string; status: string; date: Date }> = []
     if (date) {
       attendances = await prisma.attendance.findMany({
         where: {

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     
     if (!targetModuleId) {
       // Créer un module temporaire pour cette évaluation
-      const module = await prisma.module.create({
+      const createdModule = await prisma.module.create({
         data: {
           nom: subject,
           type: 'COURS',
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           filiereId: classId
         }
       })
-      targetModuleId = module.id
+      targetModuleId = createdModule.id
     }
 
     // Récupérer les étudiants de la classe/filière

@@ -58,12 +58,13 @@ function formatDateRange(debut: Date, fin: Date): string {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // Récupérer l'enseignant
     const enseignant = await prisma.enseignant.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         emplois: {
           include: {
@@ -156,23 +157,16 @@ export async function GET(
     });
 
     // Calcul des totaux
-    const total = emploisFiltered.reduce((acc: Total, emploi) => ({
-      heuresEffectuees: acc.heuresEffectuees + emploi.vh,
-      heuresDues: enseignant.type === TYPE_ENSEIGNANT.PERMANENT ? HEURES_DUES : 0,
-      heuresSupplementaires: enseignant.type === TYPE_ENSEIGNANT.PERMANENT ? 
-        Math.max(0, acc.heuresEffectuees + emploi.vh - HEURES_DUES) : 0
-    }), {
-      heuresDues: 0,
-      heuresEffectuees: 0,
-      heuresSupplementaires: 0
-    });
+    const heuresEffectuees = emploisFiltered.reduce((sum, emploi) => sum + emploi.vh, 0);
+    const heuresDues = enseignant.type === 'PERMANENT' ? (typeof HEURES_DUES === 'number' ? HEURES_DUES : 192) : 0;
+    const heuresSupplementaires = enseignant.type === 'PERMANENT' ? Math.max(0, heuresEffectuees - heuresDues) : 0;
 
     // Afficher les totaux
-    const finalY = (doc as any).lastAutoTable.finalY + 20;
-    doc.text(`Total des heures effectuées: ${total.heuresEffectuees}h`, 20, finalY);
-    if (enseignant.type === TYPE_ENSEIGNANT.PERMANENT) {
-      doc.text(`Heures dues: ${total.heuresDues}h`, 20, finalY + 10);
-      doc.text(`Heures supplémentaires: ${total.heuresSupplementaires}h`, 20, finalY + 20);
+    const finalY = (doc as any).lastAutoTable?.finalY || 130 + 20;
+    doc.text(`Total des heures effectuées: ${heuresEffectuees}h`, 20, finalY);
+    if (enseignant.type === 'PERMANENT') {
+      doc.text(`Heures dues: ${heuresDues}h`, 20, finalY + 10);
+      doc.text(`Heures supplémentaires: ${heuresSupplementaires}h`, 20, finalY + 20);
     }
 
     // Signature
