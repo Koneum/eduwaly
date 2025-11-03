@@ -36,7 +36,7 @@ export default async function StudentMessagesPage({
         </p>
       </div>
 
-      <MessagingInterface currentUserId={user.id} />
+      <MessagingInterface currentUserId={user.id} schoolId={''} />
     </div>
   )
 }

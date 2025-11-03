@@ -14,7 +14,7 @@ export default async function SuperAdminMessagesPage() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">Messagerie</h1>
         <p className="text-muted-foreground mt-2">
-          Communiquez avec les administrateurs d'école
+          Communiquez avec les administrateurs d&apos;école
         </p>
       </div>
 

@@ -84,12 +84,48 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Vérifier si un parent existe déjà avec cet enrollmentId (pour les fratries)
+    let parent = await prisma.parent.findUnique({
+      where: { enrollmentId }
+    })
+
+    if (parent) {
+      // Un parent existe déjà (fratrie) - lier l'étudiant à ce parent
+      await prisma.parent.update({
+        where: { id: parent.id },
+        data: {
+          students: {
+            connect: { id: student.id }
+          }
+        }
+      })
+    } else {
+      // Créer un nouveau parent avec cet enrollmentId
+      parent = await prisma.parent.create({
+        data: {
+          enrollmentId,
+          isEnrolled: false,
+          userId: null,
+          students: {
+            connect: { id: student.id }
+          }
+        }
+      })
+    }
+
     return NextResponse.json({
       success: true,
       student,
+      parent: {
+        id: parent.id,
+        enrollmentId: parent.enrollmentId,
+        isNew: !parent.userId // Indique si c'est un nouveau parent ou existant
+      },
       enrollmentId,
-      generatedEmail, // Email qui sera utilisé lors de l'enrôlement
-      message: `Étudiant créé. ID d'enrôlement: ${enrollmentId}. Email suggéré: ${generatedEmail}`
+      generatedEmail,
+      message: parent.userId 
+        ? `Étudiant créé et lié au parent existant. ID d'enrôlement: ${enrollmentId}. Email suggéré: ${generatedEmail}`
+        : `Étudiant et parent créés. ID d'enrôlement: ${enrollmentId}. Email suggéré: ${generatedEmail}`
     })
 
   } catch (error) {

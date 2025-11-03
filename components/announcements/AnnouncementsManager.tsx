@@ -296,7 +296,7 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
               </div>
 
               <div>
-                <Label htmlFor="expiresAt">Date d'expiration (optionnel)</Label>
+                <Label htmlFor="expiresAt">Date d&apos;expiration (optionnel)</Label>
                 <Input
                   id="expiresAt"
                   type="datetime-local"

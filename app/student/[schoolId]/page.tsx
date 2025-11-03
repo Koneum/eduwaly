@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { BookOpen, Calendar, FileText, TrendingUp, CheckCircle2, DollarSign } from "lucide-react"
+import { BookOpen, Calendar, FileText, TrendingUp, CheckCircle2, DollarSign, Megaphone } from "lucide-react"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
@@ -57,9 +57,9 @@ export default async function StudentDashboard({
   const generalAverage = totalCoef > 0 ? (totalWeightedSum / totalCoef).toFixed(1) : '0.0'
 
   // Récupérer l'emploi du temps de cette semaine
-  const now = new Date()
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1))
-  const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 7))
+  const currentDate = new Date()
+  const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1))
+  const endOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 7))
   
   const weekSchedule = await prisma.emploiDuTemps.count({
     where: {
@@ -105,6 +105,26 @@ export default async function StudentDashboard({
   })
   const attendanceRate = totalSessions > 0 ? Math.round(((totalSessions - totalAbsences) / totalSessions) * 100) : 100
 
+  // Récupérer les annonces récentes
+  const now = new Date()
+  const announcements = await prisma.announcement.findMany({
+    where: {
+      schoolId: student.schoolId,
+      isActive: true,
+      targetAudience: {
+        hasSome: ['ALL', 'STUDENT']
+      },
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gte: now } }
+      ]
+    },
+    orderBy: {
+      publishedAt: 'desc'
+    },
+    take: 3
+  })
+
   // Stats
   const stats = [
     { label: "Moyenne Générale", value: `${generalAverage}/20`, icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },
@@ -141,6 +161,48 @@ export default async function StudentDashboard({
           </Card>
         ))}
       </div>
+
+      {/* Annonces */}
+      {announcements.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-blue-900">Annonces</CardTitle>
+            </div>
+            <CardDescription>Dernières informations importantes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {announcements.map((announcement) => (
+                <div key={announcement.id} className="p-4 bg-white border border-blue-200 rounded-lg">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">{announcement.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {announcement.content}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {new Date(announcement.createdAt).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                    {announcement.priority === 'HIGH' && (
+                      <Badge variant="destructive">Urgent</Badge>
+                    )}
+                    {announcement.priority === 'NORMAL' && (
+                      <Badge className="bg-blue-600">Normal</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Content */}

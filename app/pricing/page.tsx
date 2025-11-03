@@ -20,7 +20,7 @@ export default function PricingPage() {
       <div className="container mx-auto py-12 text-center">
         <h2 className="text-2xl font-bold mb-4">Prêt à commencer ?</h2>
         <p className="text-muted-foreground mb-6">
-          Créez votre compte et profitez de 30 jours d'essai gratuit
+          Créez votre compte et profitez de 30 jours d&apos;essai gratuit
         </p>
         <Link href="/register">
           <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">

@@ -3,7 +3,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FaArrowLeft, FaEdit, FaDownload } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import Image from 'next/image';
 

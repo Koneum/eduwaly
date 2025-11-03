@@ -382,7 +382,7 @@ export default function NouvelEmploiPage() {
               ))}
             </select>
             {formData.ueCommune && (
-              <p className="mt-1 text-sm text-gray-500">La filière n'est pas requise pour une UE Commune</p>
+              <p className="mt-1 text-sm text-gray-500">La filière n&apos;est pas requise pour une UE Commune</p>
             )}
           </div>
 
@@ -460,7 +460,7 @@ export default function NouvelEmploiPage() {
             {formData.evaluation && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Jour de l'évaluation
+                  Jour de l&apos;évaluation
                 </label>
                 <select
                   value={formData.jourEvaluation}
@@ -491,7 +491,7 @@ export default function NouvelEmploiPage() {
           
           <Button type="submit" className="w-full md:w-auto bg-indigo-600 text-white">
             <FaSave className="mr-2" />
-            Créer l'emploi du temps
+            Créer l&apos;emploi du temps
           </Button>
         </div>
       </form>
