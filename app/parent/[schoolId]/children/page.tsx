@@ -21,13 +21,41 @@ export default async function ParentChildrenPage({
       students: {
         include: {
           user: true,
-          filiere: true
+          filiere: true,
+          evaluations: {
+            select: {
+              note: true,
+              coefficient: true,
+              moduleId: true
+            }
+          },
+          attendances: {
+            select: {
+              status: true
+            }
+          }
         }
       }
     }
   })
 
   if (!parent) redirect('/auth/login')
+
+  // Calculer les statistiques globales
+  const allEvaluations = parent.students.flatMap(s => s.evaluations)
+  const allAttendances = parent.students.flatMap(s => s.attendances)
+  
+  const globalAverage = allEvaluations.length > 0
+    ? (allEvaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0) / 
+       allEvaluations.reduce((sum, e) => sum + e.coefficient, 0)).toFixed(1)
+    : '0.0'
+  
+  const globalAttendanceRate = allAttendances.length > 0
+    ? ((allAttendances.filter(a => a.status === 'PRESENT').length / allAttendances.length) * 100).toFixed(1)
+    : '100'
+
+  // Compter les modules uniques
+  const uniqueModules = new Set(allEvaluations.map(e => e.moduleId)).size
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -37,7 +65,22 @@ export default async function ParentChildrenPage({
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {parent.students.map((student) => (
+        {parent.students.map((student) => {
+          // Calculer les statistiques par étudiant
+          const studentAverage = student.evaluations.length > 0
+            ? (student.evaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0) / 
+               student.evaluations.reduce((sum, e) => sum + e.coefficient, 0)).toFixed(1)
+            : '0.0'
+          
+          const studentAttendanceRate = student.attendances.length > 0
+            ? ((student.attendances.filter(a => a.status === 'PRESENT').length / student.attendances.length) * 100).toFixed(0)
+            : '100'
+          
+          const studentModules = new Set(student.evaluations.map(e => e.moduleId)).size
+          const totalModules = studentModules || 1
+          const progression = ((studentModules / totalModules) * 100).toFixed(0)
+
+          return (
           <Card key={student.id} className="border-2">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -62,23 +105,23 @@ export default async function ParentChildrenPage({
                     <TrendingUp className="h-4 w-4 text-blue-600" />
                     <p className="text-xs text-muted-foreground">Moyenne</p>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">15.8/20</p>
+                  <p className="text-2xl font-bold text-blue-600">{studentAverage}/20</p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <p className="text-xs text-muted-foreground">Présence</p>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">96%</p>
+                  <p className="text-2xl font-bold text-green-600">{studentAttendanceRate}%</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Progression annuelle</span>
-                  <span className="font-medium text-foreground">78%</span>
+                  <span className="font-medium text-foreground">{progression}%</span>
                 </div>
-                <Progress value={78} className="h-2" />
+                <Progress value={parseInt(progression)} className="h-2" />
               </div>
 
               <div className="pt-3 border-t space-y-2">
@@ -93,7 +136,8 @@ export default async function ParentChildrenPage({
               </div>
             </CardContent>
           </Card>
-        ))}
+          )
+        })}
       </div>
 
       <Card>
@@ -110,22 +154,21 @@ export default async function ParentChildrenPage({
             </div>
             <div className="text-center">
               <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-              <p className="text-2xl font-bold text-blue-600">14.5/20</p>
+              <p className="text-2xl font-bold text-blue-600">{globalAverage}/20</p>
               <p className="text-sm text-muted-foreground">Moyenne générale</p>
             </div>
             <div className="text-center">
               <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold text-green-600">92.5%</p>
+              <p className="text-2xl font-bold text-green-600">{globalAttendanceRate}%</p>
               <p className="text-sm text-muted-foreground">Taux de présence</p>
             </div>
             <div className="text-center">
               <div className="h-8 w-8 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600 font-bold">8</span>
+                <span className="text-purple-600 font-bold">{uniqueModules}</span>
               </div>
-              <p className="text-2xl font-bold text-foreground">8</p>
+              <p className="text-2xl font-bold text-foreground">{uniqueModules}</p>
               <p className="text-sm text-muted-foreground">Matières</p>
-            </div>
-          </div>
+            </div>          </div>
         </CardContent>
       </Card>
     </div>

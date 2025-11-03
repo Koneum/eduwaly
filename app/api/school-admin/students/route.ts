@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
 import { generateStudentEmail } from '@/lib/email-utils'
-import bcrypt from 'bcryptjs'
+import { generateEnrollmentId } from '@/lib/enrollment-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       niveau, 
       phone,
       filiereId,
-      schoolId 
+      schoolId
     } = body
 
     // Validation des champs obligatoires
@@ -59,77 +59,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ce matricule existe déjà' }, { status: 400 })
     }
 
-    // Générer l'email automatiquement: N.Prenom@ecole.com
+    // Générer l'email automatiquement: N.Prenom@ecole.com (pour information)
     const generatedEmail = generateStudentEmail(firstName, lastName, school.name)
 
-    // Vérifier si l'email existe déjà
-    const existingUser = await prisma.user.findUnique({
-      where: { email: generatedEmail }
-    })
+    // Générer un enrollmentId unique au format ENR-YYYY-XXXXX
+    const enrollmentId = generateEnrollmentId()
 
-    if (existingUser) {
-      return NextResponse.json({ 
-        error: `L'email ${generatedEmail} existe déjà. Veuillez modifier le nom ou prénom.` 
-      }, { status: 400 })
-    }
-
-    // Générer un enrollmentId unique
-    const enrollmentId = `ENR-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`
-
-    // Générer un mot de passe temporaire (le matricule)
-    const hashedPassword = await bcrypt.hash(studentNumber, 10)
-
-    // Créer l'utilisateur et l'étudiant dans une transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Créer l'utilisateur
-      const newUser = await tx.user.create({
-        data: {
-          name: `${firstName} ${lastName}`,
-          email: generatedEmail,
-          password: hashedPassword,
-          role: 'STUDENT',
-          schoolId,
-          isActive: true
-        }
-      })
-
-      // Créer l'étudiant
-      const student = await tx.student.create({
-        data: {
-          schoolId,
-          userId: newUser.id,
-          studentNumber,
-          enrollmentId,
-          niveau,
-          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-          address: address || null,
-          phone: phone || null,
-          filiereId: filiereId || null,
-          isEnrolled: true, // Compte créé automatiquement
-        },
-        include: {
-          filiere: true,
-          user: {
-            select: {
-              name: true,
-              email: true
-            }
-          }
-        }
-      })
-
-      return { user: newUser, student }
+    // Créer l'étudiant SANS compte (le compte sera créé lors de l'enrôlement)
+    const student = await prisma.student.create({
+      data: {
+        schoolId,
+        studentNumber,
+        enrollmentId,
+        niveau,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        address: address || null,
+        phone: phone || null,
+        filiereId: filiereId || null,
+        isEnrolled: false, // Pas encore enrôlé
+        userId: null // Pas de compte utilisateur
+      },
+      include: {
+        filiere: true
+      }
     })
 
     return NextResponse.json({
       success: true,
-      student: result.student,
-      credentials: {
-        email: generatedEmail,
-        password: studentNumber, // Mot de passe temporaire = matricule
-        enrollmentId
-      },
-      message: `Étudiant créé avec succès. Email: ${generatedEmail}, Mot de passe: ${studentNumber}`
+      student,
+      enrollmentId,
+      generatedEmail, // Email qui sera utilisé lors de l'enrôlement
+      message: `Étudiant créé. ID d'enrôlement: ${enrollmentId}. Email suggéré: ${generatedEmail}`
     })
 
   } catch (error) {

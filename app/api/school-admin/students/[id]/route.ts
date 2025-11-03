@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
 
 // PUT - Modifier un étudiant
@@ -9,19 +8,19 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getAuthUser()
     
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    if (session.user.role !== 'SCHOOL_ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+    if (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
     const { id } = await params
     const body = await request.json()
-    const { phone, niveau, roomId } = body
+    const { phone, niveau } = body
 
     // Vérifier que l'étudiant existe
     const student = await prisma.student.findUnique({
@@ -34,7 +33,7 @@ export async function PUT(
     }
 
     // Vérifier l'accès à l'école
-    if (session.user.role !== 'SUPER_ADMIN' && session.user.schoolId !== student.schoolId) {
+    if (user.role !== 'SUPER_ADMIN' && user.schoolId !== student.schoolId) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 

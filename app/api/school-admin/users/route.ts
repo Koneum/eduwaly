@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { auth } from '@/lib/auth'
+import { UserRole } from '@/app/generated/prisma'
 
 // GET - Récupérer tous les utilisateurs de l'école
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const user = await getAuthUser()
+    const authUser = await getAuthUser()
 
-    if (!session?.user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
+    if (!authUser || (authUser.role !== 'SCHOOL_ADMIN' && authUser.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const schoolId = user.schoolId
+    const schoolId = authUser.schoolId
     if (!schoolId) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
@@ -49,7 +50,9 @@ export async function GET(request: NextRequest) {
         enseignant: {
           select: {
             id: true,
-            specialite: true
+            nom: true,
+            prenom: true,
+            titre: true
           }
         },
         parent: {
@@ -78,13 +81,13 @@ export async function GET(request: NextRequest) {
 // POST - Créer un nouvel utilisateur
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser()
+    const authUser = await getAuthUser()
 
-    if (!session?.user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
+    if (!authUser || (authUser.role !== 'SCHOOL_ADMIN' && authUser.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const schoolId = user.schoolId
+    const schoolId = authUser.schoolId
     if (!schoolId) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
@@ -121,19 +124,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Créer l'utilisateur
-    const user = await prisma.user.create({
-      data: {
-        name,
+    // Créer l'utilisateur avec Better Auth (gère le hashing automatiquement)
+    const signUpResult = await auth.api.signUpEmail({
+      body: {
         email,
-        password: hashedPassword,
+        password,
+        name,
         role,
         schoolId,
-        isActive: true,
-      },
+      }
+    })
+
+    if (!signUpResult || !signUpResult.user) {
+      return NextResponse.json(
+        { error: 'Erreur lors de la création du compte' },
+        { status: 500 }
+      )
+    }
+
+    // Récupérer l'utilisateur complet avec tous les champs
+    const user = await prisma.user.findUnique({
+      where: { id: signUpResult.user.id },
       select: {
         id: true,
         name: true,
@@ -143,6 +154,13 @@ export async function POST(request: NextRequest) {
         createdAt: true,
       }
     })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Erreur lors de la récupération de l\'utilisateur' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       message: 'Utilisateur créé avec succès',
@@ -161,13 +179,13 @@ export async function POST(request: NextRequest) {
 // PUT - Mettre à jour un utilisateur
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getAuthUser()
+    const authUser = await getAuthUser()
 
-    if (!session?.user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
+    if (!authUser || (authUser.role !== 'SCHOOL_ADMIN' && authUser.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const schoolId = user.schoolId
+    const schoolId = authUser.schoolId
     if (!schoolId) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
@@ -206,22 +224,26 @@ export async function PUT(request: NextRequest) {
     }
 
     // Préparer les données de mise à jour
-    const updateData: any = {}
+    const updateData: {
+      name?: string
+      isActive?: boolean
+      role?: UserRole
+    } = {}
     if (name !== undefined) updateData.name = name
     if (isActive !== undefined) updateData.isActive = isActive
     if (role !== undefined) {
-      const allowedRoles = ['STUDENT', 'TEACHER', 'PARENT', 'SCHOOL_ADMIN']
-      if (!allowedRoles.includes(role)) {
+      const allowedRoles: UserRole[] = ['STUDENT', 'TEACHER', 'PARENT', 'SCHOOL_ADMIN']
+      if (!allowedRoles.includes(role as UserRole)) {
         return NextResponse.json(
           { error: 'Rôle non autorisé' },
           { status: 400 }
         )
       }
-      updateData.role = role
+      updateData.role = role as UserRole
     }
 
     // Mettre à jour l'utilisateur
-    const user = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
       select: {
@@ -236,7 +258,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Utilisateur mis à jour avec succès',
-      user
+      user: updatedUser
     }, { status: 200 })
 
   } catch (error) {
@@ -251,13 +273,13 @@ export async function PUT(request: NextRequest) {
 // DELETE - Supprimer un utilisateur
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await getAuthUser()
+    const authUser = await getAuthUser()
 
-    if (!session?.user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
+    if (!authUser || (authUser.role !== 'SCHOOL_ADMIN' && authUser.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const schoolId = user.schoolId
+    const schoolId = authUser.schoolId
     if (!schoolId) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
@@ -296,7 +318,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Empêcher l'admin de se supprimer lui-même
-    if (existingUser.id === user.id) {
+    if (existingUser.id === authUser.id) {
       return NextResponse.json(
         { error: 'Vous ne pouvez pas supprimer votre propre compte' },
         { status: 403 }

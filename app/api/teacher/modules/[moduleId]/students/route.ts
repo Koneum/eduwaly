@@ -15,19 +15,19 @@ export async function GET(
     const { moduleId } = await params
 
     // Récupérer le module avec la filière
-    const module = await prisma.module.findUnique({
+    const moduleData = await prisma.module.findUnique({
       where: { id: moduleId },
       include: { filiere: true }
     })
 
-    if (!module || !module.filiereId) {
+    if (!moduleData || !moduleData.filiereId) {
       return NextResponse.json({ error: 'Module non trouvé ou sans filière' }, { status: 404 })
     }
 
     // Récupérer tous les étudiants de la filière
     const students = await prisma.student.findMany({
       where: {
-        filiereId: module.filiereId
+        filiereId: moduleData.filiereId
       },
       include: {
         user: {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,32 +10,121 @@ import { Badge } from "@/components/ui/badge"
 import { GraduationCap, UserPlus, Key, Mail, Phone, Lock, User } from "lucide-react"
 
 export default function EnrollPage() {
+  const router = useRouter()
   const [enrollmentId, setEnrollmentId] = useState("")
   const [step, setStep] = useState<"id" | "form">("id")
   const [studentInfo, setStudentInfo] = useState<any>(null)
   const [userType, setUserType] = useState<"student" | "parent">("student")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [formData, setFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: ""
+  })
 
   const handleVerifyId = async () => {
-    // TODO: API call to verify enrollment ID
-    // Mock data for now
-    setStudentInfo({
-      studentNumber: "STU2024001",
-      niveau: "L1",
-      filiere: "Informatique",
-      schoolName: "Université de Yaoundé",
-      schoolType: "UNIVERSITY"
-    })
-    setStep("form")
+    if (!enrollmentId.trim()) {
+      setError("Veuillez entrer votre ID d'enrôlement")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+
+    try {
+      const response = await fetch('/api/enroll/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enrollmentId, userType })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Erreur lors de la vérification')
+        return
+      }
+
+      setStudentInfo(data.data)
+      setStep("form")
+    } catch (err) {
+      console.error('Erreur vérification enrollment:', err)
+      setError('Erreur de connexion au serveur')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: API call to create user account
-    console.log("Creating account...")
+    setError("")
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas")
+      return
+    }
+
+    if (formData.password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères")
+      return
+    }
+
+    // Validation email pour université
+    if (studentInfo?.schoolType === "UNIVERSITY" && !formData.email) {
+      setError("L'email est obligatoire pour les universités")
+      return
+    }
+
+    // Validation téléphone pour lycée
+    if (studentInfo?.schoolType === "HIGH_SCHOOL" && !formData.phone) {
+      setError("Le numéro de téléphone est obligatoire pour les lycées")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const response = await fetch('/api/enroll/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enrollmentId,
+          userType,
+          nom: formData.nom,
+          prenom: formData.prenom,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          studentId: studentInfo?.studentId,
+          parentId: studentInfo?.parentId,
+          schoolId: studentInfo?.schoolId
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Erreur lors de la création du compte')
+        return
+      }
+
+      // Rediriger vers la page de connexion avec un message de succès
+      router.push('/login?enrolled=true')
+    } catch (err) {
+      console.error('Erreur création compte:', err)
+      setError('Erreur de connexion au serveur')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-primary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -63,12 +153,19 @@ export default function EnrollPage() {
                   <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="enrollmentId"
-                    placeholder="Entrez votre ID (ex: ENR-2024-001)"
+                    placeholder="Entrez votre ID (ex: ENR-2024-A3B5C)"
                     value={enrollmentId}
-                    onChange={(e) => setEnrollmentId(e.target.value)}
+                    onChange={(e) => {
+                      setEnrollmentId(e.target.value.toUpperCase())
+                      setError("")
+                    }}
                     className="pl-10"
+                    disabled={loading}
                   />
                 </div>
+                {error && (
+                  <p className="text-sm text-red-600">{error}</p>
+                )}
               </div>
 
               <div className="flex gap-2">
@@ -99,9 +196,9 @@ export default function EnrollPage() {
               <Button
                 className="w-full"
                 onClick={handleVerifyId}
-                disabled={!enrollmentId}
+                disabled={!enrollmentId || loading}
               >
-                Vérifier l&apos;ID
+                {loading ? "Vérification..." : "Vérifier l'ID"}
               </Button>
 
               <div className="pt-4 border-t">
@@ -131,23 +228,23 @@ export default function EnrollPage() {
               {/* Info étudiant */}
               {studentInfo && (
                 <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-foreground mb-2">Informations de l&apos;inscription</h3>
+                  <h3 className="font-semibold text-background mb-2">Informations de l&apos;inscription</h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Établissement:</span>
-                      <p className="font-medium text-foreground">{studentInfo.schoolName}</p>
+                      <span className="text-background">Établissement:</span>
+                      <p className="font-medium text-background">{studentInfo.schoolName}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">N° Étudiant:</span>
-                      <p className="font-medium text-foreground">{studentInfo.studentNumber}</p>
+                      <span className="text-background">N° Étudiant:</span>
+                      <p className="font-medium text-background">{studentInfo.studentNumber}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Niveau:</span>
-                      <p className="font-medium text-foreground">{studentInfo.niveau}</p>
+                      <span className="text-background">Niveau:</span>
+                      <p className="font-medium text-background">{studentInfo.niveau}</p>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Filière:</span>
-                      <p className="font-medium text-foreground">{studentInfo.filiere}</p>
+                      <span className="text-background">Filière:</span>
+                      <p className="font-medium text-background">{studentInfo.filiere}</p>
                     </div>
                   </div>
                 </div>
@@ -158,11 +255,23 @@ export default function EnrollPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nom">Nom *</Label>
-                    <Input id="nom" placeholder="Votre nom" required />
+                    <Input 
+                      id="nom" 
+                      placeholder="Votre nom" 
+                      value={formData.nom}
+                      onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="prenom">Prénom *</Label>
-                    <Input id="prenom" placeholder="Votre prénom" required />
+                    <Input 
+                      id="prenom" 
+                      placeholder="Votre prénom" 
+                      value={formData.prenom}
+                      onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                      required 
+                    />
                   </div>
                 </div>
 
@@ -177,6 +286,8 @@ export default function EnrollPage() {
                         type="email"
                         placeholder="votre.email@example.com"
                         className="pl-10"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
                         required
                       />
                     </div>
@@ -194,6 +305,8 @@ export default function EnrollPage() {
                         type="email"
                         placeholder="votre.email@example.com"
                         className="pl-10"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
                       />
                     </div>
                   </div>
@@ -210,6 +323,8 @@ export default function EnrollPage() {
                         type="tel"
                         placeholder="+237 6XX XXX XXX"
                         className="pl-10"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         required
                       />
                     </div>
@@ -227,6 +342,8 @@ export default function EnrollPage() {
                         type="tel"
                         placeholder="+237 6XX XXX XXX"
                         className="pl-10"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       />
                     </div>
                   </div>
@@ -240,8 +357,10 @@ export default function EnrollPage() {
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Créez un mot de passe sécurisé"
+                      placeholder="Créez un mot de passe sécurisé (min. 8 caractères)"
                       className="pl-10"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
                       required
                     />
                   </div>
@@ -257,13 +376,21 @@ export default function EnrollPage() {
                       type="password"
                       placeholder="Confirmez votre mot de passe"
                       className="pl-10"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                       required
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Créer mon compte
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Création en cours..." : "Créer mon compte"}
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">

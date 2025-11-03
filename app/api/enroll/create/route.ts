@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { auth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,9 +25,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10)
-
     if (userType === 'student') {
       // Vérifier que l'étudiant existe et n'est pas déjà enrôlé
       const student = await prisma.student.findUnique({
@@ -48,24 +45,36 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Créer l'utilisateur
-      const user = await prisma.user.create({
-        data: {
-          email: email || `${student.studentNumber}@temp.edu`,
-          password: hashedPassword,
+      // Créer l'utilisateur avec Better Auth (gère le hashing automatiquement)
+      const userEmail = email || `${student.studentNumber}@temp.edu`
+      
+      // Utiliser l'API Better Auth pour créer le compte
+      const signUpResult = await auth.api.signUpEmail({
+        body: {
+          email: userEmail,
+          password: password,
           name: `${prenom} ${nom}`,
           role: 'STUDENT',
           schoolId: schoolId,
-          isActive: true
         }
       })
+
+      if (!signUpResult || !signUpResult.user) {
+        return NextResponse.json(
+          { error: 'Erreur lors de la création du compte' },
+          { status: 500 }
+        )
+      }
+
+      const user = signUpResult.user
 
       // Mettre à jour l'étudiant
       await prisma.student.update({
         where: { id: studentId },
         data: {
           userId: user.id,
-          phone: phone || student.phone
+          phone: phone || student.phone,
+          isEnrolled: true
         }
       })
 
@@ -94,24 +103,36 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Créer l'utilisateur
-      const user = await prisma.user.create({
-        data: {
-          email: email || `parent-${parentId}@temp.edu`,
-          password: hashedPassword,
+      // Créer l'utilisateur avec Better Auth (gère le hashing automatiquement)
+      const userEmail = email || `parent-${parentId}@temp.edu`
+      
+      // Utiliser l'API Better Auth pour créer le compte
+      const signUpResult = await auth.api.signUpEmail({
+        body: {
+          email: userEmail,
+          password: password,
           name: `${prenom} ${nom}`,
           role: 'PARENT',
           schoolId: schoolId,
-          isActive: true
         }
       })
+
+      if (!signUpResult || !signUpResult.user) {
+        return NextResponse.json(
+          { error: 'Erreur lors de la création du compte' },
+          { status: 500 }
+        )
+      }
+
+      const user = signUpResult.user
 
       // Mettre à jour le parent
       await prisma.parent.update({
         where: { id: parentId },
         data: {
           userId: user.id,
-          phone: phone || parent.phone
+          phone: phone || parent.phone,
+          isEnrolled: true
         }
       })
 

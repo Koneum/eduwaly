@@ -93,6 +93,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
   const [isScholarshipDialogOpen, setIsScholarshipDialogOpen] = useState(false)
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isSendEnrollmentDialogOpen, setIsSendEnrollmentDialogOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   
   // Form state for new student
@@ -134,6 +135,11 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
     phone: '',
     niveau: '',
     roomId: ''
+  })
+
+  // Send enrollment form state
+  const [enrollmentEmailData, setEnrollmentEmailData] = useState({
+    recipientEmail: ''
   })
 
   // Import state
@@ -193,28 +199,38 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
     }
   }
 
-  const handleSendCredentials = async (student: Student) => {
-    if (!student.user?.email) {
-      toast.error('Cet étudiant n\'a pas d\'email')
+  const handleSendEnrollmentId = (student: Student) => {
+    setSelectedStudent(student)
+    setEnrollmentEmailData({ recipientEmail: '' })
+    setIsSendEnrollmentDialogOpen(true)
+  }
+
+  const handleConfirmSendEnrollment = async () => {
+    if (!selectedStudent) return
+
+    if (!enrollmentEmailData.recipientEmail) {
+      toast.error('Veuillez entrer l\'email du destinataire')
       return
     }
 
     try {
-      const response = await fetch('/api/admin/send-credentials', {
+      const response = await fetch(`/api/school-admin/students/${selectedStudent.id}/send-enrollment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: student.id })
+        body: JSON.stringify({ recipientEmail: enrollmentEmailData.recipientEmail })
       })
 
       if (response.ok) {
-        toast.success('Identifiants envoyés par email avec succès')
+        toast.success('ID d\'enrôlement envoyé par email avec succès')
+        setIsSendEnrollmentDialogOpen(false)
+        setEnrollmentEmailData({ recipientEmail: '' })
       } else {
         const error = await response.json()
         toast.error(error.error || 'Erreur lors de l\'envoi')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error('Erreur lors de l\'envoi des identifiants')
+      toast.error('Erreur lors de l\'envoi de l\'email')
     }
   }
 
@@ -704,7 +720,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                             <PermissionMenuItem category="students" action="edit" onClick={() => handleAction(student, 'reminder')}>
                               Envoyer rappel
                             </PermissionMenuItem>
-                            <PermissionMenuItem category="students" action="view" onClick={() => handleSendCredentials(student)}>
+                            <PermissionMenuItem category="students" action="view" onClick={() => handleSendEnrollmentId(student)}>
                               <Mail className="h-4 w-4 mr-2" />
                               Envoyer identifiants
                             </PermissionMenuItem>
@@ -906,10 +922,9 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => {
-                        toast.success('Code envoyé par email à l\'étudiant')
-                      }}
+                      onClick={() => handleSendEnrollmentId(selectedStudent)}
                     >
+                      <Mail className="h-4 w-4 mr-2" />
                       Envoyer par Email
                     </Button>
                     <Button 
@@ -1340,6 +1355,60 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
             </Button>
             <Button onClick={handleImportFile} disabled={!importFile || isImporting}>
               {isImporting ? 'Import en cours...' : 'Importer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Envoi ID d'Enrôlement */}
+      <Dialog open={isSendEnrollmentDialogOpen} onOpenChange={setIsSendEnrollmentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Envoyer l&apos;ID d&apos;enrôlement</DialogTitle>
+            <DialogDescription>
+              Étudiant: {selectedStudent?.user?.name || selectedStudent?.studentNumber}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-blue-600" />
+                <p className="font-semibold text-sm">Informations à envoyer</p>
+              </div>
+              <div className="space-y-1 text-sm">
+                <p>ID d&apos;enrôlement (parent et etudiant): <span className="font-bold "><strong>{selectedStudent?.enrollmentId}</strong></span></p>
+                <p>Matricule: <span className="font-bold "><strong>{selectedStudent?.studentNumber}</strong></span></p>
+                <p>Niveau: <span className="font-bold "><strong>{selectedStudent?.niveau}</strong></span></p>
+                {selectedStudent?.filiere && (
+                  <p>Filière: <span className="font-bold "><strong>{selectedStudent.filiere.nom}</strong></span></p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="recipientEmail">Email du destinataire *</Label>
+              <Input
+                id="recipientEmail"
+                type="email"
+                placeholder="parent@example.com ou etudiant@example.com"
+                value={enrollmentEmailData.recipientEmail}
+                onChange={(e) => setEnrollmentEmailData({ recipientEmail: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                Un email professionnel sera envoyé avec l&apos;ID d&apos;enrôlement, l&apos;email suggéré et les instructions complètes.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsSendEnrollmentDialogOpen(false)
+              setEnrollmentEmailData({ recipientEmail: '' })
+            }}>
+              Annuler
+            </Button>
+            <Button onClick={handleConfirmSendEnrollment}>
+              <Mail className="h-4 w-4 mr-2" />
+              Envoyer
             </Button>
           </DialogFooter>
         </DialogContent>

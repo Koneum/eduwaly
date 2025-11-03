@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
     }
 
     // Vérifier les permissions
-    const user = user
     const isAuthorized =
       user.role === 'SUPER_ADMIN' ||
       (user.role === 'SCHOOL_ADMIN' && user.schoolId === schoolId) ||
@@ -87,7 +86,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Vérifier les permissions (Admin ou Super Admin uniquement)
-    const user = user
     const isAuthorized =
       user.role === 'SUPER_ADMIN' ||
       (user.role === 'SCHOOL_ADMIN' && user.schoolId === schoolId)
@@ -162,7 +160,6 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Vérifier les permissions
-    const user = user
     const isAuthorized =
       user.role === 'SUPER_ADMIN' ||
       (user.role === 'SCHOOL_ADMIN' && user.schoolId === schoolId)
