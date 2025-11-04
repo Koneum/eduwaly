@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const isRecent = url.searchParams.get('recent') === 'true';
     const schoolId = url.searchParams.get('schoolId');
 
-    // Si schoolId est fourni, filtrer par école
-    const whereClause: any = {};
+  // Si schoolId est fourni, filtrer par école
+  const whereClause: { schoolId?: string; anneeUnivId?: string } = {};
     
     if (schoolId) {
       whereClause.schoolId = schoolId;
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json(emplois);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Erreur lors de la récupération des emplois du temps:', error);
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des emplois du temps' },
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
 
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       if (!Array.isArray(joursCours)) {
         throw new Error('Le format des jours de cours est invalide');
       }
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Le format des jours de cours est invalide' },
         { status: 400 }
@@ -230,7 +230,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(emploi);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Erreur lors de la création de l\'emploi du temps:', error);
     return NextResponse.json(
       { error: 'Erreur lors de la création de l\'emploi du temps' },

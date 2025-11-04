@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -16,15 +16,18 @@ function formatDateFR(date: Date | string | null | undefined): string {
   }).toUpperCase();
 }
 
+// Petit type local pour limiter l'usage d'any' dans les helpers
+type EmploiDays = { joursCours: string; evaluation?: boolean; jourEvaluation?: string | null };
+
 // Fonction pour vérifier si c'est le jour du cours
-function isCoursDay(emploi: any, jour: string) {
+function isCoursDay(emploi: EmploiDays, jour: string) {
   const joursCours = JSON.parse(emploi.joursCours);
   return joursCours.includes(jour);
 }
 
 // Fonction pour vérifier si c'est le jour de l'évaluation
-function isEvaluationDay(emploi: any, jour: string) {
-  return emploi.evaluation && emploi.jourEvaluation === jour;
+function isEvaluationDay(emploi: EmploiDays, jour: string) {
+  return !!emploi.evaluation && emploi.jourEvaluation === jour;
 }
 
 // Fonction pour formater l'heure
@@ -33,12 +36,12 @@ function formatHeure(heure: string) {
 }
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Récupérer l'ID de l'emploi du temps après avoir attendu params
-    const { id } = await params;
+    const { id } = await context.params;
     
     // Récupérer l'emploi du temps
     const emploi = await prisma.emploiDuTemps.findUnique({
@@ -180,7 +183,7 @@ export async function GET(
     });
 
     // Signature avec les informations du chef de département
-    const finalY = (doc as any).lastAutoTable.finalY + 20;
+  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
     doc.setFontSize(10);
     
     // Colonne de gauche avec le nom de l'enseignant
