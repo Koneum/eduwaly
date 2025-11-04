@@ -48,5 +48,5 @@ export const auth = betterAuth({
   trustedOrigins: [
     'http://localhost:3000', 'https://eduwaly.vercel.app',
     process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
-  ],
+  ], 
 })
