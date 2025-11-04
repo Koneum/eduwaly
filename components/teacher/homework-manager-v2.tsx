@@ -60,7 +60,7 @@ interface Homework {
   assignmentType: string
   module: Module
   workGroup?: WorkGroup
-  submissions: any[]
+  submissions: Array<{ id: string; studentId: string; status: string }>
   fileUrl?: string
   fileName?: string
 }
@@ -389,7 +389,7 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
           {homework.length === 0 && (
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">
-                Aucun devoir créé. Cliquez sur "Nouveau Devoir" pour commencer.
+                Aucun devoir créé. Cliquez sur &quot;Nouveau Devoir&quot; pour commencer.
               </CardContent>
             </Card>
           )}
@@ -427,7 +427,7 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
                   <SelectValue placeholder={`Sélectionnez ${schoolType === 'UNIVERSITY' ? 'une filière' : 'une classe'}`} />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
-                  {filieres.map((filiere: any) => (
+                  {filieres.map((filiere: { id: string; nom: string }) => (
                     <SelectItem key={filiere.id} value={filiere.id}>
                       {filiere.nom}
                     </SelectItem>
@@ -457,7 +457,7 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
 
             <div>
-              <Label>Type d'assignation *</Label>
+              <Label>Type d&apos;assignation *</Label>
               <Select value={assignmentType} onValueChange={setAssignmentType}>
                 <SelectTrigger className="bg-card">
                   <SelectValue />
@@ -605,7 +605,7 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
                   <SelectValue placeholder="Sélectionnez" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
-                  {filieres.map((filiere: any) => (
+                  {filieres.map((filiere: { id: string; nom: string }) => (
                     <SelectItem key={filiere.id} value={filiere.id}>
                       {filiere.nom}
                     </SelectItem>

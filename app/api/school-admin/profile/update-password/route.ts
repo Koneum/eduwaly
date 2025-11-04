@@ -29,20 +29,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vérifier le code
-    const verificationCode = await prisma.verificationCode.findFirst({
+    // Vérifier le code en utilisant le modèle `Verification` (identifier/value)
+    const verification = await prisma.verification.findFirst({
       where: {
-        userId: user.id,
-        code,
-        type: 'password',
-        used: false,
+        identifier: user.id,
+        value: code,
         expiresAt: {
           gt: new Date()
         }
       }
     })
 
-    if (!verificationCode) {
+    if (!verification) {
       return NextResponse.json(
         { error: 'Code invalide ou expiré' },
         { status: 400 }
@@ -52,15 +50,14 @@ export async function POST(request: NextRequest) {
     // Hasher le nouveau mot de passe
     const hashedPassword = await bcrypt.hash(newPassword, 10)
 
-    // Mettre à jour le mot de passe et marquer le code comme utilisé
+    // Mettre à jour le mot de passe et supprimer le code (consommé)
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
         data: { password: hashedPassword }
       }),
-      prisma.verificationCode.update({
-        where: { id: verificationCode.id },
-        data: { used: true }
+      prisma.verification.delete({
+        where: { id: verification.id }
       })
     ])
 

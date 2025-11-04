@@ -1,4 +1,5 @@
 import { VITEPAY_CONFIG, VITEPAY_ENDPOINTS } from './config'
+import crypto from 'crypto'
 
 export interface VitepayPayment {
   id: string
@@ -6,12 +7,14 @@ export interface VitepayPayment {
   currency: string
   status: 'pending' | 'completed' | 'failed' | 'cancelled'
   reference: string
+  // URL where the user can complete the payment (if provided by Vitepay)
+  paymentUrl?: string
   customer: {
     name: string
     email: string
     phone: string
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface VitepaySubscription {
@@ -73,7 +76,7 @@ class VitepayClient {
       phone: string
     }
     returnUrl?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }): Promise<VitepayPayment> {
     return this.request<VitepayPayment>(VITEPAY_ENDPOINTS.createPayment, {
       method: 'POST',
@@ -99,7 +102,7 @@ class VitepayClient {
   async createSubscription(data: {
     planId: string
     customerId: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   }): Promise<VitepaySubscription> {
     return this.request<VitepaySubscription>(VITEPAY_ENDPOINTS.createSubscription, {
       method: 'POST',
@@ -131,7 +134,6 @@ class VitepayClient {
   verifyWebhookSignature(payload: string, signature: string): boolean {
     // Implémenter la vérification selon la documentation Vitepay
     // Généralement: HMAC-SHA256 du payload avec le webhook secret
-    const crypto = require('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', VITEPAY_CONFIG.webhookSecret)
       .update(payload)

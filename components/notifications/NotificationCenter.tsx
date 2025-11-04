@@ -94,10 +94,16 @@ export default function NotificationCenter() {
   }, [])
 
   useEffect(() => {
-    loadNotifications()
+    // Schedule initial load asynchronously to avoid synchronous setState inside effect
+    const timeout = setTimeout(() => {
+      void loadNotifications()
+    }, 0)
     // Polling toutes les 30 secondes
     const interval = setInterval(loadNotifications, 30000)
-    return () => clearInterval(interval)
+    return () => {
+      clearTimeout(timeout)
+      clearInterval(interval)
+    }
   }, [loadNotifications])
 
   const markAsRead = async (notificationId: string) => {

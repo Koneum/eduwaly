@@ -31,12 +31,13 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date()
     expiresAt.setMinutes(expiresAt.getMinutes() + 15) // Expire dans 15 minutes
 
-    // Stocker le code dans la base de données
-    await prisma.verificationCode.create({
+    // Stocker le code dans la base de données en utilisant le modèle `Verification`
+    // (identifier = userId, value = code)
+    await prisma.verification.create({
       data: {
-        userId: user.id,
-        code,
-        type,
+        id: `${user.id}-${Date.now()}`,
+        identifier: user.id,
+        value: code,
         expiresAt,
       }
     })

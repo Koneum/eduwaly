@@ -1,18 +1,29 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 
-type EnseignantWithEmplois = Prisma.EnseignantGetPayload<{
-  include: {
-    emplois: {
-      include: {
-        module: true;
-        filiere: true;
-        anneeUniv: true;
-      };
-    };
-  };
-}>;
+// Local types to avoid relying on Prisma's generated helpers which may not be
+// available in the current setup. Keep these minimal and focused on the
+// properties used by this endpoint.
+type Emploi = {
+  module?: { nom?: string; type?: string; isUeCommune?: boolean } | null;
+  filiere?: { nom?: string } | null;
+  vh?: number | null;
+  semestre?: string | null;
+  anneeUniv?: { annee?: string } | null;
+};
+
+type EnseignantWithEmplois = {
+  id: string;
+  nom: string;
+  prenom: string;
+  email?: string | null;
+  matricule?: string | null;
+  titre?: string | null;
+  grade?: string | null;
+  type?: string | null;
+  telephone?: string | null;
+  emplois: Emploi[];
+};
 
 export async function GET(request: Request) {
   try {
@@ -27,12 +38,15 @@ export async function GET(request: Request) {
     }
 
     // Rechercher les enseignants qui correspondent au terme de recherche
+    // Note: 'matricule' is not part of the generated WhereInput in some
+    // Prisma schemas in this project, so omit it from the filter to avoid
+    // TypeScript errors. If your schema contains 'matricule', re-add it and
+    // regenerate Prisma client types.
     const enseignants = await prisma.enseignant.findMany({
       where: {
         OR: [
           { nom: { contains: query } },
           { prenom: { contains: query } },
-          { matricule: { contains: query } },
           { email: { contains: query } }
         ]
       },
@@ -52,7 +66,7 @@ export async function GET(request: Request) {
     });
 
     // Formater les résultats
-    const results = enseignants.map((enseignant: EnseignantWithEmplois) => ({
+    const results = (enseignants as EnseignantWithEmplois[]).map((enseignant) => ({
       id: enseignant.id,
       nom: enseignant.nom,
       prenom: enseignant.prenom,
@@ -62,7 +76,7 @@ export async function GET(request: Request) {
       grade: enseignant.grade,
       type: enseignant.type,
       telephone: enseignant.telephone,
-      modules: enseignant.emplois.map(emploi => ({
+      modules: enseignant.emplois.map((emploi: Emploi) => ({
         nom: emploi.module?.nom,
         type: emploi.module?.type,
         filiere: emploi.filiere?.nom || 'UE Commune',

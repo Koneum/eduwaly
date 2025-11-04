@@ -1,6 +1,7 @@
 import { PrismaClient } from '../app/generated/prisma'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
+import type { UserRole } from '../app/generated/prisma'
 
 const prisma = new PrismaClient()
 
@@ -9,7 +10,7 @@ async function createUserWithAccount(data: {
   email: string
   password: string
   name: string
-  role: string
+  role: UserRole
   schoolId?: string
   isActive?: boolean
 }) {
@@ -21,7 +22,7 @@ async function createUserWithAccount(data: {
       email: data.email,
       password: hashedPassword,
       name: data.name,
-      role: data.role as any,
+  role: data.role,
       schoolId: data.schoolId,
       isActive: data.isActive ?? true,
       emailVerified: true,
@@ -31,6 +32,7 @@ async function createUserWithAccount(data: {
   // Créer le compte BetterAuth
   await prisma.account.create({
     data: {
+      id: crypto.randomUUID(),
       userId: user.id,
       accountId: crypto.randomUUID(),
       providerId: 'credential',
@@ -70,9 +72,12 @@ async function main() {
   await prisma.user.deleteMany()
   await prisma.school.deleteMany()
 
+  // Mot de passe par défaut pour les utilisateurs créés directement dans le seed
+  const commonHashedPassword = await bcrypt.hash('password123', 10)
+
   // 1. Créer Super Admin
   console.log('👤 Création Super Admin...')
-  const superAdmin = await createUserWithAccount({
+  await createUserWithAccount({
     email: 'superadmin@saas.com',
     password: 'password123',
     name: 'Super Administrateur',
@@ -81,7 +86,7 @@ async function main() {
 
   // 2. Créer Plans d'abonnement
   console.log('💳 Création des plans...')
-  const freePlan = await prisma.plan.create({
+  await prisma.plan.create({
     data: {
       name: 'Essai Gratuit',
       description: 'Plan d\'essai gratuit de 30 jours',
@@ -151,7 +156,7 @@ async function main() {
   const schoolAdmin1 = await prisma.user.create({
     data: {
       email: 'admin@excellence-dakar.sn',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Amadou Diallo',
       role: 'SCHOOL_ADMIN',
       schoolId: school1.id,
@@ -160,7 +165,7 @@ async function main() {
   })
 
   // Année universitaire
-  const annee1 = await prisma.anneeUniversitaire.create({
+  await prisma.anneeUniversitaire.create({
     data: {
       annee: '2024-2025',
       schoolId: school1.id,
@@ -183,7 +188,7 @@ async function main() {
   })
 
   // Modules
-  const module1 = await prisma.module.create({
+  await prisma.module.create({
     data: {
       nom: 'Mathématiques',
       type: 'Cours Magistral',
@@ -198,15 +203,14 @@ async function main() {
   const teacher1User = await prisma.user.create({
     data: {
       email: 'teacher@excellence-dakar.sn',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Fatou Sow',
       role: 'TEACHER',
       schoolId: school1.id,
       isActive: true,
     },
   })
-
-  const teacher1 = await prisma.enseignant.create({
+  await prisma.enseignant.create({
     data: {
       nom: 'Sow',
       prenom: 'Fatou',
@@ -224,7 +228,7 @@ async function main() {
   const student1User = await prisma.user.create({
     data: {
       email: 'student1@excellence-dakar.sn',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Moussa Ndiaye',
       role: 'STUDENT',
       schoolId: school1.id,
@@ -248,7 +252,7 @@ async function main() {
   const student2User = await prisma.user.create({
     data: {
       email: 'student2@excellence-dakar.sn',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Aïssatou Ba',
       role: 'STUDENT',
       schoolId: school1.id,
@@ -273,15 +277,14 @@ async function main() {
   const parent1User = await prisma.user.create({
     data: {
       email: 'parent@excellence-dakar.sn',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Ibrahima Ndiaye',
       role: 'PARENT',
       schoolId: school1.id,
       isActive: true,
     },
   })
-
-  const parent1 = await prisma.parent.create({
+  await prisma.parent.create({
     data: {
       userId: parent1User.id,
       enrollmentId: 'ENR-2024-STU01',
@@ -435,7 +438,7 @@ async function main() {
   const schoolAdmin2 = await prisma.user.create({
     data: {
       email: 'admin@moderne-abidjan.ci',
-      password: hashedPassword,
+      password: commonHashedPassword,
       name: 'Kouassi Yao',
       role: 'SCHOOL_ADMIN',
       schoolId: school2.id,

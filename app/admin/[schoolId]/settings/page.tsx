@@ -142,16 +142,6 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
               address: school.address
             }}
             annees={annees}
-            scholarships={scholarships
-              .filter(s => s.student !== null)
-              .map(s => ({
-                id: s.id,
-                name: s.name,
-                type: s.type,
-                percentage: s.percentage,
-                amount: s.amount ? Number(s.amount) : null,
-                student: s.student!
-              }))}
             rooms={rooms}
           />
         </TabsContent>

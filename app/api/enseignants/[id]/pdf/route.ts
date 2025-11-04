@@ -51,14 +51,14 @@ function getSemestreFromDate(dateString: string | Date): string {
 // Selon la documentation Next.js 15, nous devons utiliser cette signature pour les routes API dynamiques
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Récupérer le semestre à partir du corps de la requête
     const { semestre = 'S2' } = await request.json();
 
-    // Récupérer les paramètres de l'URL (id de l'enseignant)
-    const { id } = await params;
+  // Récupérer les paramètres de l'URL (id de l'enseignant)
+  const { id } = await context.params;
 
     // Récupérer les données de l'enseignant
     const enseignant = await prisma.enseignant.findUnique({

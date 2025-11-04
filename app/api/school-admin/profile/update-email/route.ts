@@ -22,19 +22,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier le code
-    const verificationCode = await prisma.verificationCode.findFirst({
+    const verification = await prisma.verification.findFirst({
       where: {
-        userId: user.id,
-        code,
-        type: 'email',
-        used: false,
+        identifier: user.id,
+        value: code,
         expiresAt: {
           gt: new Date()
         }
       }
     })
 
-    if (!verificationCode) {
+    if (!verification) {
       return NextResponse.json(
         { error: 'Code invalide ou expiré' },
         { status: 400 }
@@ -59,9 +57,8 @@ export async function POST(request: NextRequest) {
         where: { id: user.id },
         data: { email: newEmail }
       }),
-      prisma.verificationCode.update({
-        where: { id: verificationCode.id },
-        data: { used: true }
+      prisma.verification.delete({
+        where: { id: verification.id }
       })
     ])
 

@@ -1,15 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, DollarSign, CheckCircle, AlertCircle } from "lucide-react"
+import { Users, CheckCircle, AlertCircle } from "lucide-react"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
-export default async function ParentDashboard({ 
-  params 
-}: { 
-  params: Promise<{ schoolId: string }> 
-}) {
+export default async function ParentDashboard() {
   const user = await getAuthUser()
   if (!user || user.role !== 'PARENT') redirect('/auth/login')
 
@@ -33,7 +29,7 @@ export default async function ParentDashboard({
 
   const allPayments = parent.students.flatMap(s => s.payments)
   const totalDue = allPayments.reduce((sum, p) => sum + Number(p.amountDue), 0)
-  const totalPaid = allPayments.reduce((sum, p) => sum + Number(p.amountPaid), 0)
+  // totalPaid not used currently; leave calculation out to satisfy lint
   const paidCount = allPayments.filter(p => p.status === 'PAID').length
   const overdueCount = allPayments.filter(p => p.status === 'OVERDUE').length
 
@@ -102,7 +98,7 @@ export default async function ParentDashboard({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>{student.user.name}</CardTitle>
+                    <CardTitle>{student.user?.name ?? student.studentNumber}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {student.studentNumber} • {student.filiere?.nom} • {student.niveau}
                     </p>

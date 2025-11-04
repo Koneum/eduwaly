@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma"
 import { requireSchoolAccess } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 import RoomsManager from "@/components/school-admin/rooms-manager"
-import { Button } from "react-day-picker"
+import { Button } from '@/components/ui/button'
 
 export default async function RoomsManagementPage({ 
   params 

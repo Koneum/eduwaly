@@ -17,8 +17,8 @@ interface User {
 interface AuthContextType {
   user: User | null
   isLoading: boolean
-  signIn: (email: string, password: string) => Promise<{ error?: any; data?: any }>
-  signUp: (email: string, password: string, name: string, role?: string) => Promise<{ error?: any; data?: any }>
+  signIn: (email: string, password: string) => Promise<{ error?: unknown; data?: unknown }>
+  signUp: (email: string, password: string, name: string, role?: string) => Promise<{ error?: unknown; data?: unknown }>
   signOut: () => Promise<void>
   isAdmin: boolean
   isSuperAdmin: boolean
@@ -33,15 +33,32 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
 
-  const user = session?.user ? {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-    role: (session.user as any).role as "SUPER_ADMIN" | "SCHOOL_ADMIN" | "TEACHER" | "STUDENT" | "PARENT" | "MANAGER" | "PERSONNEL" | "ASSISTANT" | "SECRETARY",
-    schoolId: (session.user as any).schoolId,
-    avatar: (session.user as any).avatar,
-    isActive: (session.user as any).isActive,
-  } : null
+  // Narrow session.user safely without using `any`
+  const sessionUser = session?.user as unknown as (
+    | {
+        id?: string
+        email?: string
+        name?: string
+        role?: AuthContextType['user'] extends { role: infer R } ? R : string
+        schoolId?: string
+        avatar?: string
+        isActive?: boolean
+      }
+    | undefined
+  )
+
+  const user = sessionUser
+    ? {
+        id: sessionUser.id ?? '',
+        email: sessionUser.email ?? '',
+        name: sessionUser.name ?? '',
+        // cast to the User.role union defined above
+        role: (sessionUser.role ?? 'STUDENT') as User['role'],
+        schoolId: sessionUser.schoolId,
+        avatar: sessionUser.avatar,
+        isActive: sessionUser.isActive,
+      }
+    : null
 
   const handleSignIn = async (email: string, password: string) => {
     try {
@@ -62,6 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         name,
       })
+      // reference role to avoid unused param lint, if provided
+      if (role) {
+        void role
+      }
       return result
     } catch (error) {
       return { error }

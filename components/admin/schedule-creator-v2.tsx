@@ -113,7 +113,7 @@ export function ScheduleCreatorV2({ modules, enseignants, filieres, schoolId, sc
         if (response.ok) {
           const data = await response.json()
           // Combiner salles prédéfinies et salles existantes
-          const allSalles = [...new Set([...SALLES_PREDEFINIES, ...data.map((s: any) => s.nom)])]
+          const allSalles = [...new Set([...SALLES_PREDEFINIES, ...data.map((s: { nom: string }) => s.nom)])]
           setSalles(allSalles)
         } else {
           setSalles(SALLES_PREDEFINIES)
@@ -131,11 +131,11 @@ export function ScheduleCreatorV2({ modules, enseignants, filieres, schoolId, sc
   // Auto-fill VH when module is selected
   useEffect(() => {
     if (currentSlot.moduleId) {
-      const module = modules.find(m => m.id === currentSlot.moduleId)
-      if (module) {
-        setCurrentSlot(prev => ({ ...prev, vh: module.vh }))
-        if (module.filiere && !filiereId) {
-          setFiliereId(module.filiere.id)
+      const selectedModule = modules.find(m => m.id === currentSlot.moduleId)
+      if (selectedModule) {
+        setCurrentSlot(prev => ({ ...prev, vh: selectedModule.vh }))
+        if (selectedModule.filiere && !filiereId) {
+          setFiliereId(selectedModule.filiere.id)
         }
       }
     }

@@ -13,7 +13,7 @@ const s3Client = new S3Client({
 const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'schooly-files'
 
 export interface UploadOptions {
-  file: File | Buffer
+  file: File | Buffer | ArrayBuffer | Uint8Array
   fileName: string
   folder?: string
   contentType?: string
@@ -32,12 +32,22 @@ export async function uploadToS3(options: UploadOptions): Promise<string> {
 
   // Préparer le buffer
   let buffer: Buffer
-  if (file instanceof Buffer) {
-    buffer = file
-  } else {
-    // Convertir File en Buffer
-    const arrayBuffer = await file.arrayBuffer()
+  if (Buffer.isBuffer(file)) {
+    buffer = file as Buffer
+  } else if (
+    typeof file === 'object' &&
+    file !== null &&
+    typeof (file as { arrayBuffer?: unknown }).arrayBuffer === 'function'
+  ) {
+    // File-like (browser File)
+    const arrayBuffer = await (file as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer()
     buffer = Buffer.from(arrayBuffer)
+  } else if (file instanceof ArrayBuffer) {
+    buffer = Buffer.from(file)
+  } else if (file instanceof Uint8Array) {
+    buffer = Buffer.from(file)
+  } else {
+    throw new Error('Unsupported file type for upload')
   }
 
   // Upload vers S3
@@ -45,7 +55,7 @@ export async function uploadToS3(options: UploadOptions): Promise<string> {
     Bucket: BUCKET_NAME,
     Key: key,
     Body: buffer,
-    ContentType: contentType || file.type || 'application/octet-stream',
+  ContentType: contentType || ((file as { type?: string }).type ?? 'application/octet-stream'),
     ACL: 'public-read', // Rendre le fichier accessible publiquement
   })
 

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Construire la requête
-    const where: any = {
+    const where: Record<string, unknown> = {
       student: { schoolId },
     }
 
@@ -66,11 +66,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { studentId, name, amount, type, startDate, endDate, schoolId } = body
+    // fields aligned with Prisma Scholarship model
+    const { studentId, name, amount, type, percentage, reason, schoolId, description } = body
 
-    if (!studentId || !name || !amount || !type || !startDate || !endDate || !schoolId) {
+    // Basic validation: name, type and either percentage or amount are required
+    if (!name || !type || (!percentage && !amount) || !schoolId) {
       return NextResponse.json(
-        { error: 'Données manquantes' },
+        { error: 'Champs obligatoires manquants (name, type, percentage ou amount, schoolId)' },
         { status: 400 }
       )
     }
@@ -87,16 +89,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Créer la bourse
+    // Créer la bourse en respectant le schéma Prisma
     const scholarship = await prisma.scholarship.create({
       data: {
-        studentId,
+        schoolId,
+        studentId: studentId || null,
         name,
-        amount: parseFloat(amount),
         type,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        status: 'ACTIVE',
+        percentage: percentage ? parseFloat(percentage) : null,
+        amount: amount ? parseFloat(amount) : null,
+        reason: reason || description || 'Non spécifié',
+        academicYear: new Date().getFullYear() + '-' + (new Date().getFullYear() + 1),
       },
       include: {
         student: {
@@ -136,9 +139,9 @@ export async function PATCH(req: NextRequest) {
       )
     }
 
-    const updateData: any = {}
-    if (status) updateData.status = status
-    if (amount) updateData.amount = parseFloat(amount)
+  const updateData: { status?: string; amount?: number } = {}
+  if (status) updateData.status = status
+  if (amount) updateData.amount = parseFloat(amount)
 
     // Mettre à jour la bourse
     const scholarship = await prisma.scholarship.update({

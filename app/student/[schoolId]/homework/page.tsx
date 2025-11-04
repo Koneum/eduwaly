@@ -6,12 +6,7 @@ import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
-export default async function StudentHomeworkPage({ 
-  params 
-}: { 
-  params: Promise<{ schoolId: string }> 
-}) {
-  const { schoolId } = await params
+export default async function StudentHomeworkPage() {
   const user = await getAuthUser()
   if (!user || user.role !== 'STUDENT') redirect('/auth/login')
 
@@ -262,9 +257,9 @@ export default async function StudentHomeworkPage({
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground">{homework.title}</h3>
                           <p className="text-sm text-muted-foreground mt-1">{homework.module.nom}</p>
-                          {submission && (
+                          {submission && submission.submittedAt && (
                             <p className="text-sm text-green-600 mt-2">
-                              Rendu le {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
+                              Rendu le {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}   
                             </p>
                           )}
                         </div>

@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       moduleId,
     }
 
@@ -84,8 +84,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Enseignant non trouvé' }, { status: 404 })
     }
 
-    const body = await req.json()
-    const { moduleId, type, date, grades, fileUrl, fileName, fileSize, fileType } = body
+  const body = await req.json()
+  const { moduleId, type, date, grades } = body
 
     // type: DEVOIR, CONTROLE, EXAMEN, GROUPE
     // grades: [{ studentId, note, coefficient, groupName? }]
@@ -97,23 +97,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Créer les évaluations
+    // Créer les évaluations (fields aligned with the Prisma Evaluation model)
     const evaluations = await Promise.all(
-      grades.map((grade: any) =>
+      grades.map((grade: { studentId: string; note: number; coefficient?: number; comment?: string; validated?: boolean }) =>
         prisma.evaluation.create({
           data: {
             studentId: grade.studentId,
             moduleId,
-            teacherId: teacher.id,
             type,
             note: grade.note,
             coefficient: grade.coefficient || 1,
             date: new Date(date),
-            groupName: grade.groupName,
-            fileUrl,
-            fileName,
-            fileSize,
-            fileType,
+            comment: grade.comment || null,
+            validated: grade.validated ?? false,
           },
           include: {
             student: {
@@ -147,8 +143,8 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { id, note, coefficient, fileUrl, fileName, fileSize, fileType } = body
+  const body = await req.json()
+  const { id, note, coefficient, comment } = body
 
     if (!id || note === undefined) {
       return NextResponse.json(
@@ -162,10 +158,7 @@ export async function PUT(req: NextRequest) {
       data: {
         note,
         coefficient,
-        fileUrl,
-        fileName,
-        fileSize,
-        fileType,
+        comment,
       },
       include: {
         student: {

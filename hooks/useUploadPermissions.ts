@@ -14,7 +14,9 @@ import {
  */
 export function useUploadPermissions() {
   const { data: session } = useSession()
-  const userRole = ((session?.user as any)?.role as UserRole) || 'STUDENT'
+  // Avoid explicit `any` by treating session.user as unknown and narrowing
+  const sessionUser = session?.user as unknown as { role?: UserRole } | undefined
+  const userRole = (sessionUser?.role as UserRole) || 'STUDENT'
 
   return {
     /**

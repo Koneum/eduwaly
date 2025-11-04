@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         // Mettre à jour l'abonnement
         await prisma.subscription.updateMany({
           where: {
-            vitepaySubscriptionId: payment.metadata?.subscriptionId
+            id: payment.metadata?.subscriptionId
           },
           data: {
             status: 'ACTIVE',
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         
         await prisma.subscription.updateMany({
           where: {
-            vitepaySubscriptionId: payment.metadata?.subscriptionId
+            id: payment.metadata?.subscriptionId
           },
           data: {
             status: 'PAST_DUE'
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         
         await prisma.subscription.updateMany({
           where: {
-            vitepaySubscriptionId: subscription.id
+            id: subscription.id
           },
           data: {
             status: 'CANCELED'

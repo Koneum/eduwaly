@@ -195,7 +195,7 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                   <SelectValue placeholder="Sélectionnez une filière" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
-                  {filieres.map((filiere: any) => (
+                  {filieres.map((filiere: { id: string; nom: string }) => (
                     <SelectItem key={filiere.id} value={filiere.id}>
                       {filiere.nom}
                     </SelectItem>
