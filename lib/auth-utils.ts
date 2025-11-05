@@ -137,6 +137,6 @@ export function redirectToDashboard(user: AuthUser) {
       // Ces rôles ont accès au dashboard admin avec permissions limitées
       return `/admin/${user.schoolId}`
     default:
-      return "/"
+      return "/" 
   }
 }
