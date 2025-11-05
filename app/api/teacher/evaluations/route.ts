@@ -92,8 +92,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Créer les évaluations pour tous les étudiants
+    type StudentLite = { id: string }
     const evaluations = await prisma.$transaction(
-      students.map(student =>
+      (students as StudentLite[]).map((student: StudentLite) =>
         prisma.evaluation.create({
           data: {
             studentId: student.id,

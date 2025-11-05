@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 // GET - Récupérer les bourses
 export async function GET(request: Request) {

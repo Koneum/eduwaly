@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     })
 
     // Convertir les Decimal en number pour la sérialisation JSON
-    const serializedFees = feeStructures.map(fee => ({
+    const serializedFees = feeStructures.map((fee: { amount: unknown; filiere?: { nom?: string } | null }) => ({
       ...fee,
       amount: Number(fee.amount)
     }))

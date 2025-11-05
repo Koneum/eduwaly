@@ -171,12 +171,15 @@ export async function POST(request: NextRequest) {
 
     if (emploisExistants.length > 0) {
       // Vérifier les chevauchements d'horaires
-      const chevauchement = emploisExistants.some(emploi => {
-        const joursCoursExistant = JSON.parse(emploi.joursCours);
+      type EmploiExistRow = { joursCours?: string | null; heureDebut?: string | number | null; heureFin?: string | number | null }
+      const chevauchement = emploisExistants.some((emploi: EmploiExistRow) => {
+        const joursCoursExistant = JSON.parse((emploi.joursCours as string) || '[]');
         return joursCours.some((jour: string) => 
           joursCoursExistant.includes(jour) &&
-          ((data.heureDebut >= emploi.heureDebut && data.heureDebut < emploi.heureFin) ||
-           (data.heureFin > emploi.heureDebut && data.heureFin <= emploi.heureFin))
+          emploi.heureDebut != null && emploi.heureFin != null && (
+            (data.heureDebut >= emploi.heureDebut && data.heureDebut < emploi.heureFin) ||
+            (data.heureFin > emploi.heureDebut && data.heureFin <= emploi.heureFin)
+          )
         );
       });
 

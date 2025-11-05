@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (superAdmins.length > 0) {
       const notifications = await Promise.all(
-        superAdmins.map((admin) =>
+        superAdmins.map((admin: { id: string; name?: string | null; email?: string | null }) =>
           prisma.notification.create({
             data: {
               userId: admin.id,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       notified: superAdmins.length,
-      superAdmins: superAdmins.map(sa => ({ id: sa.id, name: sa.name, email: sa.email }))
+      superAdmins: superAdmins.map((sa: { id: string; name?: string | null; email?: string | null }) => ({ id: sa.id, name: sa.name, email: sa.email }))
     });
   } catch (error) {
     console.error('Erreur signalement:', error);

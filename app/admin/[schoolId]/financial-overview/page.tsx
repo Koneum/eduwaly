@@ -1,7 +1,7 @@
 import FinancialDashboard from "@/components/school-admin/financial-dashboard"
 import prisma from "@/lib/prisma"
 import { requireAdminDashboardAccess } from "@/lib/auth-utils"
-import { Button } from "@/components/ui/button"
+// Button import removed (unused)
 import Link from "next/link"
 import { Settings, FileText, Users } from "lucide-react"
 import { PermissionButton } from '@/components/permission-button'
@@ -11,7 +11,8 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
   const { schoolId } = await params
 
   // Récupérer les structures de frais configurées
-  const feeStructures = await prisma.feeStructure.findMany({
+  type FeeStructureRow = { amount: unknown }
+  const feeStructures: FeeStructureRow[] = await prisma.feeStructure.findMany({
     where: { schoolId, isActive: true }
   })
 
@@ -22,7 +23,8 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
   })
 
   // Récupérer tous les paiements
-  const payments = await prisma.studentPayment.findMany({
+  type PaymentRow = { amountDue: unknown; amountPaid: unknown; status: string; student: { id: string } }
+  const payments: PaymentRow[] = await prisma.studentPayment.findMany({
     where: {
       student: {
         schoolId
@@ -41,12 +43,12 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
   })
 
   // Calculer le total attendu basé sur les frais configurés
-  const totalFeeStructures = feeStructures.reduce((sum, fee) => sum + Number(fee.amount), 0)
+  const totalFeeStructures = feeStructures.reduce<number>((sum, fee) => sum + Number(fee.amount), 0)
   const totalExpectedFromFees = totalFeeStructures * students.length
 
   // Calculer les statistiques des paiements
-  const totalCollected = payments.reduce((sum, p) => sum + Number(p.amountPaid), 0)
-  const totalExpectedFromPayments = payments.reduce((sum, p) => sum + Number(p.amountDue), 0)
+  const totalCollected = payments.reduce<number>((sum, p) => sum + Number(p.amountPaid), 0)
+  const totalExpectedFromPayments = payments.reduce<number>((sum, p) => sum + Number(p.amountDue), 0)
   
   // Utiliser le maximum entre les frais configurés et les paiements enregistrés
   const totalExpected = Math.max(totalExpectedFromFees, totalExpectedFromPayments)
@@ -55,8 +57,8 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
   const pendingPayments = payments.filter(p => p.status === 'PENDING')
   const overduePayments = payments.filter(p => p.status === 'OVERDUE')
   
-  const totalPending = pendingPayments.reduce((sum, p) => sum + (Number(p.amountDue) - Number(p.amountPaid)), 0)
-  const totalOverdue = overduePayments.reduce((sum, p) => sum + (Number(p.amountDue) - Number(p.amountPaid)), 0)
+  const totalPending = pendingPayments.reduce<number>((sum, p) => sum + (Number(p.amountDue) - Number(p.amountPaid)), 0)
+  const totalOverdue = overduePayments.reduce<number>((sum, p) => sum + (Number(p.amountDue) - Number(p.amountPaid)), 0)
 
   // Compter les étudiants uniques
   const uniqueStudents = new Set(payments.map(p => p.student.id))

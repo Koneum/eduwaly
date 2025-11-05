@@ -32,7 +32,21 @@ export default async function FinanceSettingsPage({ params }: { params: Promise<
   })
 
   // Récupérer toutes les bourses de l'école (attribuées et non attribuées)
-  const scholarships = await prisma.scholarship.findMany({
+  type ScholarshipRow = {
+    id: string
+    name: string
+    type: string
+    percentage?: number | null
+    amount?: unknown
+    student: {
+      studentNumber: string
+      niveau: string
+      user?: { name?: string } | null
+      filiere?: { nom?: string } | null
+    } | null
+  }
+
+  const scholarships: ScholarshipRow[] = await prisma.scholarship.findMany({
     where: {
       schoolId
     },
@@ -84,14 +98,19 @@ export default async function FinanceSettingsPage({ params }: { params: Promise<
           <ScholarshipsManager 
             schoolId={schoolId}
             scholarships={scholarships
-              .filter(s => s.student !== null)
-              .map(s => ({
+              .filter((s) => s.student !== null)
+              .map((s) => ({
                 id: s.id,
                 name: s.name,
                 type: s.type,
-                percentage: s.percentage,
-                amount: s.amount ? Number(s.amount) : null,
-                student: s.student!
+                percentage: s.percentage ?? null,
+                amount: s.amount ? Number(String(s.amount)) : null,
+                student: {
+                  user: s.student!.user ? { name: s.student!.user.name ?? 'Non inscrit' } : null,
+                  studentNumber: s.student!.studentNumber,
+                  niveau: s.student!.niveau,
+                  filiere: s.student!.filiere ? { nom: s.student!.filiere.nom ?? '' } : null
+                }
               }))}
           />
         </TabsContent>

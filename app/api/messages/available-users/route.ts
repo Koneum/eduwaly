@@ -13,8 +13,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const schoolId = searchParams.get('schoolId');
 
+    type UserSelect = {
+      id: string
+      name: string
+      email?: string | null
+      role?: string
+      image?: string | null
+      schoolId?: string | null
+      school?: { name?: string | null } | null
+    }
+
     const userRole = session.user.role;
-    let availableUsers: any[] = [];
+    let availableUsers: Array<{ id: string; name: string; email?: string | null; role?: string; image?: string | null }> = [];
 
     // SUPER_ADMIN: Récupère tous les admins d'école (pas besoin de schoolId)
     if (userRole === 'SUPER_ADMIN') {
@@ -40,12 +50,12 @@ export async function GET(request: NextRequest) {
       });
 
       // Enrichir avec le nom de l'école
-      availableUsers = users.map(user => ({
+      availableUsers = users.map((user: UserSelect) => ({
         id: user.id,
         name: user.name,
-        email: user.email,
+        email: user.email ?? null,
         role: user.school?.name || 'SCHOOL_ADMIN', // Afficher le nom de l'école au lieu du rôle
-        image: user.image,
+        image: user.image ?? null,
       }));
     }
 
@@ -97,14 +107,14 @@ export async function GET(request: NextRequest) {
       });
 
       // Enrichir avec le nom de l'école pour les admins d'école
-      availableUsers = users.map((user: any) => ({
+      availableUsers = users.map((user: UserSelect) => ({
         id: user.id,
         name: user.name,
-        email: user.email,
+        email: user.email ?? null,
         role: user.role === 'SCHOOL_ADMIN' && user.school?.name 
           ? user.school.name 
           : user.role,
-        image: user.image,
+        image: user.image ?? null,
       }));
     }
 
@@ -155,14 +165,14 @@ export async function GET(request: NextRequest) {
       });
 
       // Enrichir avec le nom de l'école pour les admins d'école
-      availableUsers = users.map((user: any) => ({
+      availableUsers = users.map((user: UserSelect) => ({
         id: user.id,
         name: user.name,
-        email: user.email,
+        email: user.email ?? null,
         role: user.role === 'SCHOOL_ADMIN' && user.school?.name 
           ? user.school.name 
           : user.role,
-        image: user.image,
+        image: user.image ?? null,
       }));
     }
 
@@ -238,10 +248,11 @@ export async function GET(request: NextRequest) {
         },
       });
 
+  const classmateUsers = classmates.map((c: { user?: UserSelect | null }) => c.user).filter(Boolean) as UserSelect[]
       availableUsers = [
-        ...classmates.map(c => c.user).filter(Boolean),
-        ...teachers,
-        ...admins,
+        ...classmateUsers.map((u: UserSelect) => ({ id: u.id, name: u.name, email: u.email ?? null, role: u.role, image: u.image ?? null })),
+        ...teachers.map((t: UserSelect) => ({ id: t.id, name: t.name, email: t.email ?? null, role: t.role, image: t.image ?? null })),
+        ...admins.map((a: UserSelect) => ({ id: a.id, name: a.name, email: a.email ?? null, role: a.role, image: a.image ?? null })),
       ];
     }
 
@@ -273,8 +284,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Parent sans enfants' }, { status: 404 });
       }
 
-      const schoolIds = parent.students.map((s: any) => s.schoolId);
-      const studentUsers = parent.students.map((s: any) => s.user).filter(Boolean);
+  const schoolIds = parent.students.map((s: { schoolId?: string }) => s.schoolId);
+  const studentUsers = parent.students.map((s: { user?: UserSelect | null }) => s.user).filter(Boolean) as UserSelect[];
 
       // Teachers des écoles des enfants
       const teachers = await prisma.user.findMany({
@@ -309,9 +320,9 @@ export async function GET(request: NextRequest) {
       });
 
       availableUsers = [
-        ...studentUsers,
-        ...teachers,
-        ...admins,
+        ...studentUsers.map(u => ({ id: u.id, name: u.name, email: u.email ?? null, role: u.role, image: u.image ?? null })),
+        ...teachers.map((t: UserSelect) => ({ id: t.id, name: t.name, email: t.email ?? null, role: t.role, image: t.image ?? null })),
+        ...admins.map((a: UserSelect) => ({ id: a.id, name: a.name, email: a.email ?? null, role: a.role, image: a.image ?? null })),
       ];
     }
 

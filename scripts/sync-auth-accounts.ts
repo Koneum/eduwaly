@@ -5,7 +5,7 @@
  * Usage: npx tsx scripts/sync-auth-accounts.ts
  */
 
-import { PrismaClient } from '../app/generated/prisma'
+import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { nanoid } from 'nanoid'
 

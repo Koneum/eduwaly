@@ -33,7 +33,8 @@ export async function GET(req: NextRequest) {
       distinct: ['salle'],
     })
 
-    const salles = emplois.map((e) => ({ nom: e.salle }))
+  type EmploiRow = { salle?: string | null }
+  const salles = (emplois as EmploiRow[]).map((e) => ({ nom: e.salle }))
 
     return NextResponse.json(salles)
   } catch (error) {

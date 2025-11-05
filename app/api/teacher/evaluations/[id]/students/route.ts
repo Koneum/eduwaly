@@ -37,7 +37,8 @@ export async function GET(
     }
 
     // Formater les données pour l'interface
-    const students = evaluations.map(evaluation => ({
+    type EvalRow = { studentId: string; student: { user?: { name?: string }; studentNumber: string }; note?: number | null }
+    const students = (evaluations as EvalRow[]).map((evaluation: EvalRow) => ({
       id: evaluation.studentId,
       name: evaluation.student.user?.name || 'Nom inconnu',
       studentNumber: evaluation.student.studentNumber,

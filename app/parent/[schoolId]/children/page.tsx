@@ -6,6 +6,19 @@ import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
+type EvaluationRow = { note: number | null; coefficient: number; moduleId: string }
+type AttendanceRow = { status: string }
+type StudentRow = {
+  id: string
+  studentNumber: string
+  niveau: string
+  filiere?: { nom?: string } | null
+  user?: { name?: string | null } | null
+  evaluations: EvaluationRow[]
+  attendances: AttendanceRow[]
+}
+type ParentRow = { id: string; students: StudentRow[] }
+
 export default async function ParentChildrenPage({ 
   params 
 }: { 
@@ -42,20 +55,21 @@ export default async function ParentChildrenPage({
   if (!parent) redirect('/auth/login')
 
   // Calculer les statistiques globales
-  const allEvaluations = parent.students.flatMap(s => s.evaluations)
-  const allAttendances = parent.students.flatMap(s => s.attendances)
+  const parentTyped = parent as ParentRow
+  const allEvaluations = parentTyped.students.flatMap((s: StudentRow) => s.evaluations)
+  const allAttendances = parentTyped.students.flatMap((s: StudentRow) => s.attendances)
   
   const globalAverage = allEvaluations.length > 0
-    ? (allEvaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0) / 
-       allEvaluations.reduce((sum, e) => sum + e.coefficient, 0)).toFixed(1)
+    ? (allEvaluations.reduce((sum: number, e: EvaluationRow) => sum + ((e.note ?? 0) * e.coefficient), 0) / 
+       allEvaluations.reduce((sum: number, e: EvaluationRow) => sum + e.coefficient, 0)).toFixed(1)
     : '0.0'
   
   const globalAttendanceRate = allAttendances.length > 0
-    ? ((allAttendances.filter(a => a.status === 'PRESENT').length / allAttendances.length) * 100).toFixed(1)
+    ? ((allAttendances.filter((a: AttendanceRow) => a.status === 'PRESENT').length / allAttendances.length) * 100).toFixed(1)
     : '100'
 
   // Compter les modules uniques
-  const uniqueModules = new Set(allEvaluations.map(e => e.moduleId)).size
+  const uniqueModules = new Set(allEvaluations.map((e: EvaluationRow) => e.moduleId)).size
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -65,18 +79,18 @@ export default async function ParentChildrenPage({
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {parent.students.map((student) => {
+  {parentTyped.students.map((student: StudentRow) => {
           // Calculer les statistiques par étudiant
           const studentAverage = student.evaluations.length > 0
-            ? (student.evaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0) / 
-               student.evaluations.reduce((sum, e) => sum + e.coefficient, 0)).toFixed(1)
+            ? (student.evaluations.reduce((sum: number, e: EvaluationRow) => sum + ((e.note ?? 0) * e.coefficient), 0) / 
+               student.evaluations.reduce((sum: number, e: EvaluationRow) => sum + e.coefficient, 0)).toFixed(1)
             : '0.0'
           
           const studentAttendanceRate = student.attendances.length > 0
-            ? ((student.attendances.filter(a => a.status === 'PRESENT').length / student.attendances.length) * 100).toFixed(0)
+            ? ((student.attendances.filter((a: AttendanceRow) => a.status === 'PRESENT').length / student.attendances.length) * 100).toFixed(0)
             : '100'
           
-          const studentModules = new Set(student.evaluations.map(e => e.moduleId)).size
+          const studentModules = new Set(student.evaluations.map((e: EvaluationRow) => e.moduleId)).size
           const totalModules = studentModules || 1
           const progression = ((studentModules / totalModules) * 100).toFixed(0)
 

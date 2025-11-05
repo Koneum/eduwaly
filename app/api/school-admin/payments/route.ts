@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 // POST - Enregistrer un paiement
 export async function POST(request: Request) {

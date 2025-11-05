@@ -67,7 +67,21 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
       })
 
   // Récupérer tous les utilisateurs de l'école
-  const users = await prisma.user.findMany({
+  type UserRow = {
+    id: string
+    name: string
+    email: string
+    role: string
+    isActive: boolean
+    emailVerified?: Date | null
+    lastLoginAt?: Date | null
+    createdAt: Date
+    student?: { id: string; studentNumber: string; niveau: string; filiere?: { nom?: string } | null } | null
+    enseignant?: { id: string } | null
+    parent?: { id: string; phone?: string } | null
+  }
+
+  const users: UserRow[] = await prisma.user.findMany({
     where: {
       schoolId: schoolId,
       role: {
@@ -148,10 +162,21 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
 
         <TabsContent value="users" className="space-y-6">
           <UsersManager 
-            users={users.map(u => ({
-              ...u,
-              emailVerified: u.emailVerified ? new Date() : new Date()
-            }))} 
+                  users={users.map((u) => ({
+                    ...u,
+                    emailVerified: u.emailVerified ? new Date() : new Date(),
+                    lastLoginAt: u.lastLoginAt ?? null,
+                    student: u.student
+                      ? {
+                          id: u.student.id,
+                          studentNumber: u.student.studentNumber,
+                          niveau: u.student.niveau,
+                          filiere: u.student.filiere ? { nom: u.student.filiere.nom ?? '' } : null
+                        }
+                      : null
+                    ,
+                    parent: u.parent ? { id: u.parent.id, phone: u.parent.phone ?? null } : null
+                  }))} 
             schoolId={schoolId} 
           />
         </TabsContent>

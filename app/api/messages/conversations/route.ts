@@ -43,8 +43,23 @@ export async function GET() {
     })
 
     // Enrichir avec les informations des participants
+    type ConversationRow = {
+      id: string
+      participants: Array<{ userId: string }>
+      messages: Array<{ id: string; content?: string; createdAt?: string }>
+    }
+
+    type OtherUserSelect = {
+      id: string
+      name: string
+      email?: string | null
+      role?: string
+      avatar?: string | null
+      school?: { name?: string | null } | null
+    }
+
     const enrichedConversations = await Promise.all(
-      conversations.map(async (conv) => {
+      (conversations as ConversationRow[]).map(async (conv: ConversationRow) => {
         const participantIds = conv.participants
           .map(p => p.userId)
           .filter(id => id !== user.id)
@@ -67,14 +82,14 @@ export async function GET() {
         })
         
         // Enrichir avec le nom de l'école pour les admins d'école
-        const enrichedUsers = otherUsers.map((user: any) => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          avatar: user.avatar,
-          schoolName: user.role === 'SCHOOL_ADMIN' && user.school?.name 
-            ? user.school.name 
+        const enrichedUsers = (otherUsers as OtherUserSelect[]).map((u: OtherUserSelect) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email ?? null,
+          role: u.role,
+          avatar: u.avatar ?? null,
+          schoolName: u.role === 'SCHOOL_ADMIN' && u.school?.name 
+            ? u.school.name 
             : null,
         }))
 

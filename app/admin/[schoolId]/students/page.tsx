@@ -4,6 +4,30 @@ import StudentsManager from "@/components/school-admin/students-manager"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 
+type FeeStructureRow = {
+  id: string
+  name: string
+  amount: unknown
+  type: string
+  niveau?: string | null
+  filiereId?: string | null
+  filiere?: { id?: string; nom?: string } | null
+}
+type PaymentRow = { status: string; amountDue: unknown; amountPaid: unknown; dueDate: Date }
+type ScholarshipRow = { id?: string; name?: string; amount?: unknown | null; percentage?: number | null; isActive?: boolean }
+type StudentRow = {
+  id: string
+  studentNumber: string
+  enrollmentId?: string | null
+  phone?: string | null
+  isEnrolled?: boolean
+  niveau: string
+  user?: { name?: string; email?: string | null } | null
+  filiere?: { id?: string; nom?: string } | null
+  payments: PaymentRow[]
+  scholarships: ScholarshipRow[]
+}
+
 export default async function StudentsPage({ params }: { params: Promise<{ schoolId: string }> }) {
   const { schoolId } = await params
   
@@ -37,7 +61,7 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
   })
 
   // Récupérer les structures de frais de l'école
-  const feeStructuresData = await prisma.feeStructure.findMany({
+  const feeStructuresData: FeeStructureRow[] = await prisma.feeStructure.findMany({
     where: { schoolId },
     include: {
       filiere: {
@@ -48,13 +72,15 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
   })
 
   // Convertir les Decimal en number pour feeStructures
-  const feeStructures = feeStructuresData.map(fee => ({
+  const feeStructures = feeStructuresData.map((fee: FeeStructureRow) => ({
     ...fee,
-    amount: Number(fee.amount)
+    amount: Number(fee.amount),
+    niveau: fee.niveau ?? null,
+    filiereId: fee.filiereId ?? null
   }))
 
   // Récupérer tous les étudiants de l'école
-  const studentsData = await prisma.student.findMany({
+  const studentsData: StudentRow[] = await prisma.student.findMany({
     where: { schoolId },
     include: {
       user: true,
@@ -75,19 +101,42 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
   console.log('StudentsPage - students found:', studentsData.length)
 
   // Convertir les Decimal en number
-  const students = studentsData.map(student => ({
+  const students = studentsData.map((student: StudentRow) => ({
     ...student,
-    payments: student.payments.map(payment => ({
+    payments: student.payments.map((payment: PaymentRow) => ({
       status: payment.status,
       amountDue: Number(payment.amountDue),
       amountPaid: Number(payment.amountPaid),
       dueDate: payment.dueDate
     })),
-    scholarships: student.scholarships.map(scholarship => ({
-      ...scholarship,
+    scholarships: student.scholarships.map((scholarship: ScholarshipRow) => ({
+      id: scholarship.id ?? '',
+      type: scholarship.name ?? 'DISCOUNT',
+      name: scholarship.name ?? '',
+      isActive: scholarship.isActive ?? false,
       amount: scholarship.amount ? Number(scholarship.amount) : null,
-      percentage: scholarship.percentage
+      percentage: scholarship.percentage ?? null
     }))
+  })).map(s => ({
+    ...s,
+    enrollmentId: s.enrollmentId ?? '',
+    phone: s.phone ?? null,
+    isEnrolled: Boolean(s.isEnrolled),
+  }))
+  .map(s => ({
+    ...s,
+    user: s.user ? { name: s.user.name ?? 'Non inscrit', email: s.user.email ?? null } : null
+  }))
+  // Normalize filiere object on fee structures to match FeeStructure type
+  const finalFeeStructures = feeStructures.map(f => ({
+    ...f,
+    filiere: f.filiere ? { nom: f.filiere.nom ?? '' } : null
+  }))
+
+  // Ensure student.filiere has required fields
+  const finalStudents = students.map(s => ({
+    ...s,
+    filiere: s.filiere ? { id: s.filiere.id ?? '', nom: s.filiere.nom ?? '' } : null
   }))
 
   // Calculer les statistiques
@@ -135,11 +184,11 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
 
       {/* Students Table */}
       <StudentsManager 
-        students={students} 
+        students={finalStudents} 
         schoolId={schoolId} 
         schoolType={school.schoolType} 
         filieres={filieres}
-        feeStructures={feeStructures}
+        feeStructures={finalFeeStructures}
       />
     </div>
   )

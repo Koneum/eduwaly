@@ -56,9 +56,9 @@ export async function GET(request: Request) {
     }
 
     // Calculer les revenus par mois
-    payments.forEach(payment => {
+    (payments as Array<{ amountPaid: unknown; paidAt?: string | Date | null }>).forEach((payment) => {
       if (payment.paidAt) {
-        const date = new Date(payment.paidAt)
+        const date = new Date(payment.paidAt as string)
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
         revenueByMonth[monthKey] = (revenueByMonth[monthKey] || 0) + Number(payment.amountPaid)
       }
@@ -68,13 +68,13 @@ export async function GET(request: Request) {
     const chartData = Object.keys(revenueByMonth)
       .sort()
       .map(monthKey => {
-        const [year, month] = monthKey.split('-')
-        const monthIndex = parseInt(month) - 1
-        return {
-          month: monthNames[monthIndex],
-          revenue: Math.round(revenueByMonth[monthKey])
-        }
-      })
+          const [, month] = monthKey.split('-')
+          const monthIndex = parseInt(month) - 1
+          return {
+            month: monthNames[monthIndex],
+            revenue: Math.round(revenueByMonth[monthKey])
+          }
+        })
 
     return NextResponse.json(chartData)
   } catch (error) {

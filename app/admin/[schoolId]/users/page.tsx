@@ -8,6 +8,38 @@ import prisma from "@/lib/prisma"
 import { requireSchoolAccess } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
+// Local typed shapes to avoid implicit `any` in map callbacks
+type UserRow = {
+  id: string
+  name: string
+  email: string | null
+  role: string
+  isActive: boolean
+}
+
+type FiliereLite = { id: string; nom: string }
+
+type StudentRow = {
+  id: string
+  studentNumber: string
+  enrollmentId: string
+  user?: { name?: string } | null
+  niveau: string
+  filiere?: FiliereLite | null
+  isEnrolled: boolean
+}
+
+type TeacherRow = {
+  id: string
+  titre?: string | null
+  nom: string
+  prenom: string
+  email?: string | null
+  grade?: string | null
+  type?: string | null
+  userId?: string | null
+}
+
 export default async function UsersManagementPage({ 
   params 
 }: { 
@@ -41,14 +73,18 @@ export default async function UsersManagementPage({
   }
 
   // Statistiques
-  const totalUsers = school.users.length
-  const adminUsers = school.users.filter(u => u.role === 'SCHOOL_ADMIN').length
-  const teacherUsers = school.users.filter(u => u.role === 'TEACHER').length
-  const studentUsers = school.users.filter(u => u.role === 'STUDENT').length
-  const parentUsers = school.users.filter(u => u.role === 'PARENT').length
-  
-  const enrolledStudents = school.students.filter(s => s.isEnrolled).length
-  const pendingStudents = school.students.filter(s => !s.isEnrolled).length
+  const users = school.users as UserRow[]
+  const totalUsers = users.length
+  const adminUsers = users.filter(u => u.role === 'SCHOOL_ADMIN').length
+  const teacherUsers = users.filter(u => u.role === 'TEACHER').length
+  const studentUsers = users.filter(u => u.role === 'STUDENT').length
+  const parentUsers = users.filter(u => u.role === 'PARENT').length
+
+  const students = school.students as StudentRow[]
+  const enrolledStudents = students.filter(s => s.isEnrolled).length
+  const pendingStudents = students.filter(s => !s.isEnrolled).length
+
+  const teachers = school.enseignants as TeacherRow[]
 
   const roleColors = {
     SCHOOL_ADMIN: "bg-purple-100 text-purple-700",
@@ -160,7 +196,7 @@ export default async function UsersManagementPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {school.users.map((user) => (
+                {users.map((user: UserRow) => (
                   <div key={user.id} className="p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -196,7 +232,7 @@ export default async function UsersManagementPage({
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Étudiants Inscrits</CardTitle>
-                  <CardDescription>{enrolledStudents} enrôlés / {school.students.length} total</CardDescription>
+                  <CardDescription>{enrolledStudents} enrôlés / {students.length} total</CardDescription>
                 </div>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -206,7 +242,7 @@ export default async function UsersManagementPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {school.students.map((student) => (
+                {students.map((student: StudentRow) => (
                   <div key={student.id} className="p-4 border border-border rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
@@ -260,7 +296,7 @@ export default async function UsersManagementPage({
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Enseignants</CardTitle>
-                  <CardDescription>{school.enseignants.length} enseignants</CardDescription>
+                  <CardDescription>{teachers.length} enseignants</CardDescription>
                 </div>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -270,7 +306,7 @@ export default async function UsersManagementPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {school.enseignants.map((teacher) => (
+                {teachers.map((teacher: TeacherRow) => (
                   <div key={teacher.id} className="p-4 border border-border rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
@@ -322,7 +358,7 @@ export default async function UsersManagementPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {school.students.filter(s => !s.isEnrolled).map((student) => (
+                {students.filter((s: StudentRow) => !s.isEnrolled).map((student: StudentRow) => (
                   <div key={student.id} className="p-4 border-2 border-dashed border-amber-300 bg-amber-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>

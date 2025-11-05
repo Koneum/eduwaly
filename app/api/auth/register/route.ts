@@ -102,8 +102,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Créer l'école, l'année scolaire et l'abonnement en une transaction
-    await prisma.$transaction(async (tx) => {
+  // Créer l'école, l'année scolaire et l'abonnement en une transaction
+  await prisma.$transaction(async (tx: typeof prisma) => {
 
       // 4. Créer l'année scolaire par défaut
       const currentYear = new Date().getFullYear()

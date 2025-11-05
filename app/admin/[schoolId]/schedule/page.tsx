@@ -7,6 +7,19 @@ import { requireSchoolAccess } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 import { SchedulePageWrapper } from "@/components/admin/schedule-page-wrapper"
 
+type EmploiModel = {
+  id: string
+  module: { nom: string }
+  enseignant: { nom: string; prenom: string }
+  filiere?: { nom?: string } | null
+  vh: number
+  joursCours?: string | null
+  heureDebut: string
+  heureFin: string
+  salle: string
+  niveau: string
+}
+
 export default async function ScheduleManagementPage({ 
   params 
 }: { 
@@ -24,7 +37,7 @@ export default async function ScheduleManagementPage({
   }
 
   // Récupérer les emplois du temps
-  const emplois = await prisma.emploiDuTemps.findMany({
+  const emplois = (await prisma.emploiDuTemps.findMany({
     where: { schoolId: schoolId },
     include: {
       module: true,
@@ -33,7 +46,7 @@ export default async function ScheduleManagementPage({
     },
     orderBy: { heureDebut: 'asc' },
     take: 50
-  })
+  })) as unknown as EmploiModel[]
 
   // Récupérer les enseignants, modules et filières pour le formulaire
   const enseignants = await prisma.enseignant.findMany({
@@ -61,7 +74,7 @@ export default async function ScheduleManagementPage({
   })
 
   // Grouper par jour
-  const emploisByDay = emplois.reduce((acc, emploi) => {
+  const emploisByDay = emplois.reduce((acc: Record<string, EmploiModel[]>, emploi: EmploiModel) => {
     const jours = JSON.parse(emploi.joursCours || '[]')
     jours.forEach((jour: string) => {
       if (!acc[jour]) {
@@ -70,7 +83,7 @@ export default async function ScheduleManagementPage({
       acc[jour].push(emploi)
     })
     return acc
-  }, {} as Record<string, typeof emplois>)
+  }, {} as Record<string, EmploiModel[]>)
 
   const daysOfWeek = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI']
 
@@ -139,7 +152,7 @@ export default async function ScheduleManagementPage({
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Heures/Semaine</p>
                 <p className="text-3xl font-bold text-foreground mt-2">
-                  {emplois.reduce((sum, e) => sum + e.vh, 0)}h
+                  {emplois.reduce<number>((sum, e: EmploiModel) => sum + e.vh, 0)}h
                 </p>
               </div>
               <div className="bg-orange-100 p-3 rounded-xl">

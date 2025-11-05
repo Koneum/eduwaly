@@ -5,7 +5,7 @@
  * Usage: npx tsx scripts/create-auth-accounts.ts
  */
 
-import { PrismaClient } from '../app/generated/prisma'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 

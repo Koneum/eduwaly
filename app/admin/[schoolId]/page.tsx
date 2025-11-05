@@ -7,6 +7,8 @@ import DashboardActions from "@/components/school-admin/dashboard-actions"
 import SubscriptionButton from "@/components/school-admin/subscription-button"
 import prisma from "@/lib/prisma"
 
+type PaymentRow = { status: string; amountPaid: unknown; student?: { id: string } }
+
 export default async function AdminSchoolDashboard({ 
   params 
 }: { 
@@ -23,7 +25,7 @@ export default async function AdminSchoolDashboard({
     where: { schoolId: schoolId }
   })
 
-  const payments = await prisma.studentPayment.findMany({
+  const payments: PaymentRow[] = await prisma.studentPayment.findMany({
     where: { student: { schoolId: schoolId } }
   })
 
@@ -31,8 +33,8 @@ export default async function AdminSchoolDashboard({
   const overdueCount = payments.filter(p => p.status === 'OVERDUE').length
   const pendingCount = payments.filter(p => p.status === 'PENDING').length
   const totalRevenue = payments
-    .filter(p => p.status === 'PAID')
-    .reduce((sum, p) => sum + Number(p.amountPaid), 0)
+    .filter((p) => p.status === 'PAID')
+    .reduce<number>((sum, p) => sum + Number(p.amountPaid), 0)
 
   // Données pour le graphique des paiements
   const paymentStatusData = {

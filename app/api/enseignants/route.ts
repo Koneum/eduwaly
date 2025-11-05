@@ -45,7 +45,34 @@ export async function GET() {
       }
     });
 
-    const formattedEnseignants = enseignants.map(enseignant => ({
+    type EmploiRow = {
+      id: string
+      dateDebut: string | Date
+      dateFin: string | Date
+      vh?: number | null
+      module: {
+        id: string
+        nom: string
+        type?: string | null
+        filiere?: { nom?: string } | null
+      }
+    }
+
+    type EnseignantRow = {
+      id: string
+      nom: string
+      prenom: string
+      titre?: string | null
+      grade?: string | null
+      type?: string | null
+      email?: string | null
+      telephone?: string | null
+      userId?: string | null
+      user?: { id: string; name: string; email?: string | null; image?: string | null } | null
+      emplois?: EmploiRow[]
+    }
+
+    const formattedEnseignants = (enseignants as EnseignantRow[]).map((enseignant: EnseignantRow) => ({
       id: enseignant.id,
       nom: enseignant.nom,
       prenom: enseignant.prenom,
@@ -61,7 +88,7 @@ export async function GET() {
         email: enseignant.user.email,
         avatar: enseignant.user.image
       } : null,
-      emplois: enseignant.emplois.map(emploi => ({
+      emplois: (enseignant.emplois || []).map((emploi: EmploiRow) => ({
         id: emploi.id,
         dateDebut: emploi.dateDebut,
         dateFin: emploi.dateFin,

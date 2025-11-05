@@ -3,7 +3,7 @@
  * Supprime les utilisateurs qui n'ont pas de compte Better Auth
  */
 
-import { PrismaClient } from '../app/generated/prisma'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 

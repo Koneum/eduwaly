@@ -1,11 +1,27 @@
 import prisma from "@/lib/prisma"
+
+type PaymentRow = {
+  id: string
+  amountDue: unknown
+  amountPaid: unknown
+  status: string
+  dueDate: Date
+  paidAt?: Date | null
+  paymentMethod?: string | null
+  student: {
+    id: string
+    user?: { name?: string } | null
+    niveau: string
+    filiere?: { nom?: string } | null
+  }
+}
 import FinanceManager from "@/components/school-admin/finance-manager"
 
 export default async function FinancePage({ params }: { params: Promise<{ schoolId: string }> }) {
   const { schoolId } = await params
 
   // Récupérer tous les paiements de l'école
-  const paymentsData = await prisma.studentPayment.findMany({
+  const paymentsData: PaymentRow[] = await prisma.studentPayment.findMany({
     where: {
       student: {
         schoolId
@@ -31,8 +47,8 @@ export default async function FinancePage({ params }: { params: Promise<{ school
     amountPaid: Number(payment.amountPaid),
     status: payment.status,
     dueDate: payment.dueDate,
-    paidAt: payment.paidAt,
-    paymentMethod: payment.paymentMethod,
+    paidAt: payment.paidAt ?? null,
+    paymentMethod: payment.paymentMethod ?? null,
     student: {
       id: payment.student.id,
       firstName: payment.student.user?.name?.split(' ')[0] || 'Prénom',

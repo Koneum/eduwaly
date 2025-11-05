@@ -47,11 +47,11 @@ export async function GET(req: NextRequest) {
     // Si une date est spécifiée, récupérer les présences
     let attendances: Array<{ id: string; studentId: string; status: string; date: Date }> = []
     if (date) {
-      attendances = await prisma.attendance.findMany({
+        attendances = await prisma.attendance.findMany({
         where: {
           moduleId,
           date: new Date(date),
-          studentId: { in: students.map((s) => s.id) },
+    studentId: { in: students.map((s: { id: string }) => s.id) },
         },
       })
     }
@@ -110,14 +110,17 @@ export async function POST(req: NextRequest) {
     })
 
     // Créer les nouvelles présences
+    type AttendanceInput = { studentId: string; status: string; notes?: string }
+    const attendanceInputs = attendances as AttendanceInput[]
+
     const createdAttendances = await prisma.attendance.createMany({
-      data: attendances.map((att: any) => ({
+      data: attendanceInputs.map((att: AttendanceInput) => ({
         studentId: att.studentId,
         moduleId,
         teacherId: teacher.id,
         date: new Date(date),
         status: att.status, // PRESENT, ABSENT, LATE, EXCUSED
-        notes: att.notes,
+        notes: att.notes ?? null,
       })),
     })
 

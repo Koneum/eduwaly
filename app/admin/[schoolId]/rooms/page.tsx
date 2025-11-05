@@ -3,6 +3,18 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Search, Building2, Users, CheckCircle, XCircle, Plus } from "lucide-react"
 import prisma from "@/lib/prisma"
+
+type RoomModel = {
+  id: string
+  name: string
+  code: string
+  capacity: number
+  isAvailable: boolean
+  type: string
+  equipment?: string | null
+  building?: string | null
+  floor?: string | null
+}
 import { requireSchoolAccess } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 import RoomsManager from "@/components/school-admin/rooms-manager"
@@ -16,14 +28,14 @@ export default async function RoomsManagementPage({
   const { schoolId } = await params
   await requireSchoolAccess(schoolId)
 
-  const school = await prisma.school.findUnique({
+  const school = (await prisma.school.findUnique({
     where: { id: schoolId },
     include: {
       rooms: {
         orderBy: { name: 'asc' }
       }
     }
-  })
+  })) as unknown as ({ rooms: RoomModel[]; schoolType: 'HIGH_SCHOOL' | 'UNIVERSITY' } & Record<string, unknown>) | null
 
   if (!school) {
     redirect('/admin')
@@ -45,8 +57,8 @@ export default async function RoomsManagementPage({
     OTHER: { label: "Autre", color: "bg-gray-100 text-gray-700" },
   }
 
-  const totalCapacity = school.rooms.reduce((sum, room) => sum + room.capacity, 0)
-  const availableRooms = school.rooms.filter(r => r.isAvailable).length
+  const totalCapacity = school!.rooms.reduce<number>((sum, room: RoomModel) => sum + room.capacity, 0)
+  const availableRooms = school!.rooms.filter((r: RoomModel) => r.isAvailable).length
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">

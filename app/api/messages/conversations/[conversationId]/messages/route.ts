@@ -74,8 +74,9 @@ export async function POST(
     })
 
     // Créer les notifications
+    type ParticipantRow = { userId: string }
     await prisma.notification.createMany({
-      data: otherParticipants.map(p => ({
+      data: (otherParticipants as ParticipantRow[]).map((p: ParticipantRow) => ({
         userId: p.userId,
         schoolId: conversation?.schoolId || null,
         title: 'Nouveau message',

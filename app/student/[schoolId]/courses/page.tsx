@@ -7,6 +7,21 @@ import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
+// Local types to avoid implicit `any` in callbacks
+type DocRow = { id: string; createdAt: string | Date; title: string; fileUrl: string; module?: { nom?: string } }
+type HomeworkRow = { id: string; dueDate: string | Date }
+type TeacherLite = { titre?: string | null; prenom?: string | null; nom?: string | null }
+type ModuleRow = {
+  id: string
+  nom: string
+  type: string
+  emplois: Array<{ enseignant?: TeacherLite }>
+  documents: DocRow[]
+  homework: HomeworkRow[]
+}
+type EvalRow = { moduleId: string; note: number; coefficient: number; type?: string }
+type StudentRow = { id: string; schoolId: string; filiereId?: string | null; evaluations: EvalRow[] }
+
 export default async function StudentCoursesPage({ 
   params 
 }: { 
@@ -33,7 +48,7 @@ export default async function StudentCoursesPage({
   if (!student) redirect('/auth/login')
 
   // Récupérer les modules de la filière de l'étudiant
-  const modules = await prisma.module.findMany({
+  const modules: ModuleRow[] = await prisma.module.findMany({
     where: {
       schoolId: student.schoolId,
       OR: [
@@ -59,21 +74,21 @@ export default async function StudentCoursesPage({
   // Calculer les statistiques pour chaque module
   const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-cyan-500", "bg-teal-500", "bg-pink-500", "bg-indigo-500"]
   
-  const courses = modules.map((module, index) => {
+  const courses = modules.map((module: ModuleRow, index: number) => {
     // Calculer la moyenne pour ce module
-    const moduleEvaluations = student.evaluations.filter(e => e.moduleId === module.id)
-    const totalWeighted = moduleEvaluations.reduce((sum, e) => sum + (e.note * e.coefficient), 0)
-    const totalCoef = moduleEvaluations.reduce((sum, e) => sum + e.coefficient, 0)
-    const average = totalCoef > 0 ? (totalWeighted / totalCoef).toFixed(1) : 0
+    const moduleEvaluations: EvalRow[] = student.evaluations.filter((e: EvalRow) => e.moduleId === module.id)
+    const totalWeighted = moduleEvaluations.reduce((sum: number, e: EvalRow) => sum + (e.note * e.coefficient), 0)
+    const totalCoef = moduleEvaluations.reduce((sum: number, e: EvalRow) => sum + e.coefficient, 0)
+    const average = totalCoef > 0 ? (totalWeighted / totalCoef).toFixed(1) : '0'
 
     // Calculer la progression (pourcentage de devoirs rendus)
-    const moduleHomework = module.homework.filter(h => h.dueDate >= new Date())
-    const submittedHomework = student.evaluations.filter(e => e.moduleId === module.id && e.type === 'DEVOIR')
-    const progress = moduleHomework.length > 0 ? Math.round((submittedHomework.length / moduleHomework.length) * 100) : 0
+  const moduleHomework: HomeworkRow[] = module.homework.filter((h: HomeworkRow) => new Date(h.dueDate) >= new Date())
+  const submittedHomework = student.evaluations.filter((e: EvalRow) => e.moduleId === module.id && e.type === 'DEVOIR')
+  const progress = moduleHomework.length > 0 ? Math.round((submittedHomework.length / moduleHomework.length) * 100) : 0
 
     // Enseignant principal
-    const teacher = module.emplois[0]?.enseignant 
-      ? `${module.emplois[0].enseignant.titre} ${module.emplois[0].enseignant.prenom} ${module.emplois[0].enseignant.nom}`
+    const teacher = module.emplois[0]?.enseignant
+      ? `${module.emplois[0].enseignant.titre ?? ''} ${module.emplois[0].enseignant.prenom ?? ''} ${module.emplois[0].enseignant.nom ?? ''}`.trim()
       : 'Non assigné'
 
     return {
@@ -89,7 +104,7 @@ export default async function StudentCoursesPage({
   })
 
   // Récupérer les documents récents
-  const recentDocuments = await prisma.document.findMany({
+  const recentDocuments: DocRow[] = await prisma.document.findMany({
     where: {
       module: {
         OR: [
@@ -108,8 +123,9 @@ export default async function StudentCoursesPage({
   })
 
   // Calculer le temps écoulé pour chaque document
+  /* eslint-disable-next-line react-hooks/purity */
   const now = Date.now()
-  const documentsWithTime = recentDocuments.map(doc => {
+  const documentsWithTime = (recentDocuments as DocRow[]).map((doc: DocRow) => {
     const timeAgo = Math.floor((now - new Date(doc.createdAt).getTime()) / (1000 * 60 * 60 * 24))
     const dateText = timeAgo === 0 ? "Aujourd'hui" : timeAgo === 1 ? "Hier" : `Il y a ${timeAgo}j`
     return { ...doc, dateText }

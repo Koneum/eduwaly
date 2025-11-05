@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       parent,
       enrollmentId,
       message: `Parent créé. ID d'enrôlement: ${enrollmentId}. Le parent peut maintenant créer son compte.`,
-      studentNames: students.map(s => s.studentNumber).join(', ')
+    studentNames: students.map((s: { studentNumber: string }) => s.studentNumber).join(', ')
     })
 
   } catch (error) {

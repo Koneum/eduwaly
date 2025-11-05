@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     })
 
     // Vérifier si un conflit existe pour les mêmes jours
-    const hasConflict = conflits.some((emploi) => {
+    const hasConflict = conflits.some((emploi: { joursCours?: string | null }) => {
       const emploiJours = JSON.parse(emploi.joursCours || '[]')
       return joursCours.some((jour: string) => emploiJours.includes(jour))
     })

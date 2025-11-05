@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       distinct: ['moduleId'],
     })
 
-    const moduleIds = emplois.map((e) => e.module.id)
+  const moduleIds = emplois.map((e: { module: { id: string } }) => e.module.id)
 
     // Construire le where
     const where: Record<string, unknown> = {

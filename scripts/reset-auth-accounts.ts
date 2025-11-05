@@ -7,7 +7,7 @@
  * Usage: npx tsx scripts/reset-auth-accounts.ts
  */
 
-import { PrismaClient } from '../app/generated/prisma'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'

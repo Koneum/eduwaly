@@ -1,6 +1,18 @@
 import prisma from "@/lib/prisma"
 import SubscriptionManager from "@/components/school-admin/subscription-manager"
 
+type PlanRow = {
+  id: string
+  name: string
+  price: unknown
+  isActive: boolean
+  description?: string | null
+  interval?: string
+  maxStudents?: number
+  maxTeachers?: number
+  features?: string
+}
+
 export default async function SubscriptionPage({ params }: { params: Promise<{ schoolId: string }> }) {
   const { schoolId } = await params
 
@@ -13,7 +25,7 @@ export default async function SubscriptionPage({ params }: { params: Promise<{ s
   })
 
   // Récupérer tous les plans disponibles
-  const plansData = await prisma.plan.findMany({
+  const plansData: PlanRow[] = await prisma.plan.findMany({
     where: { isActive: true },
     orderBy: { price: 'asc' }
   })
@@ -27,9 +39,14 @@ export default async function SubscriptionPage({ params }: { params: Promise<{ s
     }
   } : null
 
-  const plans = plansData.map(plan => ({
+  const plans = plansData.map((plan: PlanRow) => ({
     ...plan,
-    price: Number(plan.price)
+    price: Number(plan.price),
+    description: plan.description ?? null,
+    interval: plan.interval ?? 'month',
+    maxStudents: plan.maxStudents ?? 0,
+    maxTeachers: plan.maxTeachers ?? 0,
+    features: plan.features ?? '[]'
   }))
 
   return (

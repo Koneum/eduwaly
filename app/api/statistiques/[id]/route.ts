@@ -37,7 +37,8 @@ export async function GET(
 
     // Filtrer les emplois du semestre
     const semestreMois = SEMESTRES[semestre as keyof typeof SEMESTRES]
-    const emploisFiltered = enseignant.emplois.filter(emploi => {
+    type EmploiRow = { dateDebut: string | Date; dateFin?: string | Date; vh?: number; module: { nom: string; type: string; filiere?: { nom?: string } | null } }
+    const emploisFiltered = enseignant.emplois.filter((emploi: EmploiRow) => {
       const dateDebut = new Date(emploi.dateDebut)
       const mois = dateDebut.getMonth()
       return mois >= semestreMois.DEBUT_MOIS && mois <= semestreMois.FIN_MOIS
@@ -52,7 +53,7 @@ export async function GET(
         grade: enseignant.grade,
         type: enseignant.type
       },
-      emplois: emploisFiltered.map(emploi => ({
+      emplois: emploisFiltered.map((emploi: EmploiRow) => ({
         dateDebut: emploi.dateDebut,
         dateFin: emploi.dateFin,
         vh: emploi.vh,
@@ -62,7 +63,7 @@ export async function GET(
           filiere: emploi.module.filiere?.nom || 'UE COMMUNE'
         }
       })),
-      totalHeures: emploisFiltered.reduce((total, emploi) => total + emploi.vh, 0)
+      totalHeures: emploisFiltered.reduce((total: number, emploi: EmploiRow) => total + (emploi.vh || 0), 0)
     }
 
     return NextResponse.json(stats)

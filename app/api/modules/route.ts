@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     }
 
     // Créer le nouveau module
-    const module = await prisma.module.create({
+    const createdModule = await prisma.module.create({
       data: {
         nom: data.nom,
         type: data.type || 'CM_TD',
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json(module);
+    return NextResponse.json(createdModule);
   } catch (error) {
     console.error('Erreur lors de la création du module:', error);
     return NextResponse.json(

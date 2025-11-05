@@ -15,12 +15,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
     }
 
-    const schoolId = session.user.schoolId as string;
-    let data: any = {};
-    let summary: any = {};
+  const schoolId = session.user.schoolId as string;
+  let data: Record<string, unknown> = {};
+  let summary: Record<string, unknown> = {};
 
     // Rapport académique
     if (reportType === 'academic') {
+      type EvaluationRow = { note: number }
       const evaluations = await prisma.evaluation.findMany({
         where: {
           module: { schoolId },
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
         },
         include: { student: { include: { user: true } }, module: true },
       });
-
-      const avgNote = evaluations.reduce((sum, evaluation) => sum + evaluation.note, 0) / evaluations.length || 0;
+      const evals = evaluations as EvaluationRow[]
+      const avgNote = evals.length > 0 ? evals.reduce<number>((sum, evaluation) => sum + (Number(evaluation.note) || 0), 0) / evals.length : 0;
       
       data = { evaluations };
       summary = {
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Rapport financier
     if (reportType === 'financial') {
+      type PaymentRow = { amountPaid: number | string }
       const payments = await prisma.studentPayment.findMany({
         where: {
           student: { schoolId },
@@ -51,8 +53,8 @@ export async function POST(request: NextRequest) {
         },
         include: { student: { include: { user: true } } },
       });
-
-      const totalPaid = payments.reduce((sum, p) => sum + Number(p.amountPaid), 0);
+      const payRows = payments as PaymentRow[]
+      const totalPaid = payRows.reduce<number>((sum, p) => sum + Number(p.amountPaid || 0), 0);
       
       data = { payments };
       summary = {

@@ -4,6 +4,16 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Plus, Search, GraduationCap, Users } from "lucide-react"
 import prisma from "@/lib/prisma"
+
+// Local lightweight type for Class model (avoid depending on generated Prisma types)
+type ClassModel = {
+  id: string
+  name: string
+  code: string
+  niveau: string
+  capacity: number
+  mainRoom?: string | null
+}
 import { requireSchoolAccess } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 
@@ -15,14 +25,14 @@ export default async function ClassesManagementPage({
   const { schoolId } = await params
   await requireSchoolAccess(schoolId)
 
-  const school = await prisma.school.findUnique({
+  const school = (await prisma.school.findUnique({
     where: { id: schoolId },
     include: {
       classes: {
         orderBy: { name: 'asc' }
       }
     }
-  })
+  })) as unknown as ({ classes: ClassModel[] } & Record<string, unknown>) | null
 
   if (!school) {
     redirect('/admin')
@@ -33,16 +43,16 @@ export default async function ClassesManagementPage({
     redirect(`/admin/${schoolId}/rooms`)
   }
 
-  const totalCapacity = school.classes.reduce((sum, cls) => sum + cls.capacity, 0)
+  const totalCapacity = school!.classes.reduce<number>((sum: number, cls: ClassModel) => sum + cls.capacity, 0)
 
   // Grouper par niveau
-  const classesByNiveau = school.classes.reduce((acc, cls) => {
+  const classesByNiveau = school!.classes.reduce((acc: Record<string, ClassModel[]>, cls: ClassModel) => {
     if (!acc[cls.niveau]) {
       acc[cls.niveau] = []
     }
     acc[cls.niveau].push(cls)
     return acc
-  }, {} as Record<string, typeof school.classes>)
+  }, {} as Record<string, ClassModel[]>)
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
