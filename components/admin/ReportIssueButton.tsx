@@ -54,7 +54,7 @@ export function ReportIssueButton() {
         <DialogHeader>
           <DialogTitle>Signaler au Super Admin</DialogTitle>
           <DialogDescription>
-            Signalez un problème technique ou faites une suggestion d'amélioration
+            Signalez un problème technique ou faites une suggestion d&apos;amélioration
           </DialogDescription>
         </DialogHeader>
         
@@ -67,7 +67,7 @@ export function ReportIssueButton() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="bug">🐛 Bug / Problème technique</SelectItem>
-                <SelectItem value="suggestion">💡 Suggestion d'amélioration</SelectItem>
+                <SelectItem value="suggestion">💡 Suggestion d&apos;amélioration</SelectItem>
                 <SelectItem value="question">❓ Question / Support</SelectItem>
                 <SelectItem value="other">📝 Autre</SelectItem>
               </SelectContent>

@@ -70,11 +70,11 @@ export function ScheduleCreator({ modules, enseignants, filieres, schoolId, onSu
   // Auto-fill VH when module is selected
   useEffect(() => {
     if (moduleId) {
-      const module = modules.find(m => m.id === moduleId)
-      if (module) {
-        setVh(module.vh.toString())
-        if (module.filiere) {
-          setFiliereId(module.filiere.id)
+      const selectedModule = modules.find(m => m.id === moduleId)
+      if (selectedModule) {
+        setVh(selectedModule.vh.toString())
+        if (selectedModule.filiere) {
+          setFiliereId(selectedModule.filiere.id)
         }
       }
     }
