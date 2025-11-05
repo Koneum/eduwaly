@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
-import { AttendanceStatus } from '@prisma/client'
+import { AttendanceStatus } from '@/app/generated/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     if (!moduleId || !filiereId) {
       return NextResponse.json(
-        { error: 'Module et filière requis' },
+        { error: 'Module et filière requis' }, 
         { status: 400 }
       )
     }
