@@ -20,11 +20,10 @@ type ModuleRow = {
   homework: HomeworkRow[]
 }
 type EvalRow = { moduleId: string; note: number; coefficient: number; type?: string }
-type StudentRow = { id: string; schoolId: string; filiereId?: string | null; evaluations: EvalRow[] }
 
 export default async function StudentCoursesPage({ 
   params 
-}: { 
+}: {  
   params: Promise<{ schoolId: string }> 
 }) {
   const { schoolId } = await params
@@ -104,7 +103,7 @@ export default async function StudentCoursesPage({
   })
 
   // Récupérer les documents récents
-  const recentDocuments: DocRow[] = await prisma.document.findMany({
+  const recentDocuments = (await prisma.document.findMany({
     where: {
       module: {
         OR: [
@@ -120,15 +119,24 @@ export default async function StudentCoursesPage({
       createdAt: 'desc'
     },
     take: 5
-  })
+  })).map(doc => ({
+    id: doc.id,
+    createdAt: doc.createdAt,
+    title: doc.title,
+    fileUrl: doc.fileUrl,
+    module: doc.module ? { nom: doc.module.nom } : undefined
+  }))
 
   // Calculer le temps écoulé pour chaque document
   /* eslint-disable-next-line react-hooks/purity */
   const now = Date.now()
-  const documentsWithTime = (recentDocuments as DocRow[]).map((doc: DocRow) => {
+  const documentsWithTime = recentDocuments.map((doc: DocRow) => {
     const timeAgo = Math.floor((now - new Date(doc.createdAt).getTime()) / (1000 * 60 * 60 * 24))
     const dateText = timeAgo === 0 ? "Aujourd'hui" : timeAgo === 1 ? "Hier" : `Il y a ${timeAgo}j`
-    return { ...doc, dateText }
+    return { 
+      ...doc, 
+      dateText 
+    }
   })
 
   return (

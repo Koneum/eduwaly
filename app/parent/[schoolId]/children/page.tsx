@@ -100,13 +100,13 @@ export default async function ParentChildrenPage({
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 text-primary font-bold text-lg w-12 h-12 rounded-full flex items-center justify-center">
-                    {student.user?.name.substring(0, 2).toUpperCase()}
+                    {student.user?.name?.substring(0, 2).toUpperCase() ?? 'NA'}
                   </div>
                   <div>
                     <CardTitle>{student.user?.name}</CardTitle>
                     <CardDescription>{student.filiere?.nom || 'Non assigné'} • {student.niveau}</CardDescription>
                   </div>
-                </div>
+                </div> 
                 <Badge variant="default" className="bg-green-600">
                   Actif
                 </Badge>

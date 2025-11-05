@@ -46,7 +46,15 @@ export async function GET() {
     type ConversationRow = {
       id: string
       participants: Array<{ userId: string }>
-      messages: Array<{ id: string; content?: string; createdAt?: string }>
+      messages: Array<{
+        id: string
+        content?: string
+        createdAt?: Date
+        conversationId?: string
+        isDeleted?: boolean
+        senderId?: string
+        senderName?: string
+      }>
     }
 
     type OtherUserSelect = {

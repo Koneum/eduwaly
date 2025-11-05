@@ -53,7 +53,10 @@ export async function POST(request: NextRequest) {
         },
         include: { student: { include: { user: true } } },
       });
-      const payRows = payments as PaymentRow[]
+      const payRows = payments.map(p => ({
+        ...p,
+        amountPaid: p.amountPaid.toString()
+      })) as PaymentRow[]
       const totalPaid = payRows.reduce<number>((sum, p) => sum + Number(p.amountPaid || 0), 0);
       
       data = { payments };
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
         insights: [`${payments.length} paiements enregistrés`],
       };
     }
-
+ 
     const report = {
       reportType,
       title: `Rapport ${reportType}`,

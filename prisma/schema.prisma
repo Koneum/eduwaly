@@ -660,6 +660,8 @@ enum AnnouncementPriority {
   URGENT
 }
 
+
+
 // ============================================
 // GESTION DES SALLES ET CLASSES
 // ============================================

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
+import { AttendanceStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
     })
 
     // Si une date est spécifiée, récupérer les présences
-    let attendances: Array<{ id: string; studentId: string; status: string; date: Date }> = []
+    let attendances: Array<{ id: string; studentId: string; status: AttendanceStatus; date: Date }> = []
     if (date) {
         attendances = await prisma.attendance.findMany({
         where: {
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
     })
 
     // Créer les nouvelles présences
-    type AttendanceInput = { studentId: string; status: string; notes?: string }
+    type AttendanceInput = { studentId: string; status: AttendanceStatus; notes?: string }
     const attendanceInputs = attendances as AttendanceInput[]
 
     const createdAttendances = await prisma.attendance.createMany({
@@ -119,10 +120,10 @@ export async function POST(req: NextRequest) {
         moduleId,
         teacherId: teacher.id,
         date: new Date(date),
-        status: att.status, // PRESENT, ABSENT, LATE, EXCUSED
+        status: att.status as AttendanceStatus, // PRESENT, ABSENT, LATE, EXCUSED
         notes: att.notes ?? null,
       })),
-    })
+    }) 
 
     return NextResponse.json({ success: true, count: createdAttendances.count })
   } catch (error) {

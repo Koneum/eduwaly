@@ -103,13 +103,13 @@ export async function POST(request: NextRequest) {
     })
 
   // Créer l'école, l'année scolaire et l'abonnement en une transaction
-  await prisma.$transaction(async (tx: typeof prisma) => {
+  await prisma.$transaction(async (prisma) => {
 
       // 4. Créer l'année scolaire par défaut
       const currentYear = new Date().getFullYear()
       const nextYear = currentYear + 1
 
-      await tx.anneeUniversitaire.create({
+      await prisma.anneeUniversitaire.create({
         data: {
           schoolId: school.id,
           annee: `${currentYear}-${nextYear}`,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       })
 
       // 5. Récupérer le plan d'essai gratuit
-      const freePlan = await tx.plan.findFirst({
+      const freePlan = await prisma.plan.findFirst({
         where: { name: 'Essai Gratuit' }
       })
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       const currentPeriodEnd = new Date()
       currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 30)
 
-      await tx.subscription.create({
+      await prisma.subscription.create({
         data: {
           schoolId: school.id,
           planId: freePlan.id,

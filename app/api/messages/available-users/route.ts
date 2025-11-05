@@ -284,7 +284,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Parent sans enfants' }, { status: 404 });
       }
 
-  const schoolIds = parent.students.map((s: { schoolId?: string }) => s.schoolId);
+  const schoolIds = parent.students.map((s: { schoolId?: string }) => s.schoolId).filter(Boolean) as string[];
   const studentUsers = parent.students.map((s: { user?: UserSelect | null }) => s.user).filter(Boolean) as UserSelect[];
 
       // Teachers des écoles des enfants
@@ -301,7 +301,7 @@ export async function GET(request: NextRequest) {
           email: true,
           role: true,
           image: true,
-        },
+        }, 
       });
 
       // Admins des écoles des enfants
