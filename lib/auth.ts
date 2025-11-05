@@ -48,7 +48,32 @@ export const auth = betterAuth({
     cookiePrefix: 'schooly',
   },
   trustedOrigins: [
-    'http://localhost:3000', 
-    process.env.BETTER_AUTH_URL || 'https://eduwaly.vercel.app',
-  ],
+  'http://localhost:3000', 
+  'https://eduwaly.vercel.app',
+  `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
+  'https://api.vitepay.com' // Ajoutez ce domaine
+],
+  callbacks: {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      if (url.startsWith('/login')) {
+        return `${baseUrl}/dashboard`
+      }
+      return url
+    },
+    async session({ 
+      session, 
+      user 
+    }: { 
+      session: { user: Record<string, unknown> }, 
+      user: Record<string, unknown> 
+    }) {
+      session.user = {
+        ...session.user,
+        ...user,
+        role: user.role || 'STUDENT',
+        schoolId: user.schoolId || null
+      }
+      return session
+    }
+  },
 })

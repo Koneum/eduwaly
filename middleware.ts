@@ -1,7 +1,22 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { getAuthUser } from '@/lib/auth-utils'
 
 export async function middleware(request: NextRequest) {
+  const url = new URL(request.url)
+  const pathname = url.pathname
+  const user = await getAuthUser()
+
+  // Redirection si utilisateur connecté tente d'accéder à /login
+  if (pathname.startsWith('/login') && user) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Protection des routes /dashboard
+  if (pathname.startsWith('/dashboard') && !user) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
   const path = request.nextUrl.pathname
 
   // Routes publiques
@@ -165,5 +180,6 @@ export const config = {
     "/teacher/:path*",
     "/student/:path*",
     "/parent/:path*",
+    "/dashboard/:path*"
   ],
 }
