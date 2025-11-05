@@ -68,18 +68,26 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
 
   // Récupérer tous les utilisateurs de l'école
   type UserRow = {
-    id: string
-    name: string
-    email: string
-    role: string
-    isActive: boolean
-    emailVerified?: Date | null
-    lastLoginAt?: Date | null
-    createdAt: Date
-    student?: { id: string; studentNumber: string; niveau: string; filiere?: { nom?: string } | null } | null
-    enseignant?: { id: string } | null
-    parent?: { id: string; phone?: string } | null
-  }
+  id: string
+  name: string
+  email: string
+  role: string
+  isActive: boolean
+  emailVerified: boolean | null
+  lastLoginAt?: Date | null
+  createdAt: Date
+  student?: { 
+    id: string; 
+    studentNumber: string; 
+    niveau: string; 
+    filiere?: { nom?: string } | null 
+  } | null
+  enseignant?: { id: string } | null
+  parent?: { 
+    id: string; 
+    phone?: string | null  
+  } | null
+}
 
   const users: UserRow[] = await prisma.user.findMany({
     where: {

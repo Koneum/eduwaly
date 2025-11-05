@@ -504,7 +504,7 @@ export default function ModulesPage() {
       {modules.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           Aucun {schoolType === 'UNIVERSITY' ? 'module' : 'matière'} pour le moment. 
-          Cliquez sur "{currentLabels.add}" pour commencer.
+          Cliquez sur &quot;{currentLabels.add}&quot; pour commencer.
         </div>
       )}
     </div>
