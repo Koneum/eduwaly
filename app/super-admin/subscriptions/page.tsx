@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma"
 import SubscriptionsManager from "@/components/super-admin/subscriptions-manager"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 
+export const dynamic = 'force-dynamic'
+
 export default async function SubscriptionsPage() {
   await requireSuperAdmin()
   
