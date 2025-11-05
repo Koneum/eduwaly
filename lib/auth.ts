@@ -4,6 +4,8 @@ import prisma from './prisma'
 
 export const auth = betterAuth({
   basePath: '/api/auth',
+  debug: process.env.NODE_ENV !== 'production',
+  logger: console,
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -46,7 +48,8 @@ export const auth = betterAuth({
     cookiePrefix: 'schooly',
   },
   trustedOrigins: [
-    "http://localhost:3000", 
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : [])
+    'http://localhost:3000', 
+    'https://eduwaly.vercel.app',
+    `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
   ],
 })

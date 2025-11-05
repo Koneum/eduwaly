@@ -8,10 +8,13 @@ export type UserRole = "SUPER_ADMIN" | "SCHOOL_ADMIN" | "TEACHER" | "STUDENT" | 
 export interface AuthUser {
   id: string
   email: string
+  emailVerified: boolean
   name: string
   role: UserRole
   schoolId: string | null
   avatar?: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 /**
@@ -25,7 +28,11 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     
     if (!session?.user) return null
     
-    return session.user as AuthUser
+    const user = session.user as unknown
+    if (user && typeof user === 'object' && 'role' in user && 'schoolId' in user) {
+      return user as AuthUser
+    }
+    return null
   } catch (error) {
     console.error('Erreur lors de la récupération de la session:', error)
     return null
