@@ -30,8 +30,7 @@ export default function LoginPage() {
       }
 
       // Forcer le rechargement pour que le middleware redirige
-      // window.location.href = '/'
-      router.push('/')
+      window.location.href = '/'
     } catch (err) {
       setError('Une erreur est survenue')
       setLoading(false)
