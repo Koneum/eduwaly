@@ -46,6 +46,7 @@ export const auth = betterAuth({
     cookiePrefix: 'schooly',
   },
   trustedOrigins: [
-    'http://localhost:3000', 'https://eduwaly.vercel.app',
-  ], 
+    "http://localhost:3000", 
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : [])
+  ],
 })
