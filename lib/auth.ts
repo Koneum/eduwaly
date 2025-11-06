@@ -7,23 +7,21 @@ import prisma from './prisma'
 const getBaseURL = () => {
   let baseURL: string
   
-  // 1. BETTER_AUTH_URL (recommandé par Better Auth)
+  // 1. BETTER_AUTH_URL (recommandé - domaine de production)
   if (process.env.BETTER_AUTH_URL) {
     baseURL = process.env.BETTER_AUTH_URL
     console.log('🔧 [AUTH] Using BETTER_AUTH_URL:', baseURL)
   }
-  // 2. Variable d'environnement personnalisée
-  else if (process.env.NEXT_PUBLIC_BASE_URL) {
-    baseURL = process.env.NEXT_PUBLIC_BASE_URL
-    console.log('🔧 [AUTH] Using NEXT_PUBLIC_BASE_URL:', baseURL)
-  }
-  // 3. En production Vercel
+  // 2. VERCEL_URL (pour preview deployments)
+  // IMPORTANT: Fonctionne UNIQUEMENT si vous accédez via l'URL de preview
   else if (process.env.VERCEL_URL) {
     baseURL = `https://${process.env.VERCEL_URL}`
-    console.log('⚠️ [AUTH] Using VERCEL_URL (preview):', baseURL)
-    console.log('⚠️ [AUTH] IMPORTANT: Définissez BETTER_AUTH_URL sur Vercel!')
+    console.log('⚠️ [AUTH] Using VERCEL_URL:', baseURL)
+    console.log('⚠️ [AUTH] Preview deployment détecté!')
+    console.log('⚠️ [AUTH] Accédez via', baseURL, 'pour que les cookies fonctionnent')
+    console.log('⚠️ [AUTH] OU définissez BETTER_AUTH_URL=https://eduwaly.vercel.app pour production')
   }
-  // 4. Développement local
+  // 3. Développement local
   else {
     baseURL = 'http://localhost:3000'
     console.log('🔧 [AUTH] Using localhost:', baseURL)

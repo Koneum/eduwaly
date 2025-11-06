@@ -1,6 +1,20 @@
 # 🎓 Plan de Transformation SAAS - Application de Gestion Scolaire
 
-> **Statut**: 🚧 En développement actif | **Progression**: 99% complété | **Dernière mise à jour**: 4 novembre 2025 - 08h50
+> **Statut**: 🚧 En développement actif | **Progression**: 99% complété | **Dernière mise à jour**: 6 novembre 2025 - 22h15
+
+## 🔥 Dernières Corrections (6 nov 2025)
+
+### ✅ Problème Middleware Vercel - RÉSOLU
+- **Problème**: Boucle de redirection après login sur Vercel
+- **Cause**: Matcher du middleware incluait `/login`
+- **Solution**: Nouveau matcher regex excluant les routes publiques
+- **Résultat**: Login et redirections fonctionnent correctement ✅
+
+### ✅ Better Auth Integration - COMPLÈTE
+- **Ajouté**: Hook `usePermissions` pour permissions granulaires
+- **Ajouté**: Logs de debug détaillés pour diagnostic Vercel
+- **Ajouté**: Support multi-domaines (production + preview)
+- **Documentation**: `MIDDLEWARE_FIX.md`, `VERCEL_DEBUG_STEPS.md`, `BETTER_AUTH_INTEGRATION.md`
 
 ## 🎯 Progression Globale
 
