@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       headers: request.headers
     })
 
-    if (!session) {
+    if (!session) { 
       return NextResponse.json(
         { error: "No session found" },
         { status: 401 }
