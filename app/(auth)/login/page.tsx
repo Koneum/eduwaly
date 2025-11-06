@@ -19,17 +19,25 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      console.log('🔐 [LOGIN] Tentative de connexion pour:', email)
       const result = await signIn(email, password)
 
+      console.log('🔐 [LOGIN] Résultat signIn:', result)
+
       if (result?.error) {
+        console.error('❌ [LOGIN] Erreur signIn:', result.error)
         setError('Email ou mot de passe incorrect')
         setLoading(false)
         return
       }
 
+      console.log('✅ [LOGIN] SignIn réussi, attente de la création de session...')
+      
       // Attendre un peu pour que la session soit bien créée
       await new Promise(resolve => setTimeout(resolve, 800))
 
+      console.log('🔄 [LOGIN] Récupération de l\'URL de redirection...')
+      
       // Récupérer l'URL de redirection depuis le serveur
       // CRITIQUE: credentials: 'include' pour envoyer les cookies
       const redirectResponse = await fetch('/api/auth/redirect-url', {
@@ -39,18 +47,26 @@ export default function LoginPage() {
         },
       })
       
+      console.log('📡 [LOGIN] Response status:', redirectResponse.status)
+      
       if (!redirectResponse.ok) {
-        console.error('Erreur lors de la récupération de l\'URL de redirection')
+        console.error('❌ [LOGIN] Erreur lors de la récupération de l\'URL:', redirectResponse.status)
+        console.error('❌ [LOGIN] Response text:', await redirectResponse.text())
         // Fallback: rediriger vers la page d'accueil qui gérera la redirection
+        console.log('🔄 [LOGIN] Redirection fallback vers /')
         window.location.href = '/'
         return
       }
       
-      const { redirectUrl } = await redirectResponse.json()
+      const data = await redirectResponse.json()
+      console.log('📍 [LOGIN] Données de redirection:', data)
+      const { redirectUrl } = data
       
+      console.log('🚀 [LOGIN] Redirection vers:', redirectUrl)
       // Rediriger vers le dashboard approprié
       window.location.href = redirectUrl
-    } catch {
+    } catch (err) {
+      console.error('💥 [LOGIN] Exception:', err)
       setError('Une erreur est survenue')
       setLoading(false)
     }

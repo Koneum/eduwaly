@@ -5,20 +5,31 @@ import prisma from './prisma'
 // Configuration de l'URL de base pour l'authentification
 // Better Auth cherche automatiquement BETTER_AUTH_URL
 const getBaseURL = () => {
+  let baseURL: string
+  
   // 1. BETTER_AUTH_URL (recommandé par Better Auth)
   if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL
+    baseURL = process.env.BETTER_AUTH_URL
+    console.log('🔧 [AUTH] Using BETTER_AUTH_URL:', baseURL)
   }
   // 2. Variable d'environnement personnalisée
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return process.env.NEXT_PUBLIC_BASE_URL
+  else if (process.env.NEXT_PUBLIC_BASE_URL) {
+    baseURL = process.env.NEXT_PUBLIC_BASE_URL
+    console.log('🔧 [AUTH] Using NEXT_PUBLIC_BASE_URL:', baseURL)
   }
   // 3. En production Vercel
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+  else if (process.env.VERCEL_URL) {
+    baseURL = `https://${process.env.VERCEL_URL}`
+    console.log('⚠️ [AUTH] Using VERCEL_URL (preview):', baseURL)
+    console.log('⚠️ [AUTH] IMPORTANT: Définissez BETTER_AUTH_URL sur Vercel!')
   }
   // 4. Développement local
-  return 'http://localhost:3000'
+  else {
+    baseURL = 'http://localhost:3000'
+    console.log('🔧 [AUTH] Using localhost:', baseURL)
+  }
+  
+  return baseURL
 }
 
 export const auth = betterAuth({
