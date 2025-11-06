@@ -53,6 +53,8 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // 1 day
   },
   advanced: {
+    // CRITIQUE: Secure cookies en production uniquement
+    // En local (HTTP), les cookies secure ne fonctionnent pas
     useSecureCookies: process.env.NODE_ENV === 'production',
     cookiePrefix: 'schooly',
   },

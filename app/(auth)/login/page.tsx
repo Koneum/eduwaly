@@ -28,10 +28,24 @@ export default function LoginPage() {
       }
 
       // Attendre un peu pour que la session soit bien créée
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 800))
 
       // Récupérer l'URL de redirection depuis le serveur
-      const redirectResponse = await fetch('/api/auth/redirect-url')
+      // CRITIQUE: credentials: 'include' pour envoyer les cookies
+      const redirectResponse = await fetch('/api/auth/redirect-url', {
+        credentials: 'include', // Envoie les cookies avec la requête
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!redirectResponse.ok) {
+        console.error('Erreur lors de la récupération de l\'URL de redirection')
+        // Fallback: rediriger vers la page d'accueil qui gérera la redirection
+        window.location.href = '/'
+        return
+      }
+      
       const { redirectUrl } = await redirectResponse.json()
       
       // Rediriger vers le dashboard approprié
