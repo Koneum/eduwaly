@@ -3,16 +3,21 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
 
 // Configuration de l'URL de base pour l'authentification
+// Better Auth cherche automatiquement BETTER_AUTH_URL
 const getBaseURL = () => {
-  // En production Vercel
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+  // 1. BETTER_AUTH_URL (recommandé par Better Auth)
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL
   }
-  // Variable d'environnement personnalisée
+  // 2. Variable d'environnement personnalisée
   if (process.env.NEXT_PUBLIC_BASE_URL) {
     return process.env.NEXT_PUBLIC_BASE_URL
   }
-  // Développement local
+  // 3. En production Vercel
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  // 4. Développement local
   return 'http://localhost:3000'
 }
 

@@ -7,13 +7,18 @@
 DATABASE_URL="postgresql://..."
 ```
 
+### Better Auth (CRITIQUE pour Vercel)
+```
+BETTER_AUTH_URL="https://eduwaly.vercel.app"
+BETTER_AUTH_SECRET="your-secret-key-here"
+```
+
+**⚠️ IMPORTANT:** Sans `BETTER_AUTH_URL`, Better Auth ne peut pas créer les cookies correctement sur Vercel.
+
 ### Application
 ```
 NEXT_PUBLIC_BASE_URL="https://eduwaly.vercel.app"
 ```
-
-### Auth Better Auth
-Les cookies et sessions sont automatiquement configurés via `lib/auth.ts`.
 
 ## Configuration Automatique
 
