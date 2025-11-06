@@ -2,10 +2,23 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
 
+// Configuration de l'URL de base pour l'authentification
+const getBaseURL = () => {
+  // En production Vercel
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  // Variable d'environnement personnalisée
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL
+  }
+  // Développement local
+  return 'http://localhost:3000'
+}
+
 export const auth = betterAuth({
+  baseURL: getBaseURL(),
   basePath: '/api/auth',
-  debug: process.env.NODE_ENV !== 'production',
-  logger: console,
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -20,60 +33,23 @@ export const auth = betterAuth({
         required: false,
         defaultValue: 'STUDENT',
       },
-      schoolId: {
-        type: 'string',
-        required: false,
-      },
-      avatar: {
-        type: 'string',
-        required: false,
-      },
-      isActive: {
-        type: 'boolean',
-        required: false,
-        defaultValue: true,
-      },
-      lastLoginAt: {
-        type: 'date',
+      phone: {
+        type: 'string', 
         required: false,
       },
     },
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 jours
-    updateAge: 60 * 60 * 24, // 1 jour
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 1 day
   },
   advanced: {
     useSecureCookies: process.env.NODE_ENV === 'production',
     cookiePrefix: 'schooly',
   },
   trustedOrigins: [
-  'http://localhost:3000', 
-  'https://eduwaly.vercel.app',
-  `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
-  'https://api.vitepay.com' // Ajoutez ce domaine
-],
-  callbacks: {
-    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      if (url.startsWith('/login')) {
-        return `${baseUrl}/dashboard`
-      }
-      return url
-    },
-    async session({ 
-      session, 
-      user 
-    }: { 
-      session: { user: Record<string, unknown> }, 
-      user: Record<string, unknown> 
-    }) {
-      session.user = {
-        ...session.user,
-        ...user,
-        role: user.role || 'STUDENT',
-        schoolId: user.schoolId || null
-      }
-      return session
-    }
-  },
+    'http://localhost:3000',
+    'https://eduwaly.vercel.app',
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+  ],
 })

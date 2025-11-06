@@ -1,24 +1,10 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { getAuthUser } from '@/lib/auth-utils'
+import { auth } from '@/lib/auth'
 
 export const runtime = 'nodejs'
 
 export async function middleware(request: NextRequest) {
-  const url = new URL(request.url)
-  const pathname = url.pathname
-  const user = await getAuthUser()
-
-  // // Redirection si utilisateur connecté tente d'accéder à /login
-  // if (pathname.startsWith('/login') && user) {
-  //   return NextResponse.redirect(new URL('/dashboard', request.url))
-  // }
-
-  // // Protection des routes /dashboard
-  // if (pathname.startsWith('/dashboard') && !user) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
-
   const path = request.nextUrl.pathname
 
   // Routes publiques
@@ -40,25 +26,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Récupérer les infos de session depuis l'API Better Auth
+  // Récupérer les infos de session directement via Better Auth (plus rapide que fetch)
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.nextUrl.origin
-    const sessionResponse = await fetch(`${baseUrl}/api/auth/get-session`, {
-      headers: {
-        cookie: `schooly.session_token=${sessionToken}`,
-      },
+    const session = await auth.api.getSession({
+      headers: request.headers
     })
 
-    if (!sessionResponse.ok) {
-      // Session invalide
+    if (!session?.user) {
       return NextResponse.redirect(new URL("/login", request.url))
     }
 
-    const { user } = await sessionResponse.json()
-
-    if (!user) {
-      return NextResponse.redirect(new URL("/login", request.url))
-    }
+    const user = session.user as { role?: string; schoolId?: string | null }
 
     const role = user.role as string
     const schoolId = user.schoolId as string | null
