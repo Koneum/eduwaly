@@ -53,11 +53,10 @@ export async function POST(request: NextRequest) {
         },
         include: { student: { include: { user: true } } },
       });
-      const payRows = payments.map(p => ({
-        ...p,
-        amountPaid: p.amountPaid.toString()
-      })) as PaymentRow[]
-      const totalPaid = payRows.reduce<number>((sum, p) => sum + Number(p.amountPaid || 0), 0);
+      const payRows: PaymentRow[] = payments.map((payment: typeof payments[number]): PaymentRow => ({
+        amountPaid: payment.amountPaid.toString()
+      }))
+      const totalPaid = payRows.reduce<number>((sum, payment) => sum + Number(payment.amountPaid || 0), 0);
       
       data = { payments };
       summary = {

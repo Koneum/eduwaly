@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -103,13 +104,13 @@ export async function POST(request: NextRequest) {
     })
 
   // Créer l'école, l'année scolaire et l'abonnement en une transaction
-  await prisma.$transaction(async (prisma) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
       // 4. Créer l'année scolaire par défaut
       const currentYear = new Date().getFullYear()
       const nextYear = currentYear + 1
 
-      await prisma.anneeUniversitaire.create({
+      await tx.anneeUniversitaire.create({
         data: {
           schoolId: school.id,
           annee: `${currentYear}-${nextYear}`,
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
       })
 
       // 5. Récupérer le plan d'essai gratuit
-      const freePlan = await prisma.plan.findFirst({
+      const freePlan = await tx.plan.findFirst({
         where: { name: 'Essai Gratuit' }
       })
 
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
       const currentPeriodEnd = new Date()
       currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 30)
 
-      await prisma.subscription.create({
+      await tx.subscription.create({
         data: {
           schoolId: school.id,
           planId: freePlan.id,

@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+type RouteContext = {
+  params: Promise<{ path: string[] }> | { path: string[] }
+}
+
 export async function handleRequest(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: RouteContext
 ) {
+  const params = await Promise.resolve(context.params)
   const path = params.path.join('/')
   const vitePayUrl = `https://api.vitepay.com/${path}`
   
