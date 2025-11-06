@@ -37,6 +37,10 @@ export const auth = betterAuth({
         type: 'string', 
         required: false,
       },
+      schoolId: {
+        type: 'string',
+        required: false,
+      },
     },
   },
   session: {

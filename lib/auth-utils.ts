@@ -33,18 +33,25 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     
     const user = session.user as unknown
     
-    if (user && typeof user === 'object' && 'role' in user && 'schoolId' in user) {
-        // ------------------------------------------------------------------
-        // >> DIAGNOSTIC IMPORTANT : Vérifiez ces valeurs dans les logs Vercel après le login
-        console.log(`[AUTH-UTIL] Session OK. Rôle: ${user.role}, School ID: ${user.schoolId}`);
-        // ------------------------------------------------------------------
+    if (user && typeof user === 'object' && 'role' in user) {
+        const userWithSchool = user as { role: unknown; schoolId?: string | null }
+        console.log(`[AUTH-UTIL] Session OK. Rôle: ${userWithSchool.role}, School ID: ${userWithSchool.schoolId || 'N/A'}`);
+        
+        // SUPER_ADMIN n'a pas besoin de schoolId
+        if (userWithSchool.role === 'SUPER_ADMIN') {
+          return user as AuthUser
+        }
+        
+        // Pour les autres rôles, vérifier que schoolId existe
+        if (!userWithSchool.schoolId) {
+          console.warn(`[AUTH-UTIL] schoolId manquant pour le rôle: ${userWithSchool.role}`);
+          return null
+        }
+        
         return user as AuthUser
     }
     
-    // ------------------------------------------------------------------
-    // >> DIAGNOSTIC IMPORTANT : Si ce log apparaît, le rôle/schoolId est manquant dans la session
     console.warn(`[AUTH-UTIL] Session utilisateur incomplète:`, user);
-    // ------------------------------------------------------------------
     return null
   } catch (error) {
     console.error('Erreur lors de la récupération de la session:', error)
