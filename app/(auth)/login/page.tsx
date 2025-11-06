@@ -2,13 +2,11 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 export default function LoginPage() {
-  const router = useRouter()
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,9 +27,16 @@ export default function LoginPage() {
         return
       }
 
-      // Forcer le rechargement pour que le middleware redirige
-      window.location.href = '/'
-    } catch (err) {
+      // Attendre un peu pour que la session soit bien créée
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Récupérer l'URL de redirection depuis le serveur
+      const redirectResponse = await fetch('/api/auth/redirect-url')
+      const { redirectUrl } = await redirectResponse.json()
+      
+      // Rediriger vers le dashboard approprié
+      window.location.href = redirectUrl
+    } catch {
       setError('Une erreur est survenue')
       setLoading(false)
     }

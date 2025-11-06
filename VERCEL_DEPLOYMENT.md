@@ -28,16 +28,24 @@ Le système détecte automatiquement l'environnement Vercel via :
 - ✅ Correction du `cookiePrefix` de `sissan` à `schooly`
 - ✅ Configuration `trustedOrigins` avec support VERCEL_URL
 - ✅ Ajout de `basePath: '/api/auth'`
+- ✅ Ajout de `schoolId` dans les `additionalFields` pour Better Auth
 
-### 2. **middleware.ts**
-- ✅ Remplacement du `fetch` par appel direct à `auth.api.getSession()`
-- ✅ Suppression de l'import inutile `getAuthUser`
-- ✅ Optimisation des performances (pas de requête HTTP interne)
+### 2. **middleware.ts** (Simplifié pour Vercel Edge Runtime)
+- ✅ Middleware ultra-léger - vérifie uniquement le cookie de session
+- ✅ Pas d'appel à `auth.api.getSession()` dans le middleware
+- ✅ Compatible avec Vercel Edge Runtime
+- ✅ Les redirections sont gérées côté serveur dans les pages
 
 ### 3. **lib/auth-client.ts**
 - ✅ Détection automatique de `window.location.origin` côté client
 - ✅ Support de `NEXT_PUBLIC_VERCEL_URL`
 - ✅ Fallback intelligent pour tous les environnements
+
+### 4. **Redirections Côté Serveur** (Nouvelle Approche)
+- ✅ `app/page.tsx` - Redirige automatiquement vers le dashboard approprié
+- ✅ `app/api/auth/redirect-url/route.ts` - API pour obtenir l'URL de redirection
+- ✅ `app/(auth)/login/page.tsx` - Utilise l'API pour rediriger après login
+- ✅ `lib/redirect-helper.ts` - Helpers pour les redirections dans toutes les pages
 
 ## Pourquoi les Redirections Fonctionnent Maintenant
 
@@ -48,10 +56,12 @@ Le système détecte automatiquement l'environnement Vercel via :
 4. **trustedOrigins incomplet** : Bloquait les requêtes Vercel
 
 ### Solution Après
-1. **Middleware rapide** : Appel direct à `auth.api.getSession()` (pas de HTTP)
-2. **Cookie prefix correct** : `schooly.session_token`
-3. **baseURL dynamique** : Détection automatique de l'environnement
-4. **trustedOrigins complet** : Inclut VERCEL_URL automatiquement
+1. **Middleware ultra-léger** : Vérifie uniquement le cookie (compatible Edge Runtime)
+2. **Redirections côté serveur** : Gérées dans les Server Components
+3. **Cookie prefix correct** : `schooly.session_token`
+4. **baseURL dynamique** : Détection automatique de l'environnement
+5. **trustedOrigins complet** : Inclut VERCEL_URL automatiquement
+6. **schoolId dans la session** : Disponible via Better Auth additionalFields
 
 ## Test en Local
 
