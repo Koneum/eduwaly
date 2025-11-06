@@ -33,38 +33,14 @@ export default function LoginPage() {
 
       console.log('✅ [LOGIN] SignIn réussi, attente de la création de session...')
       
-      // Attendre un peu pour que la session soit bien créée
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Attendre que la session soit bien créée
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      console.log('🔄 [LOGIN] Récupération de l\'URL de redirection...')
+      console.log('🚀 [LOGIN] TEST: Redirection directe vers /super-admin')
       
-      // Récupérer l'URL de redirection depuis le serveur
-      // CRITIQUE: credentials: 'include' pour envoyer les cookies
-      const redirectResponse = await fetch('/api/auth/redirect-url', {
-        credentials: 'include', // Envoie les cookies avec la requête
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      console.log('📡 [LOGIN] Response status:', redirectResponse.status)
-      
-      if (!redirectResponse.ok) {
-        console.error('❌ [LOGIN] Erreur lors de la récupération de l\'URL:', redirectResponse.status)
-        console.error('❌ [LOGIN] Response text:', await redirectResponse.text())
-        // Fallback: rediriger vers la page d'accueil qui gérera la redirection
-        console.log('🔄 [LOGIN] Redirection fallback vers /')
-        window.location.href = '/'
-        return
-      }
-      
-      const data = await redirectResponse.json()
-      console.log('📍 [LOGIN] Données de redirection:', data)
-      const { redirectUrl } = data
-      
-      console.log('🚀 [LOGIN] Redirection vers:', redirectUrl)
-      // Rediriger vers le dashboard approprié
-      window.location.href = redirectUrl
+      // TEST: Redirection directe vers super-admin
+      // Sans passer par l'API pour isoler le problème
+      window.location.href = '/super-admin'
     } catch (err) {
       console.error('💥 [LOGIN] Exception:', err)
       setError('Une erreur est survenue')
