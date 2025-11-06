@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
           password: password,
           name: `${prenom} ${nom}`,
           role: 'STUDENT',
-          schoolId: schoolId,
         }
       })
 
@@ -67,6 +66,12 @@ export async function POST(request: NextRequest) {
       }
 
       const user = signUpResult.user
+
+      // Mettre à jour l'utilisateur avec schoolId
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { schoolId }
+      })
 
       // Mettre à jour l'étudiant
       await prisma.student.update({
@@ -113,7 +118,6 @@ export async function POST(request: NextRequest) {
           password: password,
           name: `${prenom} ${nom}`,
           role: 'PARENT',
-          schoolId: schoolId,
         }
       })
 
@@ -125,6 +129,12 @@ export async function POST(request: NextRequest) {
       }
 
       const user = signUpResult.user
+
+      // Mettre à jour l'utilisateur avec schoolId
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { schoolId }
+      })
 
       // Mettre à jour le parent
       await prisma.parent.update({

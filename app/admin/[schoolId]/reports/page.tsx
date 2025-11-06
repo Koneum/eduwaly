@@ -14,7 +14,8 @@ export default async function ReportsPage({ params }: PageProps) {
   const { schoolId } = await params;
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session?.user || session.user.schoolId !== schoolId) {
+  const user = session?.user as { schoolId?: string } | undefined;
+  if (!session?.user || user?.schoolId !== schoolId) {
     redirect('/unauthorized');
   }
 
@@ -25,9 +26,9 @@ export default async function ReportsPage({ params }: PageProps) {
     orderBy: { user: { name: 'asc' } },
   });
 
-  const studentsData = students.map((s: any) => ({
+  const studentsData = students.map((s) => ({
     id: s.id,
-    name: s.user.name,
+    name: s.user?.name || '',
     enrollmentId: s.enrollmentId,
   }));
 
@@ -37,7 +38,7 @@ export default async function ReportsPage({ params }: PageProps) {
     orderBy: { nom: 'asc' },
   });
 
-  const filieresData = filieres.map((f: any) => ({
+  const filieresData = filieres.map((f) => ({
     id: f.id,
     nom: f.nom,
   }));

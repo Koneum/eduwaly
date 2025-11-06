@@ -6,7 +6,9 @@ import { headers } from 'next/headers';
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user || session.user.role !== 'SCHOOL_ADMIN') {
+    const user = session?.user as { role?: string; schoolId?: string } | undefined;
+    
+    if (!session?.user || user?.role !== 'SCHOOL_ADMIN') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // Récupérer l'école de l'admin
     const school = await prisma.school.findUnique({
-      where: { id: session.user.schoolId as string },
+      where: { id: user?.schoolId as string },
       select: { name: true },
     });
 

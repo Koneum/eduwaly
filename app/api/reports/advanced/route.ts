@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
     }
 
-  const schoolId = session.user.schoolId as string;
+  const user = session.user as { schoolId?: string };
+  const schoolId = user.schoolId as string;
   let data: Record<string, unknown> = {};
   let summary: Record<string, unknown> = {};
 

@@ -131,7 +131,6 @@ export async function POST(request: NextRequest) {
         password,
         name,
         role,
-        schoolId,
       }
     })
 
@@ -141,6 +140,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Mettre à jour l'utilisateur avec schoolId
+    await prisma.user.update({
+      where: { id: signUpResult.user.id },
+      data: { schoolId }
+    })
 
     // Récupérer l'utilisateur complet avec tous les champs
     const user = await prisma.user.findUnique({
