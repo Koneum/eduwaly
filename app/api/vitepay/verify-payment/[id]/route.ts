@@ -1,22 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { vitepay } from '@/lib/vitepay/client'
+import prisma from '@/lib/prisma'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+/**
+ * Vérifier le statut d'un paiement via l'order_id
+ * Note: VitePay ne fournit pas d'API de vérification directe.
+ * Le statut est mis à jour via le webhook callback.
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const { id: orderId } = await params
 
-    const payment = await vitepay.getPayment(id)
+    // Extraire le schoolId de l'orderId (format: SUB-{schoolId}-{timestamp})
+    const orderParts = orderId.split('-')
+    if (orderParts[0] !== 'SUB' || orderParts.length < 3) {
+      return NextResponse.json(
+        { error: 'Format order_id invalide' },
+        { status: 400 }
+      )
+    }
+
+    const schoolId = orderParts[1]
+
+    // Vérifier le statut de l'abonnement
+    const school = await prisma.school.findUnique({
+      where: { id: schoolId },
+      include: { subscription: true }
+    })
+
+    if (!school?.subscription) {
+      return NextResponse.json(
+        { error: 'Abonnement introuvable' },
+        { status: 404 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
-      payment: {
-        id: payment.id,
-        status: payment.status,
-        amount: payment.amount,
-        reference: payment.reference
+      orderId,
+      subscription: {
+        status: school.subscription.status,
+        currentPeriodEnd: school.subscription.currentPeriodEnd,
       }
     })
   } catch (error) {

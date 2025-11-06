@@ -1,6 +1,8 @@
 import IssuesManager from "@/components/super-admin/issues-manager"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 
+export const dynamic = 'force-dynamic'
+
 export default async function IssuesPage() {
   await requireSuperAdmin()
 

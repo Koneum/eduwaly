@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { getAuthUser } from '@/lib/auth-utils'
 import MessagingInterface from '@/components/messages/MessagingInterface'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SuperAdminMessagesPage() {
   const user = await getAuthUser()
   

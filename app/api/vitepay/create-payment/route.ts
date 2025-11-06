@@ -3,6 +3,9 @@ import { getAuthUser } from '@/lib/auth-utils'
 import { vitepay } from '@/lib/vitepay/client'
 import prisma from '@/lib/prisma'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser()
@@ -29,33 +32,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Créer le paiement avec Vitepay
-    const payment = await vitepay.createPayment({
-      amount: Number(plan.price) * 100, // Convertir en centimes
-      reference: `SUB-${school.id}-${Date.now()}`,
-      customer: {
-        name: school.name,
-        email: school.email || user.email,
-        phone: school.phone || ''
-      },
-      metadata: {
-        schoolId: school.id,
-        planId: plan.id,
-        subscriptionId: school.subscription?.id,
-        userId: user.id
-      }
+    // Générer un ID de commande unique
+    const orderId = `SUB-${school.id}-${Date.now()}`
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+
+    // Créer le paiement avec VitePay selon leur documentation
+    const paymentResponse = await vitepay.createPayment({
+      orderId,
+      amount: Number(plan.price), // Montant en francs (sera converti en centimes par le client)
+      description: `Abonnement ${plan.name} - ${school.name}`,
+      email: school.email || user.email,
+      returnUrl: `${baseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`,
+      declineUrl: `${baseUrl}/admin/${schoolId}/subscription?status=declined&order_id=${orderId}`,
+      cancelUrl: `${baseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`,
+      callbackUrl: `${baseUrl}/api/vitepay/webhook`,
+      buyerIpAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
     })
+
+    // Note: Pour les paiements d'abonnement école, on pourrait créer un modèle séparé
+    // Pour l'instant, on stocke l'orderId dans les métadonnées de la souscription
 
     return NextResponse.json({
       success: true,
-      paymentId: payment.id,
-      paymentUrl: payment.paymentUrl,
-      reference: payment.reference
+      orderId,
+      redirectUrl: paymentResponse.redirect_url,
     })
   } catch (error) {
-    console.error('Erreur création paiement:', error)
+    console.error('Erreur création paiement VitePay:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la création du paiement' },
+      { error: error instanceof Error ? error.message : 'Erreur lors de la création du paiement' },
       { status: 500 }
     )
   }

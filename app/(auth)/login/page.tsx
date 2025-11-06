@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,7 +70,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border text-white border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full pl-11 pr-4 py-3 border text-foreground dark:text-white border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
                   placeholder="votre@email.com"
                   required
                 />
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 text-white border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full pl-11 pr-4 py-3 text-foreground dark:text-white border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
                   placeholder="MDP"
                   required
                 />
@@ -108,7 +108,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-secondary hover:text-primary py-3 rounded-lg font-medium hover:bg-secondary   focus:ring-4 focus:ring-indigo-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-primary text-foreground hover:text-primary py-3 rounded-lg font-medium hover:bg-secondary   focus:ring-4 focus:ring-indigo-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -125,7 +125,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
               Pas encore de compte ?{' '}
-              <Link href="/register" className="text-primary hover:text-primary font-medium">
+              <Link href="/register" className="text-foreground dark:text-primary hover:text-green-600 font-medium">
                 S&apos;inscrire
               </Link>
             </p>
@@ -133,7 +133,7 @@ export default function LoginPage() {
         </div>
 
         {/* Comptes de test */}
-        <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
+        {/* <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
           <h3 className="font-semibold text-foreground mb-3">Comptes de test :</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
@@ -160,7 +160,7 @@ export default function LoginPage() {
               Mot de passe pour tous : <code className="bg-muted px-2 py-1 rounded">password123</code>
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )

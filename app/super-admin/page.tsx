@@ -7,6 +7,8 @@ import { formatDistance } from "date-fns"
 import { fr } from "date-fns/locale"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 
+export const dynamic = 'force-dynamic'
+
 export default async function SuperAdminDashboard() {
   await requireSuperAdmin()
   // Statistiques globales

@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      if (existingConversation && existingConversation.participants.length === 2) {
+      if (existingConversation && (existingConversation as any).participants.length === 2) {
         return NextResponse.json(existingConversation)
       }
     }

@@ -1,6 +1,8 @@
 import { requireSuperAdmin } from '@/lib/auth-utils'
 import AnnouncementsManager from '@/components/announcements/AnnouncementsManager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SuperAdminAnnouncementsPage() {
   await requireSuperAdmin()
 

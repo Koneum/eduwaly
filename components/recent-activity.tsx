@@ -8,6 +8,7 @@ interface Activity {
   action: string
   time: string
   type: "subscription" | "payment" | "alert"
+  subscriptionStatus?: "active" | "trial" | "expired" | "cancelled"
 }
 
 interface RecentActivityProps {
@@ -23,27 +24,31 @@ export function RecentActivity({ activities }: RecentActivityProps) {
       action: "Nouvel abonnement Premium",
       time: "Il y a 2h",
       type: "subscription",
+      subscriptionStatus: "active",
     },
     {
       id: "2",
       schoolName: "Lycée Victor Hugo",
-      action: "Paiement reçu - 15,000 FCFA",
+      action: "Essai gratuit de 30 jours",
       time: "Il y a 4h",
-      type: "payment",
+      type: "subscription",
+      subscriptionStatus: "trial",
     },
     {
       id: "3",
       schoolName: "Collège Moderne",
-      action: "Alerte: Abonnement expire dans 3 jours",
+      action: "Abonnement expiré",
       time: "Il y a 6h",
       type: "alert",
+      subscriptionStatus: "expired",
     },
     {
       id: "4",
       schoolName: "École Internationale",
-      action: "Mise à jour du profil",
+      action: "Abonnement résilié",
       time: "Il y a 1j",
       type: "subscription",
+      subscriptionStatus: "cancelled",
     },
   ]
 
@@ -70,11 +75,29 @@ export function RecentActivity({ activities }: RecentActivityProps) {
               </div>
               <Badge
                 variant={
-                  activity.type === "alert" ? "destructive" : activity.type === "payment" ? "default" : "secondary"
+                  activity.subscriptionStatus === "active"
+                    ? "success"
+                    : activity.subscriptionStatus === "trial" || activity.subscriptionStatus === "expired"
+                    ? "warning"
+                    : activity.subscriptionStatus === "cancelled"
+                    ? "destructive"
+                    : activity.type === "payment"
+                    ? "default"
+                    : "secondary"
                 }
                 className="shrink-0"
               >
-                {activity.type === "subscription" ? "Abonnement" : activity.type === "payment" ? "Paiement" : "Alerte"}
+                {activity.subscriptionStatus === "active"
+                  ? "Abonné"
+                  : activity.subscriptionStatus === "trial"
+                  ? "Essai 30j"
+                  : activity.subscriptionStatus === "expired"
+                  ? "Expiré"
+                  : activity.subscriptionStatus === "cancelled"
+                  ? "Résilié"
+                  : activity.type === "payment"
+                  ? "Abonné"
+                  : "Abonnement"}
               </Badge>
             </div>
           ))}

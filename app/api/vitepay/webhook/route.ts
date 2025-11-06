@@ -1,88 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { vitepay } from '@/lib/vitepay/client'
+import type { VitepayCallbackData } from '@/lib/vitepay/client'
 import prisma from '@/lib/prisma'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+/**
+ * Webhook VitePay - Reçoit les callbacks serveur-à-serveur
+ * Documentation: https://api.vitepay.com/developers section 5
+ */
 export async function POST(request: NextRequest) {
   try {
-    const signature = request.headers.get('x-vitepay-signature') || ''
-    const payload = await request.text()
-
-    // Vérifier la signature du webhook
-    if (!vitepay.verifyWebhookSignature(payload, signature)) {
-      console.error('❌ Signature webhook invalide')
-      return NextResponse.json(
-        { error: 'Signature invalide' },
-        { status: 401 }
-      )
+    // VitePay envoie les données en form-urlencoded
+    const formData = await request.formData()
+    
+    const callbackData: VitepayCallbackData = {
+      order_id: formData.get('order_id') as string,
+      amount_100: formData.get('amount_100') as string,
+      currency_code: formData.get('currency_code') as string,
+      authenticity: formData.get('authenticity') as string,
+      success: formData.get('success') as string | undefined,
+      failure: formData.get('failure') as string | undefined,
+      sandbox: formData.get('sandbox') as string | undefined,
     }
 
-    const event = JSON.parse(payload)
-    console.log('📨 Webhook Vitepay reçu:', event.type)
+    console.log('📨 Callback VitePay reçu:', {
+      orderId: callbackData.order_id,
+      success: callbackData.success,
+      failure: callbackData.failure,
+      sandbox: callbackData.sandbox
+    })
 
-    switch (event.type) {
-      case 'payment.completed': {
-        // Paiement réussi
-        const payment = event.data
-        
-        // Mettre à jour l'abonnement
-        await prisma.subscription.updateMany({
-          where: {
-            id: payment.metadata?.subscriptionId
-          },
-          data: {
-            status: 'ACTIVE',
-            currentPeriodEnd: new Date(payment.metadata?.periodEnd)
-          }
+    // Vérifier l'authenticité et traiter le callback
+    const result = vitepay.handleCallback(callbackData)
+
+    if (!result.isValid) {
+      console.error('❌ Signature invalide pour order_id:', callbackData.order_id)
+      return NextResponse.json(result.response)
+    }
+
+    // Extraire les informations de l'order_id (format: SUB-{schoolId}-{timestamp})
+    const orderParts = callbackData.order_id.split('-')
+    if (orderParts[0] === 'SUB' && orderParts.length >= 3) {
+      const schoolId = orderParts[1]
+      
+      if (result.isSuccess) {
+        // Paiement réussi - Activer l'abonnement
+        const school = await prisma.school.findUnique({
+          where: { id: schoolId },
+          include: { subscription: true }
         })
 
-        console.log('✅ Paiement traité:', payment.id)
-        break
-      }
+        if (school?.subscription) {
+          // Calculer la nouvelle période (30 jours)
+          const now = new Date()
+          const newPeriodEnd = new Date(now)
+          newPeriodEnd.setDate(newPeriodEnd.getDate() + 30)
 
-      case 'payment.failed': {
+          await prisma.subscription.update({
+            where: { id: school.subscription.id },
+            data: {
+              status: 'ACTIVE',
+              currentPeriodEnd: newPeriodEnd,
+              updatedAt: now
+            }
+          })
+
+          console.log('✅ Abonnement activé pour l\'\u00e9cole:', schoolId)
+        }
+      } else {
         // Paiement échoué
-        const payment = event.data
-        
-        await prisma.subscription.updateMany({
-          where: {
-            id: payment.metadata?.subscriptionId
-          },
-          data: {
-            status: 'PAST_DUE'
-          }
-        })
-
-        console.log('⚠️ Paiement échoué:', payment.id)
-        break
+        console.log('⚠️ Paiement échoué pour order_id:', callbackData.order_id)
       }
-
-      case 'subscription.cancelled': {
-        // Abonnement annulé
-        const subscription = event.data
-        
-        await prisma.subscription.updateMany({
-          where: {
-            id: subscription.id
-          },
-          data: {
-            status: 'CANCELED'
-          }
-        })
-
-        console.log('🚫 Abonnement annulé:', subscription.id)
-        break
-      }
-
-      default:
-        console.log('ℹ️ Type d\'événement non géré:', event.type)
     }
 
-    return NextResponse.json({ received: true })
+    // Retourner la réponse attendue par VitePay
+    return NextResponse.json(result.response)
   } catch (error) {
-    console.error('❌ Erreur webhook Vitepay:', error)
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    )
+    console.error('❌ Erreur webhook VitePay:', error)
+    // Même en cas d'erreur, retourner un statut 200 avec status: "0"
+    return NextResponse.json({
+      status: '0',
+      message: 'Erreur lors du traitement du callback'
+    })
   }
 }

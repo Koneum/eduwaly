@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma"
 import NotificationsManager from "@/components/super-admin/notifications-manager"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 
+export const dynamic = 'force-dynamic'
+
 export default async function NotificationsPage() {
   await requireSuperAdmin()
   

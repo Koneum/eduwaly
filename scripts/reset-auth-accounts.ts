@@ -130,14 +130,15 @@ async function main() {
     }
   })
 
-  const schoolMap = new Map(schools.map(s => [s.name, s.id]))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const schoolMap = new Map(schools.map((s: any) => [s.name, s.id]))
 
   // Étape 3: Créer les utilisateurs via BetterAuth
   console.log('👥 Création des utilisateurs...\n')
   
   let successCount = 0
   for (const userData of users) {
-    const schoolId = userData.schoolName ? schoolMap.get(userData.schoolName) || null : null
+    const schoolId = userData.schoolName ? (schoolMap.get(userData.schoolName) as string | undefined) || null : null
     
     const user = await createUserViaBetterAuth(
       userData.email,

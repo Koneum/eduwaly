@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -104,7 +103,7 @@ export async function POST(request: NextRequest) {
     })
 
   // Créer l'école, l'année scolaire et l'abonnement en une transaction
-  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  await prisma.$transaction(async (tx: any) => {
 
       // 4. Créer l'année scolaire par défaut
       const currentYear = new Date().getFullYear()

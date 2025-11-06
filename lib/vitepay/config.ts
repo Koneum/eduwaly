@@ -6,10 +6,11 @@
 export const VITEPAY_CONFIG = {
   apiKey: process.env.VITEPAY_API_KEY || '',
   apiSecret: process.env.VITEPAY_API_SECRET || '',
-  baseUrl: process.env.VITEPAY_BASE_URL || 'https://api.vitepay.com/v1',
-  webhookSecret: process.env.VITEPAY_WEBHOOK_SECRET || '',
+  baseUrl: process.env.VITEPAY_BASE_URL || 'https://api.vitepay.com',
+  mode: (process.env.VITEPAY_MODE as 'sandbox' | 'prod') || 'sandbox',
   returnUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   currency: 'XOF', // Franc CFA
+  countryCode: 'ML', // Mali par défaut
 }
 
 export const VITEPAY_ENDPOINTS = {
@@ -25,7 +26,6 @@ export const VITEPAY_ENDPOINTS = {
 export function isVitepayConfigured(): boolean {
   return !!(
     VITEPAY_CONFIG.apiKey &&
-    VITEPAY_CONFIG.apiSecret &&
-    VITEPAY_CONFIG.webhookSecret
+    VITEPAY_CONFIG.apiSecret
   )
 }

@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma"
 import SchoolsManager from "@/components/super-admin/schools-manager"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 
+export const dynamic = 'force-dynamic'
+
 export default async function SchoolsPage() {
   await requireSuperAdmin()
   

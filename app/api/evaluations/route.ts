@@ -116,7 +116,7 @@ export async function PUT(request: NextRequest) {
 
     const evaluation = await prisma.evaluation.update({
       where: { id },
-      data: updateData
+      data: updateData as any
     })
 
     return NextResponse.json({ evaluation })

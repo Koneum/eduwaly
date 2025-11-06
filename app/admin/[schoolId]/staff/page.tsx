@@ -7,7 +7,7 @@ export default async function StaffPage({ params }: { params: Promise<{ schoolId
   await requireSchoolAccess(schoolId)
 
   // Récupérer tous les membres du staff de l'école
-  const staffMembers = await prisma.user.findMany({
+  const staffMembersData = await prisma.user.findMany({
     where: {
       schoolId,
       role: {
@@ -25,6 +25,30 @@ export default async function StaffPage({ params }: { params: Promise<{ schoolId
       createdAt: 'desc'
     }
   })
+
+  // Mapper les données au format attendu par le composant
+  // @ts-ignore - Prisma types will be regenerated
+  const staffMembers = staffMembersData.map((member: any) => ({
+    id: member.id,
+    name: member.name,
+    email: member.email,
+    role: member.role as string,
+    isActive: member.isActive,
+    createdAt: member.createdAt,
+    permissions: member.permissions.map((up: any) => ({
+      id: up.id,
+      permission: {
+        id: up.permission.id,
+        name: up.permission.name,
+        description: up.permission.description,
+        category: up.permission.category
+      },
+      canView: up.canView,
+      canCreate: up.canCreate,
+      canEdit: up.canEdit,
+      canDelete: up.canDelete
+    }))
+  }))
 
   // Récupérer toutes les permissions disponibles
   const permissions = await prisma.permission.findMany({

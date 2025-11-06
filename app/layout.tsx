@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${openSans.variable} ${poppins.variable}`}>
-        <ThemeProvider defaultTheme="light" storageKey="schooly-theme">
+        <ThemeProvider defaultTheme="system" storageKey="schooly-theme">
           <AuthProvider>
             {children}
             <Toaster />

@@ -63,7 +63,8 @@ async function main() {
   }
 
   console.log(`✅ ${accounts.length} compte(s) Account trouvé(s):`)
-  accounts.forEach((account, index) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accounts.forEach((account: any, index: number) => {
     console.log(`\n   Compte ${index + 1}:`)
     console.log(`   ID: ${account.id}`)
     console.log(`   Account ID: ${account.accountId}`)
@@ -85,7 +86,8 @@ async function main() {
 
   console.log(`\n📊 Sessions actives: ${sessions.length}`)
   if (sessions.length > 0) {
-    sessions.forEach((session, index) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sessions.forEach((session: any, index: number) => {
       const isExpired = new Date(session.expiresAt) < new Date()
       console.log(`   Session ${index + 1}: ${isExpired ? '❌ Expirée' : '✅ Active'} (expire le ${new Date(session.expiresAt).toLocaleString('fr-FR')})`)
     })
@@ -99,7 +101,8 @@ async function main() {
   }
 
   // Vérifier si le compte a un hash valide
-  const validAccount = accounts.find(a => a.password && a.password.startsWith('$2'))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validAccount = accounts.find((a: any) => a.password && a.password.startsWith('$2'))
   if (!validAccount) {
     console.log('\n❌ Aucun hash de mot de passe valide trouvé')
     console.log('💡 Solution: Exécutez `npx tsx scripts/fix-superadmin.ts`')

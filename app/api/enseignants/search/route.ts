@@ -66,7 +66,7 @@ export async function GET(request: Request) {
     });
 
     // Formater les résultats
-    const results = (enseignants as EnseignantWithEmplois[]).map((enseignant) => ({
+    const results = (enseignants as any[]).map((enseignant: any) => ({
       id: enseignant.id,
       nom: enseignant.nom,
       prenom: enseignant.prenom,

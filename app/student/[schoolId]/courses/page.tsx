@@ -10,15 +10,6 @@ import { redirect } from "next/navigation"
 // Local types to avoid implicit `any` in callbacks
 type DocRow = { id: string; createdAt: string | Date; title: string; fileUrl: string; module?: { nom?: string } }
 type HomeworkRow = { id: string; dueDate: string | Date }
-type TeacherLite = { titre?: string | null; prenom?: string | null; nom?: string | null }
-type ModuleRow = {
-  id: string
-  nom: string
-  type: string
-  emplois: Array<{ enseignant?: TeacherLite }>
-  documents: DocRow[]
-  homework: HomeworkRow[]
-}
 type EvalRow = { moduleId: string; note: number; coefficient: number; type?: string }
 
 export default async function StudentCoursesPage({ 
@@ -47,7 +38,7 @@ export default async function StudentCoursesPage({
   if (!student) redirect('/auth/login')
 
   // Récupérer les modules de la filière de l'étudiant
-  const modules: ModuleRow[] = await prisma.module.findMany({
+  const modules = await prisma.module.findMany({
     where: {
       schoolId: student.schoolId,
       OR: [
@@ -65,7 +56,11 @@ export default async function StudentCoursesPage({
         },
         take: 1
       },
-      documents: true,
+      documents: {
+        include: {
+          module: true
+        }
+      },
       homework: true
     }
   })
@@ -73,7 +68,7 @@ export default async function StudentCoursesPage({
   // Calculer les statistiques pour chaque module
   const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500", "bg-cyan-500", "bg-teal-500", "bg-pink-500", "bg-indigo-500"]
   
-  const courses = modules.map((module: ModuleRow, index: number) => {
+  const courses = modules.map((module, index: number) => {
     // Calculer la moyenne pour ce module
     const moduleEvaluations: EvalRow[] = student.evaluations.filter((e: EvalRow) => e.moduleId === module.id)
     const totalWeighted = moduleEvaluations.reduce((sum: number, e: EvalRow) => sum + (e.note * e.coefficient), 0)
