@@ -187,8 +187,8 @@ export default function RoomsManager({ schoolId, schoolType }: RoomsManagerProps
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="name" className="text-responsive-sm">Nom *</Label>
               <Input
                 id="name"
                 placeholder={schoolType === 'HIGH_SCHOOL' ? 'Ex: Terminale S1' : 'Ex: 3 ou A101'}
@@ -201,10 +201,12 @@ export default function RoomsManager({ schoolId, schoolType }: RoomsManagerProps
                     code: generateCode(newName, formData.floor)
                   })
                 }}
+                required
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="floor">Étage</Label>
+              <Label htmlFor="floor" className="text-responsive-sm">Étage</Label>
               <Input
                 id="floor"
                 placeholder="Ex: 2 ou E2 ou 1er étage"
@@ -217,58 +219,60 @@ export default function RoomsManager({ schoolId, schoolType }: RoomsManagerProps
                     code: generateCode(formData.name, newFloor)
                   })
                 }}
+                className="text-responsive-sm"
               />
               
               
-              <p className="text-xs text-muted-foreground">
+              <p className="text-responsive-xs text-muted-foreground">
                 Format: Étage-Nom (ex: E2-3 pour salle 3 au 2ème étage)
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="type">Type *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="type" className="text-responsive-sm">Type *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({...formData, type: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
                   {roomTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="text-responsive-sm">
                       {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="capacity">Capacité *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="capacity" className="text-responsive-sm">Capacité *</Label>
               <Input
                 id="capacity"
                 type="number"
-                placeholder="Ex: 40"
                 value={formData.capacity}
                 onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="building">Bâtiment</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="building" className="text-responsive-sm">Bâtiment</Label>
               <Input
                 id="building"
                 placeholder="Ex: Bâtiment A"
                 value={formData.building}
                 onChange={(e) => setFormData({...formData, building: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="floor">Étage</Label>
-              <Label htmlFor="code">Code * (généré auto)</Label>
+              <Label htmlFor="code" className="text-responsive-sm">Code * (généré auto)</Label>
               <Input
                 id="code"
                 placeholder={schoolType === 'HIGH_SCHOOL' ? 'Ex: E2-TS1' : 'Ex: E2-3'}
                 value={formData.code}
                 onChange={(e) => setFormData({...formData, code: e.target.value})}
-                className="bg-muted"
+                className="bg-muted text-responsive-sm"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-responsive-xs text-muted-foreground">
                 Le code sera généré automatiquement
               </p>
             </div>
@@ -304,17 +308,17 @@ export default function RoomsManager({ schoolId, schoolType }: RoomsManagerProps
               />
               <label htmlFor="room-file-upload" className="cursor-pointer">
                 <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-sm font-medium">
+                <p className="text-responsive-sm font-medium">
                   {importFile ? importFile.name : 'Cliquez pour sélectionner un fichier'}
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-responsive-xs text-muted-foreground mt-2">
                   Formats acceptés: .xlsx, .xls, .csv
                 </p>
               </label>
             </div>
             <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm font-medium mb-2">📝 Format attendu :</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-responsive-sm font-medium mb-2">📝 Format attendu :</p>
+              <p className="text-responsive-xs text-muted-foreground">
                 Nom, Code, Type, Capacité, Bâtiment, Étage
               </p>
             </div>

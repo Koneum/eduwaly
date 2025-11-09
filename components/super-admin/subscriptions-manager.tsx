@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
@@ -174,115 +174,121 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
           <CardTitle>Tous les Abonnements</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>École</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Début</TableHead>
-                  <TableHead>Fin</TableHead>
-                  <TableHead className="text-right">Prix</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {subscriptions.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-medium">{sub.school.name}</TableCell>
-                    <TableCell>{sub.plan.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={
-                        sub.status === 'ACTIVE' ? 'default' :
-                        sub.status === 'TRIAL' ? 'secondary' :
-                        sub.status === 'PAST_DUE' ? 'destructive' : 'outline'
-                      }>
-                        {sub.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDistance(new Date(sub.currentPeriodStart), new Date(), { 
-                        addSuffix: true, 
-                        locale: fr 
-                      })}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDistance(new Date(sub.currentPeriodEnd), new Date(), { 
-                        addSuffix: true, 
-                        locale: fr 
-                      })}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {Number(sub.plan.price).toLocaleString()} FCFA
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openDialog(sub, 'renew')}
-                          title="Renouveler"
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                        {sub.status === 'ACTIVE' || sub.status === 'TRIAL' ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDialog(sub, 'suspend')}
-                            title="Suspendre"
-                          >
-                            <Pause className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDialog(sub, 'activate')}
-                            title="Activer"
-                          >
-                            <Play className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => openDialog(sub, 'delete')}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <ResponsiveTable
+            data={subscriptions}
+            columns={[
+              {
+                header: "École",
+                accessor: (sub) => sub.school.name,
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Plan",
+                accessor: (sub) => sub.plan.name,
+                priority: "high"
+              },
+              {
+                header: "Statut",
+                accessor: (sub) => (
+                  <Badge variant={
+                    sub.status === 'ACTIVE' ? 'default' :
+                    sub.status === 'TRIAL' ? 'secondary' :
+                    sub.status === 'PAST_DUE' ? 'destructive' : 'outline'
+                  }>
+                    {sub.status}
+                  </Badge>
+                ),
+                priority: "high"
+              },
+              {
+                header: "Début",
+                accessor: (sub) => formatDistance(new Date(sub.currentPeriodStart), new Date(), { 
+                  addSuffix: true, 
+                  locale: fr 
+                }),
+                priority: "medium"
+              },
+              {
+                header: "Fin",
+                accessor: (sub) => formatDistance(new Date(sub.currentPeriodEnd), new Date(), { 
+                  addSuffix: true, 
+                  locale: fr 
+                }),
+                priority: "medium"
+              },
+              {
+                header: "Prix",
+                accessor: (sub) => `${Number(sub.plan.price).toLocaleString()} FCFA`,
+                priority: "medium",
+                className: "text-right font-medium"
+              }
+            ]}
+            keyExtractor={(sub) => sub.id}
+            actions={(sub) => (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openDialog(sub, 'renew')}
+                  title="Renouveler"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {sub.status === 'ACTIVE' || sub.status === 'TRIAL' ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openDialog(sub, 'suspend')}
+                    title="Suspendre"
+                  >
+                    <Pause className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openDialog(sub, 'activate')}
+                    title="Activer"
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => openDialog(sub, 'delete')}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Aucun abonnement"
+          />
         </CardContent>
       </Card>
 
       {/* Dialog */}
       <Dialog open={!!selectedSub && !!action} onOpenChange={(open) => !open && closeDialog()}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-responsive-lg">
               {action === 'renew' && 'Renouveler l\'abonnement'}
               {action === 'suspend' && 'Suspendre l\'abonnement'}
               {action === 'activate' && 'Activer l\'abonnement'}
               {action === 'change_plan' && 'Changer de plan'}
               {action === 'delete' && 'Supprimer l\'abonnement'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-responsive-sm">
               {selectedSub && `École: ${selectedSub.school.name}`}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {action === 'renew' && (
               <div className="space-y-2">
-                <Label htmlFor="months">Nombre de mois</Label>
+                <Label htmlFor="months" className="text-responsive-sm">Nombre de mois</Label>
                 <Input
                   id="months"
                   type="number"
@@ -290,20 +296,21 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                   max="12"
                   value={renewMonths}
                   onChange={(e) => setRenewMonths(e.target.value)}
+                  className="text-responsive-sm"
                 />
               </div>
             )}
 
             {action === 'change_plan' && (
               <div className="space-y-2">
-                <Label htmlFor="plan">Nouveau plan</Label>
+                <Label htmlFor="plan" className="text-responsive-sm">Nouveau plan</Label>
                 <Select value={newPlanId} onValueChange={setNewPlanId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((plan) => (
-                      <SelectItem key={plan.id} value={plan.id}>
+                      <SelectItem key={plan.id} value={plan.id} className="text-responsive-sm">
                         {plan.name} - {Number(plan.price).toLocaleString()} FCFA/{plan.interval}
                       </SelectItem>
                     ))}
@@ -313,32 +320,33 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
             )}
 
             {action === 'suspend' && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-responsive-sm text-muted-foreground">
                 Êtes-vous sûr de vouloir suspendre cet abonnement ?
               </p>
             )}
 
             {action === 'activate' && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-responsive-sm text-muted-foreground">
                 Êtes-vous sûr de vouloir activer cet abonnement ?
               </p>
             )}
 
             {action === 'delete' && (
-              <p className="text-sm text-destructive">
+              <p className="text-responsive-sm text-destructive">
                 Attention : Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet abonnement ?
               </p>
             )}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={closeDialog} className="w-full sm:w-auto">
               Annuler
             </Button>
             <Button 
               onClick={handleAction} 
               disabled={isLoading}
               variant={action === 'delete' ? 'destructive' : 'default'}
+              className="w-full sm:w-auto"
             >
               {isLoading ? 'Traitement...' : 'Confirmer'}
             </Button>

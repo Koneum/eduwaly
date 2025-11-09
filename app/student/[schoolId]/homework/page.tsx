@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -31,7 +32,7 @@ export default async function StudentHomeworkPage() {
   if (!student) redirect('/auth/login')
 
   // Récupérer tous les devoirs de la filière
-  const allHomework = await prisma.homework.findMany({
+  const allHomework: any = await prisma.homework.findMany({
     where: {
       module: {
         OR: [
@@ -50,17 +51,17 @@ export default async function StudentHomeworkPage() {
 
   // Séparer les devoirs en catégories
   const now = new Date()
-  const submittedIds = student.submissions.map(s => s.homeworkId)
+  const submittedIds = student.submissions.map((s: any) => s.homeworkId)
   
-  const pendingHomework = allHomework.filter(h => 
+  const pendingHomework = allHomework.filter((h: any) => 
     !submittedIds.includes(h.id) && h.dueDate >= now
   )
   
-  const overdueHomework = allHomework.filter(h => 
+  const overdueHomework = allHomework.filter((h: any) => 
     !submittedIds.includes(h.id) && h.dueDate < now
   )
   
-  const submittedHomework = allHomework.filter(h => 
+  const submittedHomework = allHomework.filter((h: any) => 
     submittedIds.includes(h.id)
   )
 
@@ -83,23 +84,23 @@ export default async function StudentHomeworkPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes Devoirs</h1>
-        <p className="text-muted-foreground mt-2">Gérez vos devoirs et soumissions</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Mes Devoirs</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Gérez vos devoirs et soumissions</p>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">À faire</p>
-                <p className="text-3xl font-bold text-orange-600 mt-2">{pendingHomework.length}</p>
+                <p className="text-responsive-xs font-medium text-muted-foreground">À faire</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-orange-600 mt-1 sm:mt-2">{pendingHomework.length}</p>
               </div>
-              <div className="bg-orange-100 p-3 rounded-xl">
-                <Clock className="h-6 w-6 text-orange-600" />
+              <div className="bg-orange-100 p-2 sm:p-3 rounded-xl">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
@@ -149,7 +150,7 @@ export default async function StudentHomeworkPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {overdueHomework.map((homework) => (
+              {overdueHomework.map((homework: any) => (
                 <div key={homework.id} className="p-4 border border-red-200 rounded-lg bg-red-50">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">
@@ -198,7 +199,7 @@ export default async function StudentHomeworkPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {pendingHomework.map((homework) => (
+              {pendingHomework.map((homework: any) => (
                 <div key={homework.id} className="p-4 border border-border rounded-lg">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">
@@ -247,7 +248,7 @@ export default async function StudentHomeworkPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {submittedHomework.map((homework) => {
+              {submittedHomework.map((homework: any) => {
                 const submission = student.submissions.find(s => s.homeworkId === homework.id)
                 return (
                   <div key={homework.id} className="p-4 border border-border rounded-lg bg-green-50">

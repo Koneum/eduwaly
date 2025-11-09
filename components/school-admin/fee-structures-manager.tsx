@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from 'next/navigation'
@@ -209,96 +209,98 @@ export default function FeeStructuresManager({ schoolId, schoolType, filieres }:
     <>
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
             <div>
-              <CardTitle>Prix de Scolarité</CardTitle>
-              <CardDescription>Gérez les frais de scolarité par niveau et filière</CardDescription>
+              <CardTitle className="text-responsive-lg">Prix de Scolarité</CardTitle>
+              <CardDescription className="text-responsive-sm">Gérez les frais de scolarité par niveau et filière</CardDescription>
             </div>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button onClick={() => handleOpenDialog()} className="btn-responsive w-full sm:w-auto">
+              <Plus className="icon-responsive mr-2" />
               Ajouter un frais
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {fees.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              Aucun frais configuré. Cliquez sur &quot;Ajouter un frais&quot; pour commencer.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Niveau</TableHead>
-                  <TableHead>{schoolType === 'HIGH_SCHOOL' ? 'Série' : 'Filière'}</TableHead>
-                  <TableHead className="text-right">Montant</TableHead>
-                  <TableHead>Date Limite</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fees.map((fee) => (
-                  <TableRow key={fee.id}>
-                    <TableCell className="font-medium">{fee.name}</TableCell>
-                    <TableCell>
-                      {feeTypes.find(t => t.value === fee.type)?.label || fee.type}
-                    </TableCell>
-                    <TableCell>{fee.niveau || '-'}</TableCell>
-                    <TableCell>{fee.filiere?.nom || '-'}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {fee.amount.toLocaleString()} FCFA
-                    </TableCell>
-                    <TableCell>
-                      {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString('fr-FR') : '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleOpenDialog(fee)
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(fee.id)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <ResponsiveTable
+            data={fees}
+            columns={[
+              {
+                header: "Nom",
+                accessor: "name",
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Type",
+                accessor: (fee) => feeTypes.find(t => t.value === fee.type)?.label || fee.type,
+                priority: "medium"
+              },
+              {
+                header: "Niveau",
+                accessor: (fee) => fee.niveau || '-',
+                priority: "medium"
+              },
+              {
+                header: schoolType === 'HIGH_SCHOOL' ? 'Série' : 'Filière',
+                accessor: (fee) => fee.filiere?.nom || '-',
+                priority: "low"
+              },
+              {
+                header: "Montant",
+                accessor: (fee) => `${fee.amount.toLocaleString()} FCFA`,
+                priority: "high",
+                className: "text-right font-semibold"
+              },
+              {
+                header: "Date Limite",
+                accessor: (fee) => fee.dueDate ? new Date(fee.dueDate).toLocaleDateString('fr-FR') : '-',
+                priority: "low"
+              }
+            ]}
+            keyExtractor={(fee) => fee.id}
+            actions={(fee) => (
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleOpenDialog(fee)
+                  }}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDelete(fee.id)
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Aucun frais configuré. Cliquez sur 'Ajouter un frais' pour commencer."
+          />
         </CardContent>
       </Card>
 
       {/* Dialog Ajouter/Modifier */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-responsive-lg">
               {editingFee ? 'Modifier le frais' : 'Ajouter un frais'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-responsive-sm">
               {editingFee ? 'Modifiez les informations du frais de scolarité' : 'Créez un nouveau frais de scolarité pour une filière et un niveau'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Filière/Série *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="name" className="text-responsive-sm">Filière/Série *</Label>
               <Select 
                 value={formData.filiereId} 
                 onValueChange={(value) => {
@@ -310,31 +312,31 @@ export default function FeeStructuresManager({ schoolId, schoolType, filieres }:
                   })
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner une filière" />
                 </SelectTrigger>
                 <SelectContent>
                   {filieres.map((filiere) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-responsive-xs text-muted-foreground">
                 Le nom sera: Frais de scolarité {formData.filiereId && filieres.find(f => f.id === formData.filiereId)?.nom}
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Type de frais *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="type" className="text-responsive-sm">Type de frais *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {feeTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="text-responsive-sm">
                       {type.label}
                     </SelectItem>
                   ))}
@@ -342,15 +344,15 @@ export default function FeeStructuresManager({ schoolId, schoolType, filieres }:
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="niveau">Niveau *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="niveau" className="text-responsive-sm">Niveau *</Label>
               <Select value={formData.niveau} onValueChange={(value) => setFormData({ ...formData, niveau: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
                   {niveaux.map((niveau) => (
-                    <SelectItem key={niveau} value={niveau}>
+                    <SelectItem key={niveau} value={niveau} className="text-responsive-sm">
                       {niveau}
                     </SelectItem>
                   ))}
@@ -358,32 +360,34 @@ export default function FeeStructuresManager({ schoolId, schoolType, filieres }:
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="amount">Montant (FCFA) *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="amount" className="text-responsive-sm">Montant (FCFA) *</Label>
               <Input
                 id="amount"
                 type="number"
                 placeholder="500000"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Date limite de paiement</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="dueDate" className="text-responsive-sm">Date limite de paiement</Label>
               <Input
                 id="dueDate"
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="btn-responsive w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmit} disabled={submitting}>
+            <Button onClick={handleSubmit} disabled={submitting} className="btn-responsive w-full sm:w-auto">
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingFee ? 'Modifier' : 'Créer'}
             </Button>

@@ -22,7 +22,7 @@ export function PaymentStatusChart({ data: paymentData }: PaymentStatusChartProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Statut des Paiements</CardTitle>
+        <CardTitle className="text-responsive-lg">Statut des Paiements</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
@@ -41,11 +41,11 @@ export function PaymentStatusChart({ data: paymentData }: PaymentStatusChartProp
             />
           </PieChart>
         </ResponsiveContainer>
-        <div className="flex justify-center gap-6 mt-4">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4">
           {data.map((entry) => (
             <div key={entry.name} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-responsive-sm text-muted-foreground">
                 {entry.name}: <span className="font-medium text-foreground">{entry.value}</span>
               </span>
             </div>

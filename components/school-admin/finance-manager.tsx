@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Printer, Download, Filter, FileText, FileSpreadsheet } from "lucide-react"
 import {
@@ -417,39 +417,39 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats rapides */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Attendu</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Total Attendu</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total.toLocaleString()} FCFA</div>
+            <div className="text-responsive-xl font-bold">{stats.total.toLocaleString()} FCFA</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Payé</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Payé</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.paid.toLocaleString()} FCFA</div>
+            <div className="text-responsive-xl font-bold text-success">{stats.paid.toLocaleString()} FCFA</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">En Attente</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">En Attente</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[var(--chart-5)]">{stats.pending.toLocaleString()} FCFA</div>
+            <div className="text-responsive-xl font-bold text-chart-5">{stats.pending.toLocaleString()} FCFA</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">En Retard</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">En Retard</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.overdue.toLocaleString()} FCFA</div>
+            <div className="text-responsive-xl font-bold text-red-600">{stats.overdue.toLocaleString()} FCFA</div>
           </CardContent>
         </Card>
       </div>
@@ -457,23 +457,23 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
       {/* Filtres et actions */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>Liste des Paiements</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <CardTitle className="text-responsive-lg">Liste des Paiements</CardTitle>
             <div className="flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="text-responsive-xs">
+                    <Download className="icon-responsive mr-2" />
                     Exporter
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={exportToPDF}>
-                    <FileText className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onClick={exportToPDF} className="text-responsive-sm">
+                    <FileText className="icon-responsive mr-2" />
                     Exporter en PDF
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={exportToExcel}>
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onClick={exportToExcel} className="text-responsive-sm">
+                    <FileSpreadsheet className="icon-responsive mr-2" />
                     Exporter en Excel
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -481,108 +481,105 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           {/* Barre de recherche et filtres */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
               <Input
                 placeholder="Rechercher un étudiant..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-9 sm:pl-10 text-responsive-sm"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-full sm:w-[180px] text-responsive-sm">
+                <Filter className="icon-responsive mr-2" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="PAID">Payé</SelectItem>
-                <SelectItem value="PENDING">En attente</SelectItem>
-                <SelectItem value="OVERDUE">En retard</SelectItem>
+                <SelectItem value="all" className="text-responsive-sm">Tous les statuts</SelectItem>
+                <SelectItem value="PAID" className="text-responsive-sm">Payé</SelectItem>
+                <SelectItem value="PENDING" className="text-responsive-sm">En attente</SelectItem>
+                <SelectItem value="OVERDUE" className="text-responsive-sm">En retard</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] text-responsive-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date">Trier par date</SelectItem>
-                <SelectItem value="amount">Trier par montant</SelectItem>
-                <SelectItem value="name">Trier par nom</SelectItem>
+                <SelectItem value="date" className="text-responsive-sm">Trier par date</SelectItem>
+                <SelectItem value="amount" className="text-responsive-sm">Trier par montant</SelectItem>
+                <SelectItem value="name" className="text-responsive-sm">Trier par nom</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Tableau des paiements */}
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Étudiant</TableHead>
-                  <TableHead>Classe</TableHead>
-                  <TableHead>Date d&apos;échéance</TableHead>
-                  <TableHead className="text-right">Montant</TableHead>
-                  <TableHead className="text-right">Payé</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPayments.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      Aucun paiement trouvé
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">
-                        {payment.student.firstName} {payment.student.lastName}
-                      </TableCell>
-                      <TableCell>{payment.student.classe.name}</TableCell>
-                      <TableCell>
-                        {new Date(payment.dueDate).toLocaleDateString('fr-FR')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {Number(payment.amount).toLocaleString()} FCFA
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {Number(payment.amountPaid).toLocaleString()} FCFA
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            payment.status === 'PAID' ? 'default' :
-                            payment.status === 'PENDING' ? 'secondary' : 'destructive'
-                          }
-                        >
-                          {payment.status === 'PAID' ? 'Payé' :
-                           payment.status === 'PENDING' ? 'En attente' : 'En retard'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => printReceipt(payment)}
-                          disabled={payment.status !== 'PAID'}
-                        >
-                          <Printer className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <ResponsiveTable
+            data={filteredPayments}
+            columns={[
+              {
+                header: "Étudiant",
+                accessor: (payment) => `${payment.student.firstName} ${payment.student.lastName}`,
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Classe",
+                accessor: (payment) => payment.student.classe.name,
+                priority: "medium"
+              },
+              {
+                header: "Date d'échéance",
+                accessor: (payment) => new Date(payment.dueDate).toLocaleDateString('fr-FR'),
+                priority: "medium"
+              },
+              {
+                header: "Montant",
+                accessor: (payment) => `${Number(payment.amount).toLocaleString()} FCFA`,
+                priority: "high",
+                className: "text-right"
+              },
+              {
+                header: "Payé",
+                accessor: (payment) => `${Number(payment.amountPaid).toLocaleString()} FCFA`,
+                priority: "medium",
+                className: "text-right"
+              },
+              {
+                header: "Statut",
+                accessor: (payment) => (
+                  <Badge
+                    variant={
+                      payment.status === 'PAID' ? 'default' :
+                      payment.status === 'PENDING' ? 'secondary' : 'destructive'
+                    }
+                  >
+                    {payment.status === 'PAID' ? 'Payé' :
+                     payment.status === 'PENDING' ? 'En attente' : 'En retard'}
+                  </Badge>
+                ),
+                priority: "high"
+              }
+            ]}
+            keyExtractor={(payment) => payment.id}
+            actions={(payment) => (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => printReceipt(payment)}
+                disabled={payment.status !== 'PAID'}
+              >
+                <Printer className="h-4 w-4" />
+              </Button>
+            )}
+            emptyMessage="Aucun paiement trouvé"
+          />
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-responsive-xs text-muted-foreground">
             Affichage de {filteredPayments.length} paiement{filteredPayments.length > 1 ? 's' : ''} sur {payments.length}
           </div>
         </CardContent>

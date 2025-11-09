@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { EmailService } from '@/lib/email/sender'
+import { sendPaymentReminderEmail } from '@/lib/brevo'
 
 /**
  * Cron job pour envoyer les rappels de paiement automatiques
@@ -60,12 +60,12 @@ export async function GET() {
         })
 
         if (admin?.email) {
-          await EmailService.sendPaymentReminder7Days(admin.email, {
-            schoolName: sub.school.name,
-            amount: Number(sub.plan.price),
-            dueDate: sub.currentPeriodEnd.toLocaleDateString('fr-FR'),
-            planName: sub.plan.name
-          })
+          await sendPaymentReminderEmail(
+            admin.email,
+            admin.name,
+            Number(sub.plan.price),
+            sub.currentPeriodEnd
+          )
           sent7Days++
         }
       } catch (error) {
@@ -85,12 +85,12 @@ export async function GET() {
         })
 
         if (admin?.email) {
-          await EmailService.sendPaymentReminder1Day(admin.email, {
-            schoolName: sub.school.name,
-            amount: Number(sub.plan.price),
-            dueDate: sub.currentPeriodEnd.toLocaleDateString('fr-FR'),
-            planName: sub.plan.name
-          })
+          await sendPaymentReminderEmail(
+            admin.email,
+            admin.name,
+            Number(sub.plan.price),
+            sub.currentPeriodEnd
+          )
           sent1Day++
         }
       } catch (error) {

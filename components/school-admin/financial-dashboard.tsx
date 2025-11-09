@@ -34,15 +34,15 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Statistiques principales */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Attendu</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-responsive-xs font-medium">Total Attendu</CardTitle>
+            <DollarSign className="icon-responsive text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatAmount(stats.totalExpected)} FCFA</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-responsive-xl font-bold">{formatAmount(stats.totalExpected)} FCFA</div>
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               Montant total des frais de scolarité
             </p>
           </CardContent>
@@ -50,14 +50,14 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Collecté</CardTitle>
-            <TrendingUp className="h-4 w-4 text-success" />
+            <CardTitle className="text-responsive-xs font-medium">Total Collecté</CardTitle>
+            <TrendingUp className="icon-responsive text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">
+            <div className="text-responsive-xl font-bold text-success">
               {formatAmount(stats.totalCollected)} FCFA
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               Paiements reçus
             </p>
           </CardContent>
@@ -65,14 +65,14 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Attente</CardTitle>
-            <AlertCircle className="h-4 w-4 text-[var(--chart-5)]" />
+            <CardTitle className="text-responsive-xs font-medium">En Attente</CardTitle>
+            <AlertCircle className="icon-responsive text-chart-5" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[var(--chart-5)]">
+            <div className="text-responsive-xl font-bold text-chart-5">
               {formatAmount(stats.totalPending)} FCFA
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               Paiements en attente
             </p>
           </CardContent>
@@ -80,14 +80,14 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Retard</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <CardTitle className="text-responsive-xs font-medium">En Retard</CardTitle>
+            <TrendingDown className="icon-responsive text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-responsive-xl font-bold text-red-600">
               {formatAmount(stats.totalOverdue)} FCFA
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               Paiements en retard
             </p>
           </CardContent>
@@ -97,20 +97,20 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
       {/* Taux de collecte */}
       <Card>
         <CardHeader>
-          <CardTitle>Taux de Collecte</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-responsive-lg">Taux de Collecte</CardTitle>
+          <CardDescription className="text-responsive-sm">
             Pourcentage des frais de scolarité collectés
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-3xl font-bold">{collectionPercentage.toFixed(1)}%</span>
+            <span className="text-responsive-2xl font-bold">{collectionPercentage.toFixed(1)}%</span>
             <Badge variant={collectionPercentage >= 80 ? "default" : collectionPercentage >= 50 ? "secondary" : "destructive"}>
               {collectionPercentage >= 80 ? "Excellent" : collectionPercentage >= 50 ? "Moyen" : "Faible"}
             </Badge>
           </div>
           <Progress value={collectionPercentage} className="h-2" />
-          <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="flex justify-between text-responsive-sm text-muted-foreground">
             <span>{formatAmount(stats.totalCollected)} FCFA collectés</span>
             <span>{formatAmount(stats.totalExpected)} FCFA attendus</span>
           </div>
@@ -118,15 +118,15 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
       </Card>
 
       {/* Statistiques étudiants */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Étudiants</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-responsive-xs font-medium">Total Étudiants</CardTitle>
+            <Users className="icon-responsive text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.studentsCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-responsive-xl font-bold">{stats.studentsCount}</div>
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               Étudiants inscrits
             </p>
           </CardContent>
@@ -134,12 +134,12 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">À Jour</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
+            <CardTitle className="text-responsive-xs font-medium">À Jour</CardTitle>
+            <CheckCircle className="icon-responsive text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.paidStudents}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-responsive-xl font-bold text-success">{stats.paidStudents}</div>
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               {stats.studentsCount > 0 
                 ? `${((stats.paidStudents / stats.studentsCount) * 100).toFixed(0)}% des étudiants`
                 : '0% des étudiants'
@@ -150,12 +150,12 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Retard</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-600" />
+            <CardTitle className="text-responsive-xs font-medium">En Retard</CardTitle>
+            <AlertCircle className="icon-responsive text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.overdueStudents}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-responsive-xl font-bold text-red-600">{stats.overdueStudents}</div>
+            <p className="text-responsive-xs text-muted-foreground mt-1">
               {stats.studentsCount > 0 
                 ? `${((stats.overdueStudents / stats.studentsCount) * 100).toFixed(0)}% des étudiants`
                 : '0% des étudiants'
@@ -169,13 +169,13 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
       {stats.feeStructuresCount !== undefined && (
         <Card className="border-blue-200 bg-blue-50">
           <CardHeader>
-            <CardTitle className="text-blue-800 flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
+            <CardTitle className="text-responsive-base text-blue-800 flex items-center gap-2">
+              <CheckCircle className="icon-responsive" />
               Frais de Scolarité Configurés
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-[var(--link)]">
+            <p className="text-responsive-sm text-link">
               {stats.feeStructuresCount > 0 ? (
                 <>
                   Vous avez configuré <strong>{stats.feeStructuresCount}</strong> structure{stats.feeStructuresCount > 1 ? 's' : ''} de frais 
@@ -196,13 +196,13 @@ export default function FinancialDashboard({ stats }: FinancialDashboardProps) {
       {stats.overdueStudents > 0 && (
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
-            <CardTitle className="text-red-800 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
+            <CardTitle className="text-responsive-base text-red-800 flex items-center gap-2">
+              <AlertCircle className="icon-responsive" />
               Attention : Paiements en Retard
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-red-700">
+            <p className="text-responsive-sm text-red-700">
               {stats.overdueStudents} étudiant{stats.overdueStudents > 1 ? 's ont' : ' a'} des paiements en retard 
               pour un total de {formatAmount(stats.totalOverdue)} FCFA. 
               Pensez à envoyer des rappels de paiement.

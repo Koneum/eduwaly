@@ -2,17 +2,16 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { MoreHorizontal, Search, Plus, Upload, Mail } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -21,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from 'sonner'
 import { PermissionButton } from "@/components/permission-button"
 import { PermissionMenuItem } from "@/components/permission-menu-item"
+// checkQuota ne doit pas être appelé côté client (utilise Prisma)
 
 interface Student {
   id: string
@@ -70,15 +70,23 @@ interface FeeStructure {
   } | null
 }
 
+interface Room {
+  id: string
+  name: string
+  code: string
+  niveau: string | null
+}
+
 interface StudentsManagerProps {
   students: Student[]
   schoolId: string
   schoolType: 'UNIVERSITY' | 'HIGH_SCHOOL'
   filieres: Filiere[]
   feeStructures: FeeStructure[]
+  rooms?: Room[]
 }
 
-export default function StudentsManager({ students, schoolId, schoolType, filieres, feeStructures }: StudentsManagerProps) {
+export default function StudentsManager({ students, schoolId, schoolType, filieres, feeStructures, rooms = [] }: StudentsManagerProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -182,6 +190,44 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
       (statusFilter === "late" && status === "OVERDUE")
     )
   })
+
+  const getPaymentAmount = (student: Student) => {
+    const latestPayment = student.payments[0]
+    const scholarship = student.scholarships?.[0]
+    
+    if (!latestPayment) {
+      const applicableFees = feeStructures.filter(fee => 
+        (!fee.niveau || fee.niveau === student.niveau) &&
+        (!fee.filiereId || fee.filiereId === student.filiere?.id)
+      )
+      
+      if (applicableFees.length === 0) return { amount: '-', hasBourse: false }
+      
+      let amount = applicableFees[0].amount
+      const originalAmount = amount
+      
+      if (scholarship) {
+        if (scholarship.percentage) {
+          amount = amount - (amount * (scholarship.percentage / 100))
+        } else if (scholarship.amount) {
+          amount = Math.max(0, amount - scholarship.amount)
+        }
+      }
+      
+      return {
+        amount: `${amount.toLocaleString()} FCFA`,
+        hasBourse: scholarship && amount !== originalAmount
+      }
+    }
+    
+    const remaining = latestPayment.amountDue - latestPayment.amountPaid
+    if (remaining <= 0) return { amount: '-', hasBourse: false }
+    
+    return {
+      amount: `${remaining.toLocaleString()} FCFA`,
+      hasBourse: !!scholarship
+    }
+  }
 
   const getPaymentStatus = (student: Student) => {
     const latestPayment = student.payments[0]
@@ -304,7 +350,8 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
     setTimeout(() => setSelectedStudent(null), 300)
   }
 
-  const handleAddStudent = () => {
+  const handleAddStudent = async () => {
+    // Le check de quota se fera côté serveur lors de la soumission
     setIsAddDialogOpen(true)
     // Réinitialiser le formulaire
     setFormData({
@@ -583,160 +630,100 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Matricule</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Niveau</TableHead>
-                <TableHead>Filière</TableHead>
-                <TableHead>Classe / Salle</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Téléphone</TableHead>
-                <TableHead>Montant à payer</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStudents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground">
-                    Aucun étudiant trouvé
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredStudents.map((student) => {
-                  const paymentStatus = getPaymentStatus(student)
-                  return (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.studentNumber}</TableCell>
-                      <TableCell>
-                        {student.user?.name || (
-                          <span className="text-muted-foreground italic">Non inscrit</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{student.niveau}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {student.filiere?.nom || '-'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {/* Classe/Salle - À implémenter */}
-                        <span className="text-xs text-muted-foreground">Non assigné</span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {student.user?.email || '-'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {student.phone || '-'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          {(() => {
-                            const latestPayment = student.payments[0]
-                            const scholarship = student.scholarships?.[0]
-                            
-                            // Si pas de paiement, calculer à partir des frais de scolarité et bourse
-                            if (!latestPayment) {
-                              // Trouver les frais correspondant au niveau/filière de l'étudiant
-                              const applicableFees = feeStructures.filter(fee => 
-                                (!fee.niveau || fee.niveau === student.niveau) &&
-                                (!fee.filiereId || fee.filiereId === student.filiere?.id)
-                              )
-                              
-                              if (applicableFees.length === 0) return '-'
-                              
-                              // Prendre le premier frais applicable
-                              let amount = applicableFees[0].amount
-                              const originalAmount = amount
-                              
-                              // Appliquer la bourse si elle existe
-                              if (scholarship) {
-                                if (scholarship.percentage) {
-                                  amount = amount - (amount * (scholarship.percentage / 100))
-                                } else if (scholarship.amount) {
-                                  amount = Math.max(0, amount - scholarship.amount)
-                                }
-                              }
-                              
-                              return (
-                                <div className="flex items-center gap-2">
-                                  <span>{amount.toLocaleString()} FCFA</span>
-                                  {scholarship && amount !== originalAmount && (
-                                    <Badge variant="outline" className="bg-green-50 text-success border-green-200 text-xs">
-                                      🎓 Bourse
-                                    </Badge>
-                                  )}
-                                </div>
-                              )
-                            }
-                            
-                            // Calculer le restant à payer
-                            const remaining = latestPayment.amountDue - latestPayment.amountPaid
-                            
-                            // Si tout est payé, afficher "-"
-                            if (remaining <= 0) return '-'
-                            
-                            // Afficher le montant restant
-                            return (
-                              <div className="flex items-center gap-2">
-                                <span>{remaining.toLocaleString()} FCFA</span>
-                                {scholarship && (
-                                  <Badge variant="outline" className="bg-green-50 text-success border-green-200 text-xs">
-                                    🎓
-                                  </Badge>
-                                )}
-                              </div>
-                            )
-                          })()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={paymentStatus.variant}>
-                          {paymentStatus.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <PermissionMenuItem category="students" action="view" onClick={() => handleAction(student, 'view')}>
-                              Voir profil
-                            </PermissionMenuItem>
-                            <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'payment')}>
-                              Enregistrer paiement
-                            </PermissionMenuItem>
-                            <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'scholarship')}>
-                              Appliquer bourse
-                            </PermissionMenuItem>
-                            <PermissionMenuItem category="students" action="edit" onClick={() => handleAction(student, 'reminder')}>
-                              Envoyer rappel
-                            </PermissionMenuItem>
-                            <PermissionMenuItem category="students" action="view" onClick={() => handleSendEnrollmentId(student)}>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Envoyer identifiants
-                            </PermissionMenuItem>
-                            <DropdownMenuSeparator />
-                            <PermissionMenuItem category="students" action="edit" onClick={() => handleAction(student, 'edit')}>Modifier</PermissionMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      <ResponsiveTable
+        data={filteredStudents}
+        columns={[
+          {
+            header: "Matricule",
+            accessor: "studentNumber",
+            priority: "high",
+            className: "font-medium"
+          },
+          {
+            header: "Nom",
+            accessor: (student) => student.user?.name || <span className="text-muted-foreground italic">Non inscrit</span>,
+            priority: "high"
+          },
+          {
+            header: "Niveau",
+            accessor: "niveau",
+            priority: "medium"
+          },
+          {
+            header: "Filière",
+            accessor: (student) => student.filiere?.nom || '-',
+            priority: "medium"
+          },
+          {
+            header: "Email",
+            accessor: (student) => student.user?.email || '-',
+            priority: "low"
+          },
+          {
+            header: "Téléphone",
+            accessor: (student) => student.phone || '-',
+            priority: "low"
+          },
+          {
+            header: "Montant à payer",
+            accessor: (student) => {
+              const payment = getPaymentAmount(student)
+              return (
+                <div className="flex items-center gap-2">
+                  <span>{payment.amount}</span>
+                  {payment.hasBourse && (
+                    <Badge variant="outline" className="bg-green-50 text-success border-green-200 text-xs">
+                      🎓
+                    </Badge>
+                  )}
+                </div>
+              )
+            },
+            priority: "medium"
+          },
+          {
+            header: "Statut",
+            accessor: (student) => {
+              const status = getPaymentStatus(student)
+              return <Badge variant={status.variant}>{status.label}</Badge>
+            },
+            priority: "high"
+          }
+        ]}
+        keyExtractor={(student) => student.id}
+        actions={(student) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <PermissionMenuItem category="students" action="view" onClick={() => handleAction(student, 'view')}>
+                Voir profil
+              </PermissionMenuItem>
+              <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'payment')}>
+                Enregistrer paiement
+              </PermissionMenuItem>
+              <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'scholarship')}>
+                Appliquer bourse
+              </PermissionMenuItem>
+              <PermissionMenuItem category="students" action="edit" onClick={() => handleAction(student, 'reminder')}>
+                Envoyer rappel
+              </PermissionMenuItem>
+              <PermissionMenuItem category="students" action="view" onClick={() => handleSendEnrollmentId(student)}>
+                <Mail className="h-4 w-4 mr-2" />
+                Envoyer identifiants
+              </PermissionMenuItem>
+              <DropdownMenuSeparator />
+              <PermissionMenuItem category="students" action="edit" onClick={() => handleAction(student, 'edit')}>Modifier</PermissionMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        emptyMessage="Aucun étudiant trouvé"
+      />
 
       <div className="text-sm text-muted-foreground">
         Affichage de {filteredStudents.length} étudiant{filteredStudents.length > 1 ? 's' : ''} sur {students.length}
@@ -744,122 +731,130 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Ajouter Étudiant */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter un nouvel étudiant</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Ajouter un nouvel étudiant</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Créez un nouveau profil étudiant. Un code d&apos;inscription sera généré automatiquement.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Nom</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="lastName" className="text-responsive-sm">Nom</Label>
               <Input 
                 id="lastName" 
                 placeholder="Ex: Doe" 
                 value={formData.lastName}
                 onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstName">Prénom</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="firstName" className="text-responsive-sm">Prénom</Label>
               <Input 
                 id="firstName" 
                 placeholder="Ex: John" 
                 value={formData.firstName}
                 onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date de naissance</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="dateOfBirth" className="text-responsive-sm">Date de naissance</Label>
               <Input 
                 id="dateOfBirth" 
                 type="date" 
                 value={formData.dateOfBirth}
                 onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Adresse</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="address" className="text-responsive-sm">Adresse</Label>
               <Input 
                 id="address" 
                 placeholder="Ex: Dakar, Sénégal" 
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="studentNumber">Matricule *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="studentNumber" className="text-responsive-sm">Matricule *</Label>
               <Input 
                 id="studentNumber" 
                 placeholder="Ex: 2024001" 
                 value={formData.studentNumber}
                 onChange={(e) => setFormData({...formData, studentNumber: e.target.value})}
                 required
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="niveau">Niveau *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="niveau" className="text-responsive-sm">Niveau *</Label>
               <Select value={formData.niveau} onValueChange={(value) => setFormData({...formData, niveau: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
                   {schoolType === 'HIGH_SCHOOL' ? (
                     <>
-                      <SelectItem value="10E">10ème (Seconde)</SelectItem>
-                      <SelectItem value="11E">11ème (Première)</SelectItem>
-                      <SelectItem value="12E">12ème (Terminale)</SelectItem>
+                      <SelectItem value="10E" className="text-responsive-sm">10ème (Seconde)</SelectItem>
+                      <SelectItem value="11E" className="text-responsive-sm">11ème (Première)</SelectItem>
+                      <SelectItem value="12E" className="text-responsive-sm">12ème (Terminale)</SelectItem>
                     </>
                   ) : (
                     <>
-                      <SelectItem value="L1">Licence 1</SelectItem>
-                      <SelectItem value="L2">Licence 2</SelectItem>
-                      <SelectItem value="L3">Licence 3</SelectItem>
-                      <SelectItem value="M1">Master 1</SelectItem>
-                      <SelectItem value="M2">Master 2</SelectItem>
+                      <SelectItem value="L1" className="text-responsive-sm">Licence 1</SelectItem>
+                      <SelectItem value="L2" className="text-responsive-sm">Licence 2</SelectItem>
+                      <SelectItem value="L3" className="text-responsive-sm">Licence 3</SelectItem>
+                      <SelectItem value="M1" className="text-responsive-sm">Master 1</SelectItem>
+                      <SelectItem value="M2" className="text-responsive-sm">Master 2</SelectItem>
                     </>
                   )}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="filiere">Filière</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="filiere" className="text-responsive-sm">Filière</Label>
               <Select value={formData.filiereId} onValueChange={(value) => setFormData({...formData, filiereId: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner une filière" />
                 </SelectTrigger>
                 <SelectContent>
                   {filieres.map((filiere) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Téléphone</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="phone" className="text-responsive-sm">Téléphone</Label>
               <Input 
                 id="phone" 
                 type="tel" 
                 placeholder="+221 77 123 4567" 
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button 
               variant="outline" 
               onClick={() => setIsAddDialogOpen(false)}
               disabled={isCreating}
+              className="btn-responsive w-full sm:w-auto"
             >
               Annuler
             </Button>
             <Button 
               onClick={handleCreateStudent}
               disabled={isCreating}
+              className="btn-responsive w-full sm:w-auto"
             >
               {isCreating ? 'Création...' : "Créer l'\u00e9tudiant"}
             </Button>
@@ -869,62 +864,63 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Profil Étudiant */}
       <Dialog open={isProfileDialogOpen} onOpenChange={() => handleCloseDialog('profile')}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Profil de l&apos;étudiant</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Profil de l&apos;étudiant</DialogTitle>
           </DialogHeader>
           {selectedStudent && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Matricule</Label>
-                  <p className="font-medium">{selectedStudent.studentNumber}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Matricule</Label>
+                  <p className="text-responsive-sm font-medium">{selectedStudent.studentNumber}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">ID Système</Label>
-                  <p className="font-mono text-sm">{selectedStudent.id}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">ID Système</Label>
+                  <p className="font-mono text-responsive-xs">{selectedStudent.id}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Nom complet</Label>
-                  <p className="font-medium">{selectedStudent.user?.name || 'Non inscrit'}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Nom complet</Label>
+                  <p className="text-responsive-sm font-medium">{selectedStudent.user?.name || 'Non inscrit'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Niveau</Label>
-                  <p className="font-medium">{selectedStudent.niveau}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Niveau</Label>
+                  <p className="text-responsive-sm font-medium">{selectedStudent.niveau}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Filière</Label>
-                  <p className="font-medium">{selectedStudent.filiere?.nom || '-'}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Filière</Label>
+                  <p className="text-responsive-sm font-medium">{selectedStudent.filiere?.nom || '-'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Téléphone</Label>
-                  <p className="font-medium">{selectedStudent.phone || '-'}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Téléphone</Label>
+                  <p className="text-responsive-sm font-medium">{selectedStudent.phone || '-'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Statut</Label>
-                  <Badge variant={selectedStudent.isEnrolled ? 'default' : 'secondary'}>
+                  <Label className="text-responsive-sm text-muted-foreground">Statut</Label>
+                  <Badge variant={selectedStudent.isEnrolled ? 'default' : 'secondary'} className="text-responsive-xs">
                     {selectedStudent.isEnrolled ? 'Inscrit' : 'Non inscrit'}
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Code d&apos;inscription</Label>
-                  <p className="font-mono text-sm">{selectedStudent.enrollmentId}</p>
+                  <Label className="text-responsive-sm text-muted-foreground">Code d&apos;inscription</Label>
+                  <p className="font-mono text-responsive-xs">{selectedStudent.enrollmentId}</p>
                 </div>
               </div>
               
               {!selectedStudent.isEnrolled && (
-                <div className="border-t pt-4 space-y-3">
-                  <h4 className="font-semibold text-sm">Envoyer le code d&apos;inscription</h4>
-                  <p className="text-sm text-muted-foreground">
+                <div className="border-t pt-3 sm:pt-4 space-y-2 sm:space-y-3">
+                  <h4 className="font-semibold text-responsive-sm">Envoyer le code d&apos;inscription</h4>
+                  <p className="text-responsive-sm text-muted-foreground">
                     L&apos;étudiant n&apos;a pas encore créé son compte. Envoyez-lui le code d&apos;inscription et le lien pour s&apos;enregistrer.
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button 
                       size="sm" 
                       variant="outline"
                       onClick={() => handleSendEnrollmentId(selectedStudent)}
+                      className="w-full sm:w-auto text-responsive-sm"
                     >
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="icon-responsive mr-2" />
                       Envoyer par Email
                     </Button>
                     <Button 
@@ -933,6 +929,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       onClick={() => {
                         toast.success('Code envoyé par SMS à l\'étudiant')
                       }}
+                      className="w-full sm:w-auto text-responsive-sm"
                     >
                       Envoyer par SMS
                     </Button>
@@ -942,6 +939,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       onClick={() => {
                         toast.success('Code envoyé au parent')
                       }}
+                      className="w-full sm:w-auto text-responsive-sm"
                     >
                       Envoyer au Parent
                     </Button>
@@ -955,21 +953,21 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Paiement */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={() => handleCloseDialog('payment')}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Enregistrer un paiement</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Enregistrer un paiement</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Étudiant: {selectedStudent?.user?.name || selectedStudent?.studentNumber}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Afficher la bourse active si elle existe */}
             {selectedStudent?.scholarships && selectedStudent.scholarships.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-success">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3">
+                <p className="text-responsive-sm font-medium text-success">
                   🎓 Bourse active: {selectedStudent.scholarships[0].name}
                 </p>
-                <p className="text-xs text-success mt-1">
+                <p className="text-responsive-xs text-success mt-1">
                   {selectedStudent.scholarships[0].percentage 
                     ? `Réduction de ${selectedStudent.scholarships[0].percentage}%`
                     : `Réduction de ${selectedStudent.scholarships[0].amount?.toLocaleString()} FCFA`
@@ -978,8 +976,8 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
               </div>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="feeStructure">Type de frais *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="feeStructure" className="text-responsive-sm">Type de frais *</Label>
               {(() => {
                 // Filtrer les frais applicables
                 const applicableFees = feeStructures.filter(fee => {
@@ -991,11 +989,11 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 
                 if (applicableFees.length === 0) {
                   return (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                      <p className="text-sm text-orange-800">
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 sm:p-3">
+                      <p className="text-responsive-sm text-orange-800">
                         ⚠️ Aucun frais configuré pour le niveau {selectedStudent?.niveau}
                       </p>
-                      <p className="text-xs text-[var(--chart-5)] mt-1">
+                      <p className="text-responsive-xs text-[var(--chart-5)] mt-1">
                         Veuillez configurer les frais de scolarité dans les paramètres.
                       </p>
                     </div>
@@ -1029,7 +1027,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       }
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue placeholder="Sélectionner un type de frais" />
                     </SelectTrigger>
                 <SelectContent>
@@ -1061,7 +1059,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       }
                       
                       return (
-                        <SelectItem key={fee.id} value={fee.id}>
+                        <SelectItem key={fee.id} value={fee.id} className="text-responsive-sm">
                           {fee.name} - {displayAmount.toLocaleString()} FCFA
                           {scholarship && displayAmount !== originalAmount && (
                             <span className="text-xs text-muted-foreground line-through ml-2">
@@ -1078,54 +1076,57 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 )
               })()}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="amount">Montant (FCFA) *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="amount" className="text-responsive-sm">Montant (FCFA) *</Label>
               <Input
                 id="amount"
                 type="number"
                 placeholder="Ex: 50000"
                 value={paymentData.amount}
                 onChange={(e) => setPaymentData({...paymentData, amount: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="paymentDate">Date de paiement *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="paymentDate" className="text-responsive-sm">Date de paiement *</Label>
               <Input
                 id="paymentDate"
                 type="date"
                 value={paymentData.date}
                 onChange={(e) => setPaymentData({...paymentData, date: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="tranche">Tranche</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="tranche" className="text-responsive-sm">Tranche</Label>
               <Input
                 id="tranche"
                 placeholder="Ex: 1ère tranche, 2ème trimestre..."
                 value={paymentData.tranche}
                 onChange={(e) => setPaymentData({...paymentData, tranche: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="paymentMethod">Méthode de paiement</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="paymentMethod" className="text-responsive-sm">Méthode de paiement</Label>
               <Select value={paymentData.paymentMethod} onValueChange={(value) => setPaymentData({...paymentData, paymentMethod: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CASH">Espèces</SelectItem>
-                  <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
-                  <SelectItem value="BANK_TRANSFER">Virement bancaire</SelectItem>
-                  <SelectItem value="CARD">Carte bancaire</SelectItem>
+                  <SelectItem value="CASH" className="text-responsive-sm">Éspèces</SelectItem>
+                  <SelectItem value="MOBILE_MONEY" className="text-responsive-sm">Mobile Money</SelectItem>
+                  <SelectItem value="BANK_TRANSFER" className="text-responsive-sm">Virement bancaire</SelectItem>
+                  <SelectItem value="CARD" className="text-responsive-sm">Carte bancaire</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handleCloseDialog('payment')}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => handleCloseDialog('payment')} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmitPayment}>
+            <Button onClick={handleSubmitPayment} className="w-full sm:w-auto">
               Enregistrer
             </Button>
           </DialogFooter>
@@ -1134,31 +1135,31 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Bourse */}
       <Dialog open={isScholarshipDialogOpen} onOpenChange={() => handleCloseDialog('scholarship')}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Appliquer une bourse</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Appliquer une bourse</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Étudiant: {selectedStudent?.user?.name || selectedStudent?.studentNumber}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="scholarshipType">Type de bourse *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="scholarshipType" className="text-responsive-sm">Type de bourse *</Label>
               <Select value={scholarshipData.type} onValueChange={(value) => setScholarshipData({...scholarshipData, type: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MERIT">Bourse au mérite</SelectItem>
-                  <SelectItem value="NEED_BASED">Bourse sociale</SelectItem>
-                  <SelectItem value="DISCOUNT">Réduction</SelectItem>
-                  <SelectItem value="FULL">Bourse complète</SelectItem>
-                  <SelectItem value="PARTIAL">Bourse partielle</SelectItem>
+                  <SelectItem value="MERIT" className="text-responsive-sm">Bourse au mérite</SelectItem>
+                  <SelectItem value="NEED_BASED" className="text-responsive-sm">Bourse sociale</SelectItem>
+                  <SelectItem value="DISCOUNT" className="text-responsive-sm">Réduction</SelectItem>
+                  <SelectItem value="FULL" className="text-responsive-sm">Bourse complète</SelectItem>
+                  <SelectItem value="PARTIAL" className="text-responsive-sm">Bourse partielle</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="percentage">Pourcentage de réduction *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="percentage" className="text-responsive-sm">Pourcentage de réduction *</Label>
               <Input
                 id="percentage"
                 type="number"
@@ -1167,23 +1168,25 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 placeholder="Ex: 50"
                 value={scholarshipData.percentage}
                 onChange={(e) => setScholarshipData({...scholarshipData, percentage: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="reason">Motif</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="reason" className="text-responsive-sm">Motif</Label>
               <Input
                 id="reason"
                 placeholder="Raison de l'attribution"
                 value={scholarshipData.reason}
                 onChange={(e) => setScholarshipData({...scholarshipData, reason: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handleCloseDialog('scholarship')}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => handleCloseDialog('scholarship')} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmitScholarship}>
+            <Button onClick={handleSubmitScholarship} className="w-full sm:w-auto">
               Appliquer
             </Button>
           </DialogFooter>
@@ -1192,19 +1195,19 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Rappel */}
       <Dialog open={isReminderDialogOpen} onOpenChange={() => handleCloseDialog('reminder')}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Envoyer un rappel</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Envoyer un rappel</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Étudiant: {selectedStudent?.user?.name || selectedStudent?.studentNumber}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="message">Message *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="message" className="text-responsive-sm">Message *</Label>
               <textarea
                 id="message"
-                className="w-full min-h-[100px] px-3 py-2 border rounded-md"
+                className="w-full min-h-[100px] px-3 py-2 border rounded-md text-responsive-sm"
                 placeholder="Votre message de rappel..."
                 value={reminderData.message}
                 onChange={(e) => setReminderData({...reminderData, message: e.target.value})}
@@ -1218,16 +1221,16 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 onChange={(e) => setReminderData({...reminderData, sendToParent: e.target.checked})}
                 className="rounded"
               />
-              <Label htmlFor="sendToParent" className="cursor-pointer">
+              <Label htmlFor="sendToParent" className="cursor-pointer text-responsive-sm">
                 Envoyer également au parent
               </Label>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handleCloseDialog('reminder')}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => handleCloseDialog('reminder')} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmitReminder}>
+            <Button onClick={handleSubmitReminder} className="w-full sm:w-auto">
               Envoyer
             </Button>
           </DialogFooter>
@@ -1245,66 +1248,73 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
           })
         }
       }}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l&apos;étudiant</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Modifier l&apos;étudiant</DialogTitle>
           </DialogHeader>
           {selectedStudent && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="editPhone">Téléphone</Label>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="editPhone" className="text-responsive-sm">Téléphone</Label>
                 <Input
                   id="editPhone"
                   type="tel"
                   value={editData.phone}
                   onChange={(e) => setEditData({...editData, phone: e.target.value})}
                   placeholder="+221 77 123 4567"
+                  className="text-responsive-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="editNiveau">Niveau</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="editNiveau" className="text-responsive-sm">Niveau</Label>
                 <Select value={editData.niveau} onValueChange={(value) => setEditData({...editData, niveau: value})}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {schoolType === 'HIGH_SCHOOL' ? (
                       <>
-                        <SelectItem value="10E">10ème (Seconde)</SelectItem>
-                        <SelectItem value="11E">11ème (Première)</SelectItem>
-                        <SelectItem value="12E">12ème (Terminale)</SelectItem>
+                        <SelectItem value="10E" className="text-responsive-sm">10ème (Seconde)</SelectItem>
+                        <SelectItem value="11E" className="text-responsive-sm">11ème (Première)</SelectItem>
+                        <SelectItem value="12E" className="text-responsive-sm">12ème (Terminale)</SelectItem>
                       </>
                     ) : (
                       <>
-                        <SelectItem value="L1">Licence 1</SelectItem>
-                        <SelectItem value="L2">Licence 2</SelectItem>
-                        <SelectItem value="L3">Licence 3</SelectItem>
-                        <SelectItem value="M1">Master 1</SelectItem>
-                        <SelectItem value="M2">Master 2</SelectItem>
+                        <SelectItem value="L1" className="text-responsive-sm">Licence 1</SelectItem>
+                        <SelectItem value="L2" className="text-responsive-sm">Licence 2</SelectItem>
+                        <SelectItem value="L3" className="text-responsive-sm">Licence 3</SelectItem>
+                        <SelectItem value="M1" className="text-responsive-sm">Master 1</SelectItem>
+                        <SelectItem value="M2" className="text-responsive-sm">Master 2</SelectItem>
                       </>
                     )}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="editRoom">{schoolType === 'HIGH_SCHOOL' ? 'Classe' : 'Salle'}</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="editRoom" className="text-responsive-sm">{schoolType === 'HIGH_SCHOOL' ? 'Classe' : 'Salle'}</Label>
                 <Select value={editData.roomId} onValueChange={(value) => setEditData({...editData, roomId: value})}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Aucune</SelectItem>
-                    {/* TODO: Charger les salles/classes depuis l'API */}
+                    <SelectItem value="none" className="text-responsive-sm">Aucune</SelectItem>
+                    {rooms
+                      .filter(room => !room.niveau || room.niveau === editData.niveau)
+                      .map(room => (
+                        <SelectItem key={room.id} value={room.id} className="text-responsive-sm">
+                          {room.name} ({room.code})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handleCloseDialog('edit')}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => handleCloseDialog('edit')} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmitEdit}>
+            <Button onClick={handleSubmitEdit} className="w-full sm:w-auto">
               Enregistrer
             </Button>
           </DialogFooter>
@@ -1313,15 +1323,15 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Import Excel/CSV */}
       <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Importer des étudiants</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Importer des étudiants</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Importez une liste d&apos;étudiants depuis un fichier Excel (.xlsx) ou CSV (.csv)
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-6 sm:p-8 text-center">
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
@@ -1330,30 +1340,30 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 id="file-upload"
               />
               <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-sm font-medium">
+                <Upload className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 sm:mb-4" />
+                <p className="text-responsive-sm font-medium">
                   {importFile ? importFile.name : 'Cliquez pour sélectionner un fichier'}
                 </p>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-responsive-xs text-muted-foreground mt-2">
                   Formats acceptés: .xlsx, .xls, .csv
                 </p>
               </label>
             </div>
-            <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm font-medium mb-2">📝 Format attendu :</p>
-              <p className="text-xs text-muted-foreground">
+            <div className="bg-muted p-3 sm:p-4 rounded-lg">
+              <p className="text-responsive-sm font-medium mb-2">📝 Format attendu :</p>
+              <p className="text-responsive-xs text-muted-foreground">
                 Matricule, Nom, Prénom, Date de naissance, Niveau, Filière, Téléphone
               </p>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button variant="outline" onClick={() => {
               setIsImportDialogOpen(false)
               setImportFile(null)
-            }}>
+            }} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleImportFile} disabled={!importFile || isImporting}>
+            <Button onClick={handleImportFile} disabled={!importFile || isImporting} className="w-full sm:w-auto">
               {isImporting ? 'Import en cours...' : 'Importer'}
             </Button>
           </DialogFooter>
@@ -1362,52 +1372,54 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
 
       {/* Dialog Envoi ID d'Enrôlement */}
       <Dialog open={isSendEnrollmentDialogOpen} onOpenChange={setIsSendEnrollmentDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Envoyer l&apos;ID d&apos;enrôlement</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Envoyer l&apos;ID d&apos;enrôlement</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Étudiant: {selectedStudent?.user?.name || selectedStudent?.studentNumber}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-950 p-3 sm:p-4 rounded-lg space-y-2">
               <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-blue-600" />
-                <p className="font-semibold text-sm">Informations à envoyer</p>
+                <Mail className="icon-responsive text-blue-600" />
+                <p className="font-semibold text-responsive-sm">Informations à envoyer</p>
               </div>
-              <div className="space-y-1 text-sm">
-                <p>ID d&apos;enrôlement (parent et etudiant): <span className="font-bold "><strong>{selectedStudent?.enrollmentId}</strong></span></p>
-                <p>Matricule: <span className="font-bold "><strong>{selectedStudent?.studentNumber}</strong></span></p>
-                <p>Niveau: <span className="font-bold "><strong>{selectedStudent?.niveau}</strong></span></p>
+              <div className="space-y-1 text-responsive-sm">
+                <p>ID d&apos;enrôlement (parent et etudiant): <span className="font-bold"><strong>{selectedStudent?.enrollmentId}</strong></span></p>
+                <p>Matricule: <span className="font-bold"><strong>{selectedStudent?.studentNumber}</strong></span></p>
+                <p>Niveau: <span className="font-bold"><strong>{selectedStudent?.niveau}</strong></span></p>
                 {selectedStudent?.filiere && (
-                  <p>Filière: <span className="font-bold "><strong>{selectedStudent.filiere.nom}</strong></span></p>
+                  <p>Filière: <span className="font-bold"><strong>{selectedStudent.filiere.nom}</strong></span></p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="recipientEmail">Email du destinataire *</Label>
+
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="recipientEmail" className="text-responsive-sm">Email du destinataire *</Label>
               <Input
                 id="recipientEmail"
                 type="email"
                 placeholder="parent@example.com ou etudiant@example.com"
                 value={enrollmentEmailData.recipientEmail}
                 onChange={(e) => setEnrollmentEmailData({ recipientEmail: e.target.value })}
+                className="text-responsive-sm"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-responsive-xs text-muted-foreground">
                 Un email professionnel sera envoyé avec l&apos;ID d&apos;enrôlement, l&apos;email suggéré et les instructions complètes.
               </p>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button variant="outline" onClick={() => {
               setIsSendEnrollmentDialogOpen(false)
               setEnrollmentEmailData({ recipientEmail: '' })
-            }}>
+            }} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleConfirmSendEnrollment}>
-              <Mail className="h-4 w-4 mr-2" />
+            <Button onClick={handleConfirmSendEnrollment} className="w-full sm:w-auto">
+              <Mail className="icon-responsive mr-2" />
               Envoyer
             </Button>
           </DialogFooter>

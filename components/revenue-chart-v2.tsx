@@ -39,11 +39,11 @@ export function RevenueChart({ schoolId }: RevenueChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Revenus Mensuels</CardTitle>
+          <CardTitle className="text-responsive-lg">Revenus Mensuels</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <p className="text-responsive-sm text-muted-foreground">Chargement...</p>
           </div>
         </CardContent>
       </Card>
@@ -54,11 +54,11 @@ export function RevenueChart({ schoolId }: RevenueChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Revenus Mensuels</CardTitle>
+          <CardTitle className="text-responsive-lg">Revenus Mensuels</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Aucune donnée de revenus</p>
+            <p className="text-responsive-sm text-muted-foreground">Aucune donnée de revenus</p>
           </div>
         </CardContent>
       </Card>
@@ -70,11 +70,11 @@ export function RevenueChart({ schoolId }: RevenueChartProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Revenus Mensuels</CardTitle>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-2xl font-bold text-primary">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <CardTitle className="text-responsive-lg">Revenus Mensuels</CardTitle>
+          <div className="text-left sm:text-right">
+            <p className="text-responsive-sm text-muted-foreground">Total</p>
+            <p className="text-responsive-xl font-bold text-primary">
               {totalRevenue.toLocaleString()} FCFA
             </p>
           </div>

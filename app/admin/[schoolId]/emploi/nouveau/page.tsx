@@ -53,17 +53,17 @@ export default function NouvelEmploiPage() {
     heureDebut: '',
     heureFin: '',
     salle: '',
-    niveau: '',
-    semestre: '',
+    niveau: 'placeholder',
+    semestre: 'placeholder',
     vh: 0,
     joursCours: '[]',
     evaluation: false,
-    jourEvaluation: '',
+    jourEvaluation: 'placeholder',
     ueCommune: false,
-    moduleId: '',
-    enseignantId: '',
-    filiereId: '',
-    anneeUnivId: ''
+    moduleId: 'placeholder',
+    enseignantId: 'placeholder',
+    filiereId: 'placeholder',
+    anneeUnivId: 'placeholder'
   });
 
   useEffect(() => {
@@ -104,22 +104,22 @@ export default function NouvelEmploiPage() {
     e.preventDefault();
     
     try {
-      if (!formData.anneeUnivId) {
+      if (!formData.anneeUnivId || formData.anneeUnivId === 'placeholder') {
         toast.error('Veuillez sélectionner une année universitaire');
         return;
       }
 
-      if (!formData.moduleId) {
+      if (!formData.moduleId || formData.moduleId === 'placeholder') {
         toast.error('Veuillez sélectionner un module');
         return;
       }
 
-      if (!formData.enseignantId) {
+      if (!formData.enseignantId || formData.enseignantId === 'placeholder') {
         toast.error('Veuillez sélectionner un enseignant');
         return;
       }
 
-      if (!formData.ueCommune && !formData.filiereId) {
+      if (!formData.ueCommune && (!formData.filiereId || formData.filiereId === 'placeholder')) {
         toast.error('Veuillez sélectionner une filière');
         return;
       }
@@ -202,25 +202,25 @@ export default function NouvelEmploiPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 text-black">
-      <h1 className="text-2xl font-bold mb-6">Nouvel Emploi du Temps</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="container mx-auto p-3 sm:p-4 md:p-6 text-black">
+      <h1 className="text-responsive-xl font-bold mb-4 sm:mb-6">Nouvel Emploi du Temps</h1>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Champs de base */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-responsive-sm font-medium text-gray-700">
               Titre
             </label>
             <input
               type="text"
               value={formData.titre}
               onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-responsive-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-responsive-sm font-medium text-gray-700">
               Date de début
             </label>
             <input
@@ -288,7 +288,7 @@ export default function NouvelEmploiPage() {
               onChange={(e) => setFormData({ ...formData, niveau: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              <option value="">Niveau</option>
+              <option value="placeholder" disabled>Niveau</option>
               <option value="L1">L1</option>
               <option value="L2">L2</option>
               <option value="L3">L3</option>
@@ -306,7 +306,7 @@ export default function NouvelEmploiPage() {
               onChange={(e) => setFormData({ ...formData, semestre: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              <option value="">Sélectionner un semestre</option>
+              <option value="placeholder" disabled>Sélectionner un semestre</option>
               {['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].map((sem) => (
                 <option key={sem} value={sem}>
                   {sem}
@@ -324,7 +324,7 @@ export default function NouvelEmploiPage() {
               onChange={handleModuleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              <option value="">Sélectionner un module</option>
+              <option value="placeholder" disabled>Sélectionner un module</option>
               {modules.map((module: Module) => (
                 <option key={module.id} value={module.id}>
                   {module.nom} ({module.vh}h)
@@ -343,7 +343,7 @@ export default function NouvelEmploiPage() {
               disabled
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-100"
             />
-            <p className="mt-1 text-sm text-gray-500">Le volume horaire est automatiquement défini par le module sélectionné</p>
+            <p className="mt-1 text-responsive-xs text-gray-500">Le volume horaire est automatiquement défini par le module sélectionné</p>
           </div>
 
           <div>
@@ -355,7 +355,7 @@ export default function NouvelEmploiPage() {
               onChange={(e) => setFormData({ ...formData, enseignantId: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              <option value="">Sélectionner un enseignant</option>
+              <option value="placeholder" disabled>Sélectionner un enseignant</option>
               {enseignants.map((enseignant: any) => (
                 <option key={enseignant.id} value={enseignant.id}>
                   {enseignant.nom} {enseignant.prenom}
@@ -374,7 +374,7 @@ export default function NouvelEmploiPage() {
               disabled={formData.ueCommune}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100"
             >
-              <option value="">Sélectionner une filière</option>
+              <option value="placeholder" disabled>Sélectionner une filière</option>
               {filieres.map((filiere: any) => (
                 <option key={filiere.id} value={filiere.id}>
                   {filiere.nom}
@@ -382,7 +382,7 @@ export default function NouvelEmploiPage() {
               ))}
             </select>
             {formData.ueCommune && (
-              <p className="mt-1 text-sm text-gray-500">La filière n&apos;est pas requise pour une UE Commune</p>
+              <p className="mt-1 text-responsive-xs text-gray-500">La filière n&apos;est pas requise pour une UE Commune</p>
             )}
           </div>
 
@@ -395,7 +395,7 @@ export default function NouvelEmploiPage() {
               onChange={(e) => setFormData({ ...formData, anneeUnivId: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             >
-              <option value="">Sélectionner une année universitaire</option>
+              <option value="placeholder" disabled>Sélectionner une année universitaire</option>
               {anneesUniv.map((annee) => (
                 <option key={annee.id} value={annee.id}>
                   {annee.annee}
@@ -422,11 +422,11 @@ export default function NouvelEmploiPage() {
             </label>
           </div>
 
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2"> 
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-responsive-sm font-medium text-gray-700 mb-2"> 
               Jours de cours
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mt-2">
               {JOURS.map((jour) => {
                 const isSelected = JSON.parse(formData.joursCours).includes(jour);
                 return (
@@ -437,7 +437,7 @@ export default function NouvelEmploiPage() {
                     className={`${isSelected 
                       ? 'bg-indigo-600 text-white border-indigo-600' 
                       : 'bg-white text-indigo-600 hover:bg-accent hover:text-accent-foreground'
-                    } px-4 py-2 border rounded-md shadow-sm text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200`}
+                    } px-3 sm:px-4 py-2 border rounded-md shadow-sm text-responsive-xs font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200`}
                   >
                     {jour}
                   </button>
@@ -446,7 +446,7 @@ export default function NouvelEmploiPage() {
             </div>
           </div>
 
-          <div className="col-span-2 space-y-2">
+          <div className="col-span-1 md:col-span-2 space-y-2">
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -459,7 +459,7 @@ export default function NouvelEmploiPage() {
 
             {formData.evaluation && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-responsive-sm font-medium text-gray-700">
                   Jour de l&apos;évaluation
                 </label>
                 <select
@@ -467,7 +467,7 @@ export default function NouvelEmploiPage() {
                   onChange={(e) => setFormData({ ...formData, jourEvaluation: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
-                  <option value="">Sélectionner un jour</option>
+                  <option value="placeholder" disabled>Sélectionner un jour</option>
                   {JSON.parse(formData.joursCours).map((jour: string) => (
                     <option key={jour} value={jour}>
                       {jour}
@@ -479,17 +479,17 @@ export default function NouvelEmploiPage() {
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
           <Button 
             type="button" 
             variant="outline" 
-            className="w-full md:w-auto bg-white text-red-700 hover:bg-accent hover:text-accent-foreground"
+            className="w-full sm:w-auto bg-white text-red-700 hover:bg-accent hover:text-accent-foreground text-responsive-sm"
             onClick={() => router.back()}
           >
             Annuler
           </Button>
           
-          <Button type="submit" className="w-full md:w-auto bg-indigo-600 text-white">
+          <Button type="submit" className="w-full sm:w-auto bg-indigo-600 text-white text-responsive-sm">
             <FaSave className="mr-2" />
             Créer l&apos;emploi du temps
           </Button>

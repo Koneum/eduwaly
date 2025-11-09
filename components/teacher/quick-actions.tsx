@@ -216,7 +216,7 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Actions Rapides</CardTitle>
+          <CardTitle className="text-responsive-lg">Actions Rapides</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <Button 
@@ -248,23 +248,23 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
 
       {/* Dialog Prendre les présences */}
       <Dialog open={isAttendanceOpen} onOpenChange={setIsAttendanceOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Prendre les présences</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Prendre les présences</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Enregistrez les présences pour votre cours
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="attendance-module">Module *</Label>
+              <Label htmlFor="attendance-module" className="text-responsive-sm">Module *</Label>
               <Select value={selectedModule} onValueChange={handleModuleSelect}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un module" />
                 </SelectTrigger>
                 <SelectContent>
                   {modules.map((mod) => (
-                    <SelectItem key={mod.id} value={mod.id}>
+                    <SelectItem key={mod.id} value={mod.id} className="text-responsive-sm">
                       {mod.nom} - {mod.filiere?.nom || 'Sans filière'}
                     </SelectItem>
                   ))}
@@ -272,20 +272,21 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="attendance-date">Date</Label>
+              <Label htmlFor="attendance-date" className="text-responsive-sm">Date</Label>
               <Input
                 id="attendance-date"
                 type="date"
                 value={attendanceDate}
                 onChange={(e) => setAttendanceDate(e.target.value)}
+                className="text-responsive-sm"
               />
             </div>
             {loadingStudents && (
-              <p className="text-sm text-muted-foreground">Chargement des étudiants...</p>
+              <p className="text-responsive-sm text-muted-foreground">Chargement des étudiants...</p>
             )}
             {selectedModule && students.length > 0 && (
               <div className="space-y-2">
-                <Label>Étudiants</Label>
+                <Label className="text-responsive-sm">Étudiants</Label>
                 <div className="border rounded-lg p-4 space-y-2 max-h-[300px] overflow-y-auto">
                   {students.map((student) => (
                     <div 
@@ -293,22 +294,22 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
                       className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
                       onClick={() => toggleStudentStatus(student.id)}
                     >
-                      <span className="text-sm">{student.name}</span>
+                      <span className="text-responsive-sm">{student.name}</span>
                       <div className="flex items-center gap-2">
                         {student.status === 'present' && (
-                          <span className="flex items-center gap-1 text-success text-sm">
+                          <span className="flex items-center gap-1 text-success text-responsive-sm">
                             <CheckCircle2 className="h-4 w-4" />
                             Présent
                           </span>
                         )}
                         {student.status === 'absent' && (
-                          <span className="flex items-center gap-1 text-red-600 text-sm">
+                          <span className="flex items-center gap-1 text-red-600 text-responsive-sm">
                             <XCircle className="h-4 w-4" />
                             Absent
                           </span>
                         )}
                         {student.status === 'late' && (
-                          <span className="flex items-center gap-1 text-[var(--chart-5)] text-sm">
+                          <span className="flex items-center gap-1 text-[var(--chart-5)] text-responsive-sm">
                             <ClipboardCheck className="h-4 w-4" />
                             Retard
                           </span>
@@ -317,17 +318,17 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-responsive-xs text-muted-foreground">
                   Cliquez sur un étudiant pour changer son statut
                 </p>
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAttendanceOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsAttendanceOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleAttendanceSubmit} disabled={students.length === 0}>
+            <Button onClick={handleAttendanceSubmit} disabled={students.length === 0} className="w-full sm:w-auto">
               Enregistrer les présences
             </Button>
           </DialogFooter>
@@ -336,26 +337,26 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
 
       {/* Dialog Créer un devoir */}
       <Dialog open={isHomeworkOpen} onOpenChange={setIsHomeworkOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Créer un devoir</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Créer un devoir</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Créez un nouveau devoir pour vos étudiants
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="homework-module">Module *</Label>
+              <Label htmlFor="homework-module" className="text-responsive-sm">Module *</Label>
               <Select 
                 value={homeworkData.moduleId} 
                 onValueChange={(value) => setHomeworkData({...homeworkData, moduleId: value})}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un module" />
                 </SelectTrigger>
                 <SelectContent>
                   {modules.map((mod) => (
-                    <SelectItem key={mod.id} value={mod.id}>
+                    <SelectItem key={mod.id} value={mod.id} className="text-responsive-sm">
                       {mod.nom} - {mod.filiere?.nom || 'Sans filière'}
                     </SelectItem>
                   ))}
@@ -363,56 +364,59 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="homework-title">Titre *</Label>
+              <Label htmlFor="homework-title" className="text-responsive-sm">Titre *</Label>
               <Input
                 id="homework-title"
                 placeholder="Ex: Exercices Chapitre 3"
                 value={homeworkData.title}
                 onChange={(e) => setHomeworkData({...homeworkData, title: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="homework-type">Type</Label>
+              <Label htmlFor="homework-type" className="text-responsive-sm">Type</Label>
               <Select 
                 value={homeworkData.type} 
                 onValueChange={(value) => setHomeworkData({...homeworkData, type: value})}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ASSIGNMENT">Devoir</SelectItem>
-                  <SelectItem value="PROJECT">Projet</SelectItem>
-                  <SelectItem value="READING">Lecture</SelectItem>
-                  <SelectItem value="EXERCISE">Exercice</SelectItem>
+                  <SelectItem value="ASSIGNMENT" className="text-responsive-sm">Devoir</SelectItem>
+                  <SelectItem value="PROJECT" className="text-responsive-sm">Projet</SelectItem>
+                  <SelectItem value="READING" className="text-responsive-sm">Lecture</SelectItem>
+                  <SelectItem value="EXERCISE" className="text-responsive-sm">Exercice</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="homework-description">Description</Label>
+              <Label htmlFor="homework-description" className="text-responsive-sm">Description</Label>
               <Textarea
                 id="homework-description"
                 placeholder="Décrivez le devoir..."
                 rows={4}
                 value={homeworkData.description}
                 onChange={(e) => setHomeworkData({...homeworkData, description: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="homework-dueDate">Date limite *</Label>
+              <Label htmlFor="homework-dueDate" className="text-responsive-sm">Date limite *</Label>
               <Input
                 id="homework-dueDate"
                 type="date"
                 value={homeworkData.dueDate}
                 onChange={(e) => setHomeworkData({...homeworkData, dueDate: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsHomeworkOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsHomeworkOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleHomeworkSubmit}>
+            <Button onClick={handleHomeworkSubmit} className="w-full sm:w-auto">
               Créer le devoir
             </Button>
           </DialogFooter>
@@ -421,16 +425,16 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
 
       {/* Dialog Contacter parents */}
       <Dialog open={isContactOpen} onOpenChange={setIsContactOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Contacter les parents</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Contacter les parents</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Envoyez un message aux parents d&apos;étudiants
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label>Destinataire *</Label>
+              <Label className="text-responsive-sm">Destinataire *</Label>
               <div className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <input
@@ -445,7 +449,7 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
                     }}
                     className="cursor-pointer"
                   />
-                  <Label htmlFor="all-parents" className="cursor-pointer font-normal">
+                  <Label htmlFor="all-parents" className="cursor-pointer font-normal text-responsive-sm">
                     Tous les parents
                   </Label>
                 </div>
@@ -458,7 +462,7 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
                     onChange={() => setContactData({...contactData, recipientType: 'specific'})}
                     className="cursor-pointer"
                   />
-                  <Label htmlFor="specific-parent" className="cursor-pointer font-normal">
+                  <Label htmlFor="specific-parent" className="cursor-pointer font-normal text-responsive-sm">
                     Un parent spécifique
                   </Label>
                 </div>
@@ -468,17 +472,17 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
             {contactData.recipientType === 'specific' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="contact-module">Module *</Label>
+                  <Label htmlFor="contact-module" className="text-responsive-sm">Module *</Label>
                   <Select 
                     value={selectedModuleForParents} 
                     onValueChange={handleModuleSelectForParents}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue placeholder="Sélectionner un module" />
                     </SelectTrigger>
                     <SelectContent>
                       {modules.map((mod) => (
-                        <SelectItem key={mod.id} value={mod.id}>
+                        <SelectItem key={mod.id} value={mod.id} className="text-responsive-sm">
                           {mod.nom} - {mod.filiere?.nom || 'Sans filière'}
                         </SelectItem>
                       ))}
@@ -488,17 +492,17 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
 
                 {studentsForContact.length > 0 && (
                   <div className="space-y-2">
-                    <Label htmlFor="contact-student">Étudiant *</Label>
+                    <Label htmlFor="contact-student" className="text-responsive-sm">Étudiant *</Label>
                     <Select 
                       value={contactData.studentId} 
                       onValueChange={(value) => setContactData({...contactData, studentId: value})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-responsive-sm">
                         <SelectValue placeholder="Sélectionner un étudiant" />
                       </SelectTrigger>
                       <SelectContent>
                         {studentsForContact.map((student) => (
-                          <SelectItem key={student.id} value={student.id}>
+                          <SelectItem key={student.id} value={student.id} className="text-responsive-sm">
                             {student.name} - {student.studentNumber}
                           </SelectItem>
                         ))}
@@ -509,22 +513,24 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
               </>
             )}
             <div className="space-y-2">
-              <Label htmlFor="contact-subject">Sujet *</Label>
+              <Label htmlFor="contact-subject" className="text-responsive-sm">Sujet *</Label>
               <Input
                 id="contact-subject"
                 placeholder="Ex: Réunion parents-professeurs"
                 value={contactData.subject}
                 onChange={(e) => setContactData({...contactData, subject: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-message">Message *</Label>
+              <Label htmlFor="contact-message" className="text-responsive-sm">Message *</Label>
               <Textarea
                 id="contact-message"
                 placeholder="Votre message..."
                 rows={6}
                 value={contactData.message}
                 onChange={(e) => setContactData({...contactData, message: e.target.value})}
+                className="text-responsive-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -535,16 +541,16 @@ export default function QuickActions({ modules, schoolId }: QuickActionsProps) {
                   setContactData({...contactData, sendByEmail: checked as boolean})
                 }
               />
-              <Label htmlFor="contact-sendByEmail" className="cursor-pointer">
+              <Label htmlFor="contact-sendByEmail" className="cursor-pointer text-responsive-sm">
                 Envoyer également par email
               </Label>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsContactOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsContactOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleContactSubmit}>
+            <Button onClick={handleContactSubmit} className="w-full sm:w-auto">
               Envoyer le message
             </Button>
           </DialogFooter>

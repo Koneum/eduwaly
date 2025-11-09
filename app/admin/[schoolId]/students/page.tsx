@@ -60,6 +60,28 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
     orderBy: { nom: 'asc' }
   })
 
+  // Récupérer les salles (université) ou classes (lycée) selon le type d'école
+  const rooms = school.schoolType === 'HIGH_SCHOOL'
+    ? (await prisma.class.findMany({
+        where: { schoolId },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          niveau: true
+        },
+        orderBy: { name: 'asc' }
+      }))
+    : (await prisma.room.findMany({
+        where: { schoolId },
+        select: {
+          id: true,
+          name: true,
+          code: true
+        },
+        orderBy: { name: 'asc' }
+      })).map(room => ({ ...room, niveau: null }))
+
   // Récupérer les structures de frais de l'école
   const feeStructuresData: FeeStructureRow[] = await prisma.feeStructure.findMany({
     where: { schoolId },
@@ -152,11 +174,11 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
   ).length
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground text-balance">Gestion des Étudiants</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-responsive-xl font-bold text-foreground text-balance">Gestion des Étudiants</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
           {school.name} - Liste complète des étudiants et leur statut de paiement
         </p>
       </div>
@@ -175,7 +197,7 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
       )}
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
         <StatCard title="Total Étudiants" value={totalStudents} icon={Users} />
         <StatCard title="Paiements à jour" value={paidCount} icon={UserCheck} className="border-green-200" />
         <StatCard title="En attente" value={pendingCount} icon={Clock} className="border-orange-200" />
@@ -189,6 +211,7 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
         schoolType={school.schoolType} 
         filieres={filieres}
         feeStructures={finalFeeStructures}
+        rooms={rooms}
       />
     </div>
   )

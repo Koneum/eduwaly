@@ -1,153 +1,139 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CheckCircle, Calendar, ArrowRight } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { CheckCircle2, Calendar, CreditCard, ArrowUpCircle, X } from "lucide-react"
 import { formatDistance } from "date-fns"
 import { fr } from "date-fns/locale"
-import { toast } from 'sonner'
-
-interface Plan {
-  id: string
-  name: string
-  description: string | null
-  price: number
-  interval: string
-  maxStudents: number
-  maxTeachers: number
-  features: string
-}
+import { PlanSelector } from "@/components/pricing/PlanSelector"
 
 interface Subscription {
   id: string
   status: string
   currentPeriodStart: Date
   currentPeriodEnd: Date
-  plan: Plan
+  plan: {
+    id: string
+    name: string
+    description: string | null
+    price: number
+    interval: string
+    maxStudents: number
+    maxTeachers: number
+    features: string
+  }
 }
 
 interface SubscriptionManagerProps {
   subscription: Subscription | null
-  availablePlans: Plan[]
   schoolId: string
 }
 
-export default function SubscriptionManager({ subscription, availablePlans, schoolId }: SubscriptionManagerProps) {
+export default function SubscriptionManager({ subscription, schoolId }: SubscriptionManagerProps) {
   const [isChangePlanOpen, setIsChangePlanOpen] = useState(false)
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleChangePlan = async () => {
-    if (!selectedPlanId) {
-      toast.error('Veuillez sélectionner un plan')
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      const response = await fetch('/api/school-admin/subscription', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          planId: selectedPlanId,
-          schoolId
-        })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors du changement de plan')
-      }
-
-      toast.success('Plan changé avec succès')
-      setIsChangePlanOpen(false)
-      window.location.reload()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   if (!subscription) {
+    // Aucun abonnement - Afficher le sélecteur de plan
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">Aucun abonnement actif</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4 sm:space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-responsive-lg">Aucun abonnement actif</CardTitle>
+            <CardDescription className="text-responsive-sm">
+              Choisissez un plan pour commencer à utiliser Schooly
+            </CardDescription>
+          </CardHeader>
+        </Card>
+        <PlanSelector schoolId={schoolId} />
+      </div>
     )
   }
 
   const features = subscription.plan.features ? JSON.parse(subscription.plan.features) : []
 
   return (
-    <div className="space-y-6">
-      {/* Current Subscription */}
+    <div className="space-y-4 sm:space-y-6">
+      {/* Abonnement Actuel - Résumé */}
       <Card>
         <CardHeader>
-          <CardTitle>Abonnement Actuel</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-responsive-lg">
+                <CreditCard className="h-5 w-5" />
+                Abonnement Actuel
+              </CardTitle>
+              <CardDescription className="mt-1 text-responsive-sm">
+                Détails de votre plan d&apos;abonnement
+              </CardDescription>
+            </div>
+            <Badge 
+              variant={
+                subscription.status === 'ACTIVE' ? 'default' :
+                subscription.status === 'TRIAL' ? 'secondary' : 'destructive'
+              }
+              className="text-responsive-xs w-fit"
+            >
+              {subscription.status === 'ACTIVE' && (
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+              )}
+              {subscription.status}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 bg-primary/5 rounded-lg border border-primary/20">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <h3 className="text-2xl font-bold text-foreground">{subscription.plan.name}</h3>
-                <Badge variant={
-                  subscription.status === 'ACTIVE' ? 'default' :
-                  subscription.status === 'TRIAL' ? 'secondary' : 'destructive'
-                }>
-                  {subscription.status}
-                </Badge>
+        <CardContent className="space-y-4 sm:space-y-6">
+          {/* Plan Info */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 sm:p-6 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <h3 className="text-responsive-xl font-bold text-foreground">{subscription.plan.name}</h3>
               </div>
               {subscription.plan.description && (
-                <p className="text-muted-foreground">{subscription.plan.description}</p>
+                <p className="text-responsive-sm text-muted-foreground">{subscription.plan.description}</p>
               )}
-              <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex flex-wrap gap-3 sm:gap-4 text-responsive-xs">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-success" />
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <span className="text-foreground">Jusqu&apos;à {subscription.plan.maxStudents} étudiants</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-success" />
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <span className="text-foreground">Jusqu&apos;à {subscription.plan.maxTeachers} enseignants</span>
                 </div>
                 {features.slice(0, 2).map((feature: string, index: number) => (
                   <div key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <span className="text-foreground">{feature}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div className="text-center md:text-right">
-              <div className="text-3xl font-bold text-foreground">
+              <div className="text-responsive-2xl font-bold text-foreground">
                 {Number(subscription.plan.price).toLocaleString()} FCFA
               </div>
-              <div className="text-sm text-muted-foreground">par {subscription.plan.interval}</div>
+              <div className="text-responsive-sm text-muted-foreground">par {subscription.plan.interval}</div>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-start gap-3 p-4 rounded-lg border border-border">
-              <Calendar className="h-5 w-5 text-primary mt-0.5" />
+          {/* Dates */}
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="flex items-start gap-3 p-3 sm:p-4 rounded-lg border border-border">
+              <Calendar className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <div className="text-sm font-medium text-foreground">Date de début</div>
-                <div className="text-sm text-muted-foreground mt-1">
+                <div className="text-responsive-sm font-medium text-foreground">Date de début</div>
+                <div className="text-responsive-xs text-muted-foreground mt-1">
                   {new Date(subscription.currentPeriodStart).toLocaleDateString('fr-FR')}
                 </div>
               </div>
             </div>
-            <div className="flex items-start gap-3 p-4 rounded-lg border border-border">
-              <Calendar className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <div className="text-sm font-medium text-foreground">Date d&apos;expiration</div>
-                <div className="text-sm text-muted-foreground mt-1">
+            <div className="flex items-start gap-3 p-3 sm:p-4 rounded-lg border border-border">
+              <Calendar className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="flex flex-col">
+                <div className="text-responsive-sm font-medium text-foreground">Date d&apos;expiration</div>
+                <div className="text-responsive-xs text-muted-foreground mt-1">
                   {formatDistance(new Date(subscription.currentPeriodEnd), new Date(), { 
                     addSuffix: true, 
                     locale: fr 
@@ -156,109 +142,45 @@ export default function SubscriptionManager({ subscription, availablePlans, scho
               </div>
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex items-center gap-2">
             <Button 
-              className="flex-1"
               onClick={() => setIsChangePlanOpen(true)}
+              className="w-full sm:w-auto"
             >
+              <ArrowUpCircle className="h-4 w-4 mr-2" />
               Changer de plan
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Change Plan Dialog */}
+      {/* Dialog Modal pour changement de plan */}
       <Dialog open={isChangePlanOpen} onOpenChange={setIsChangePlanOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Changer de plan d&apos;abonnement</DialogTitle>
-            <DialogDescription>
-              Sélectionnez un nouveau plan pour votre école
-            </DialogDescription>
+        <DialogContent className="max-w-[98vw] sm:max-w-[95vw] w-full h-[98vh] sm:h-[95vh] p-0 gap-0">
+          <DialogHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3 border-b sticky top-0 bg-background z-10">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <DialogTitle className="text-responsive-base sm:text-responsive-lg">
+                  Changer de plan d&apos;abonnement
+                </DialogTitle>
+                <DialogDescription className="text-responsive-xs sm:text-responsive-sm mt-1">
+                  Comparez les plans et choisissez celui qui convient le mieux à votre établissement
+                </DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 rounded-full hover:bg-muted"
+                onClick={() => setIsChangePlanOpen(false)}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Fermer</span>
+              </Button>
+            </div>
           </DialogHeader>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {availablePlans.map((plan) => {
-              const planFeatures = plan.features ? JSON.parse(plan.features) : []
-              const isCurrentPlan = plan.id === subscription.plan.id
-              const isSelected = selectedPlanId === plan.id
-
-              return (
-                <Card 
-                  key={plan.id}
-                  className={`cursor-pointer transition-all ${
-                    isSelected ? 'ring-2 ring-primary' : 
-                    isCurrentPlan ? 'opacity-50' : 'hover:shadow-lg'
-                  }`}
-                  onClick={() => !isCurrentPlan && setSelectedPlanId(plan.id)}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      {isCurrentPlan && (
-                        <Badge variant="secondary">Actuel</Badge>
-                      )}
-                    </div>
-                    {plan.description && (
-                      <p className="text-sm text-muted-foreground">{plan.description}</p>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <div className="text-3xl font-bold text-foreground">
-                        {Number(plan.price).toLocaleString()} FCFA
-                      </div>
-                      <div className="text-sm text-muted-foreground">par {plan.interval}</div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-success" />
-                        <span>{plan.maxStudents} étudiants max</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-success" />
-                        <span>{plan.maxTeachers} enseignants max</span>
-                      </div>
-                      {planFeatures.map((feature: string, index: number) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-success" />
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {!isCurrentPlan && (
-                      <Button 
-                        className="w-full"
-                        variant={isSelected ? 'default' : 'outline'}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedPlanId(plan.id)
-                        }}
-                      >
-                        {isSelected ? 'Sélectionné' : 'Sélectionner'}
-                        {isSelected && <ArrowRight className="ml-2 h-4 w-4" />}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
+          <div className="overflow-y-auto flex-1 p-3 sm:p-4 md:p-6 pt-3 sm:pt-4">
+            <PlanSelector schoolId={schoolId} currentPlan={subscription.plan.name} />
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsChangePlanOpen(false)}>
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleChangePlan}
-              disabled={isLoading || !selectedPlanId}
-            >
-              {isLoading ? 'Changement...' : 'Confirmer le changement'}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

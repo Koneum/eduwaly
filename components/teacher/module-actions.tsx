@@ -95,40 +95,41 @@ export default function ModuleActions({ module, schoolId }: ModuleActionsProps) 
 
   return (
     <>
-      <div className="flex gap-2">
-        <Button size="sm" variant="outline" onClick={handleOpenAttendance}>
+      <div className="flex gap-2 flex-wrap">
+        <Button size="sm" variant="outline" onClick={handleOpenAttendance} className="flex-1 sm:flex-none">
           Présences
         </Button>
-        <Button size="sm" onClick={() => setIsDetailsOpen(true)}>
+        <Button size="sm" onClick={() => setIsDetailsOpen(true)} className="flex-1 sm:flex-none">
           Voir détails
         </Button>
       </div>
 
       {/* Dialog Présences */}
       <Dialog open={isAttendanceOpen} onOpenChange={setIsAttendanceOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Prendre les présences - {module.nom}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Prendre les présences - {module.nom}</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               {module.filiere?.nom || 'Sans filière'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="attendance-date">Date</Label>
+              <Label htmlFor="attendance-date" className="text-responsive-sm">Date</Label>
               <Input
                 id="attendance-date"
                 type="date"
                 value={attendanceDate}
                 onChange={(e) => setAttendanceDate(e.target.value)}
+                className="text-responsive-sm"
               />
             </div>
             {loadingStudents && (
-              <p className="text-sm text-muted-foreground">Chargement des étudiants...</p>
+              <p className="text-responsive-sm text-muted-foreground">Chargement des étudiants...</p>
             )}
             {students.length > 0 && (
               <div className="space-y-2">
-                <Label>Étudiants ({students.length})</Label>
+                <Label className="text-responsive-sm">Étudiants ({students.length})</Label>
                 <div className="border rounded-lg p-4 space-y-2 max-h-[300px] overflow-y-auto">
                   {students.map((student) => (
                     <div 
@@ -136,22 +137,22 @@ export default function ModuleActions({ module, schoolId }: ModuleActionsProps) 
                       className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
                       onClick={() => toggleStudentStatus(student.id)}
                     >
-                      <span className="text-sm">{student.name}</span>
+                      <span className="text-responsive-sm">{student.name}</span>
                       <div className="flex items-center gap-2">
                         {student.status === 'present' && (
-                          <span className="flex items-center gap-1 text-success text-sm">
+                          <span className="flex items-center gap-1 text-success text-responsive-sm">
                             <CheckCircle2 className="h-4 w-4" />
                             Présent
                           </span>
                         )}
                         {student.status === 'absent' && (
-                          <span className="flex items-center gap-1 text-red-600 text-sm">
+                          <span className="flex items-center gap-1 text-red-600 text-responsive-sm">
                             <XCircle className="h-4 w-4" />
                             Absent
                           </span>
                         )}
                         {student.status === 'late' && (
-                          <span className="flex items-center gap-1 text-[var(--chart-5)] text-sm">
+                          <span className="flex items-center gap-1 text-[var(--chart-5)] text-responsive-sm">
                             <ClipboardCheck className="h-4 w-4" />
                             Retard
                           </span>
@@ -160,22 +161,22 @@ export default function ModuleActions({ module, schoolId }: ModuleActionsProps) 
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-responsive-xs text-muted-foreground">
                   Cliquez sur un étudiant pour changer son statut
                 </p>
               </div>
             )}
             {!loadingStudents && students.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
+              <p className="text-responsive-sm text-muted-foreground text-center py-4">
                 Aucun étudiant trouvé pour ce module
               </p>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAttendanceOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsAttendanceOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleAttendanceSubmit} disabled={students.length === 0}>
+            <Button onClick={handleAttendanceSubmit} disabled={students.length === 0} className="w-full sm:w-auto">
               Enregistrer les présences
             </Button>
           </DialogFooter>
@@ -184,28 +185,28 @@ export default function ModuleActions({ module, schoolId }: ModuleActionsProps) 
 
       {/* Dialog Détails du Module */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{module.nom}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">{module.nom}</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               {module.filiere?.nom || 'Sans filière'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label className="text-muted-foreground">Module</Label>
-                <p className="font-medium">{module.nom}</p>
+                <Label className="text-responsive-sm text-muted-foreground">Module</Label>
+                <p className="font-medium text-responsive-sm">{module.nom}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Filière</Label>
-                <p className="font-medium">{module.filiere?.nom || 'Non définie'}</p>
+                <Label className="text-responsive-sm text-muted-foreground">Filière</Label>
+                <p className="font-medium text-responsive-sm">{module.filiere?.nom || 'Non définie'}</p>
               </div>
             </div>
             
-            <div className="border-t pt-4">
-              <h3 className="font-semibold mb-3">Actions rapides</h3>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="border-t pt-3 sm:pt-4">
+              <h3 className="font-semibold mb-3 text-responsive-base">Actions rapides</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
                   className="w-full"
@@ -246,8 +247,8 @@ export default function ModuleActions({ module, schoolId }: ModuleActionsProps) 
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)} className="w-full sm:w-auto">
               Fermer
             </Button>
           </DialogFooter>

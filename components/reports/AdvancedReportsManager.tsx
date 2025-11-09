@@ -64,38 +64,38 @@ export function AdvancedReportsManager({ filieres }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-responsive-lg">
           <BarChart3 className="h-5 w-5 text-primary" />
           Rapports Statistiques Avancés
         </CardTitle>
-        <CardDescription>Générer des rapports détaillés avec statistiques</CardDescription>
+        <CardDescription className="text-responsive-sm">Générer des rapports détaillés avec statistiques</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         <div>
-          <label className="text-sm font-medium mb-2 block">Type de rapport</label>
+          <label className="text-responsive-sm font-medium mb-2 block">Type de rapport</label>
           <Select value={reportType} onValueChange={setReportType}>
-            <SelectTrigger>
+            <SelectTrigger className="text-responsive-sm">
               <SelectValue placeholder="Sélectionner un type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="academic">Rapport Académique</SelectItem>
-              <SelectItem value="financial">Rapport Financier</SelectItem>
-              <SelectItem value="attendance">Rapport de Présence</SelectItem>
-              <SelectItem value="performance">Rapport de Performance</SelectItem>
+              <SelectItem value="academic" className="text-responsive-sm">Rapport Académique</SelectItem>
+              <SelectItem value="financial" className="text-responsive-sm">Rapport Financier</SelectItem>
+              <SelectItem value="attendance" className="text-responsive-sm">Rapport de Présence</SelectItem>
+              <SelectItem value="performance" className="text-responsive-sm">Rapport de Performance</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-2 block">Filière (optionnel)</label>
+          <label className="text-responsive-sm font-medium mb-2 block">Filière (optionnel)</label>
           <Select value={filiere} onValueChange={setFiliere}>
-            <SelectTrigger>
+            <SelectTrigger className="text-responsive-sm">
               <SelectValue placeholder="Toutes les filières" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes les filières</SelectItem>
+              <SelectItem value="all" className="text-responsive-sm">Toutes les filières</SelectItem>
               {filieres.map((f) => (
-                <SelectItem key={f.id} value={f.id}>
+                <SelectItem key={f.id} value={f.id} className="text-responsive-sm">
                   {f.nom}
                 </SelectItem>
               ))}
@@ -103,7 +103,7 @@ export function AdvancedReportsManager({ filieres }: Props) {
           </Select>
         </div>
 
-        <Button onClick={handleGenerate} disabled={loading} className="w-full">
+        <Button onClick={handleGenerate} disabled={loading} className="w-full text-responsive-sm">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

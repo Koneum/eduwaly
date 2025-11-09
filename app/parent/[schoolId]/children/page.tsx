@@ -72,13 +72,13 @@ export default async function ParentChildrenPage({
   const uniqueModules = new Set(allEvaluations.map((e: EvaluationRow) => e.moduleId)).size
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes Enfants</h1>
-        <p className="text-muted-foreground mt-2">Suivez la scolarité de vos enfants</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Mes Enfants</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Suivez la scolarité de vos enfants</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
   {parentTyped.students.map((student: StudentRow) => {
           // Calculer les statistiques par étudiant
           const studentAverage = student.evaluations.length > 0

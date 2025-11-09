@@ -59,10 +59,10 @@ export default async function StaffPage({ params }: { params: Promise<{ schoolId
   })
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Gestion du Personnel</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-responsive-xl font-bold">Gestion du Personnel</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
           Gérez les membres du personnel et leurs permissions
         </p>
       </div>

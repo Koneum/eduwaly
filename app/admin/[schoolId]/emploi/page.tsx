@@ -84,22 +84,22 @@ const EmploiCard = ({ emploi, onDelete }: { emploi: Emploi; onDelete: (emploi: E
   const schoolId = params.schoolId as string;
   
   return (
-    <Card className="shadow-md rounded-lg p-4 hover:shadow-xl transition-all duration-200 bg-card2">
-      <div className="flex flex-row items-center gap-4 p-0 mb-4">
-        <div className="h-12 w-12 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300">
-          <FaCalendarAlt className="h-6 w-6" />
+    <Card className="shadow-md rounded-lg p-3 sm:p-4 hover:shadow-xl transition-all duration-200 bg-card2">
+      <div className="flex flex-row items-center gap-3 sm:gap-4 p-0 mb-3 sm:mb-4">
+        <div className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300">
+          <FaCalendarAlt className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
         <div className="flex-1">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">{emploi.titre}</h3>
-              <p className="text-sm text-muted-foreground">{emploi.module.nom}</p>
+              <h3 className="text-responsive-base font-semibold text-foreground">{emploi.titre}</h3>
+              <p className="text-responsive-xs text-muted-foreground">{emploi.module.nom}</p>
             </div>
-            <Badge variant="secondary" className="text-sm font-medium bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-300">
+            <Badge variant="secondary" className="text-responsive-xs font-medium bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-300">
               {emploi.anneeUniv?.annee || 'Année en cours'}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-responsive-xs text-muted-foreground mt-1">
             Du {format(new Date(emploi.dateDebut), 'dd MMMM yyyy', { locale: fr })} au {format(new Date(emploi.dateFin), 'dd MMMM yyyy', { locale: fr })}
           </p>
         </div>
@@ -111,23 +111,23 @@ const EmploiCard = ({ emploi, onDelete }: { emploi: Emploi; onDelete: (emploi: E
           <Badge className='bg-indigo-100 text-indigo-700' variant="outline">{emploi.filiere?.nom || 'UE Commune'}</Badge>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          <div className="text-sm text-muted-foreground">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+          <div className="text-responsive-xs text-muted-foreground">
             <span className="font-medium">Horaire:</span>{' '}
             {emploi.heureDebut} - {emploi.heureFin}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-responsive-xs text-muted-foreground">
             <span className="font-medium">Salle:</span>{' '}
             {emploi.salle}
           </div>
-          <div className="col-span-2 text-sm text-gray-500">
+          <div className="sm:col-span-2 text-responsive-xs text-gray-500">
             <span className="font-medium">Enseignant:</span>{' '}
             {emploi.enseignant.nom} {emploi.enseignant.prenom}
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="flex justify-end gap-2 mt-3 sm:mt-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -346,11 +346,11 @@ export default function EmploisPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestion des Emplois du Temps</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="text-responsive-xl font-bold text-foreground">Gestion des Emplois du Temps</h1>
+          <p className="mt-1 sm:mt-2 text-responsive-sm text-muted-foreground">
             Gérez les emplois du temps des enseignants et des {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'}
           </p>
         </div>
@@ -358,7 +358,7 @@ export default function EmploisPage() {
           <PermissionButton
             category="emploi"
             action="create"
-            className="bg-primary hover:bg-primary/90 text-white"
+            className="bg-primary hover:bg-primary/90 text-white text-responsive-sm w-full sm:w-auto"
           >
             Créer un emploi du temps
           </PermissionButton>
@@ -373,18 +373,18 @@ export default function EmploisPage() {
               placeholder="Rechercher..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full"
+              className="w-full text-responsive-sm"
             />
           </div>
           <div>
             <Select value={anneeFilter} onValueChange={setAnneeFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="text-responsive-sm">
                 <SelectValue placeholder="Année universitaire" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les années</SelectItem>
+                <SelectItem value="all" className="text-responsive-sm">Toutes les années</SelectItem>
                 {annees?.map((annee) => (
-                  <SelectItem key={annee.id} value={annee.id}>
+                  <SelectItem key={annee.id} value={annee.id} className="text-responsive-sm">
                     {annee.annee}
                   </SelectItem>
                 ))}
@@ -393,13 +393,13 @@ export default function EmploisPage() {
           </div>
           <div>
             <Select value={filiereFilter} onValueChange={setFiliereFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="text-responsive-sm">
                 <SelectValue placeholder={schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes les {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'}</SelectItem>
+                <SelectItem value="all" className="text-responsive-sm">Toutes les {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'}</SelectItem>
                 {filieres?.map((filiere) => (
-                  <SelectItem key={filiere.id} value={filiere.id}>
+                  <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                     {filiere.nom}
                   </SelectItem>
                 ))}
@@ -409,23 +409,23 @@ export default function EmploisPage() {
         </div>
 
         {filteredData().length > 0 && (
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-responsive-sm text-muted-foreground mb-3 sm:mb-4">
             {filteredData().length} emploi{filteredData().length > 1 ? 's' : ''} du temps trouvé{filteredData().length > 1 ? 's' : ''}
           </p>
         )}
 
         {/* Affichage groupé par filière et module */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {Object.entries(groupedEmplois()).map(([filiereName, modules]) => (
-            <div key={filiereName} className="space-y-4">
+            <div key={filiereName} className="space-y-3 sm:space-y-4">
               {/* En-tête de filière */}
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10">
-                  <FaCalendarAlt className="h-5 w-5 text-primary" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full bg-primary/10">
+                  <FaCalendarAlt className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">{filiereName}</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <h2 className="text-responsive-lg font-bold text-foreground">{filiereName}</h2>
+                  <p className="text-responsive-xs text-muted-foreground">
                     {Object.values(modules).flat().length} emploi{Object.values(modules).flat().length > 1 ? 's' : ''} du temps
                   </p>
                 </div>
@@ -433,9 +433,9 @@ export default function EmploisPage() {
 
               {/* Modules de cette filière */}
               {Object.entries(modules).map(([moduleName, emploisModule]) => (
-                <div key={moduleName} className="ml-6 space-y-3">
-                  <div className="flex items-center gap-2 border-l-4 border-primary/30 pl-4">
-                    <Badge variant="outline" className="text-sm font-semibold">
+                <div key={moduleName} className="ml-3 sm:ml-6 space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-2 border-l-4 border-primary/30 pl-3 sm:pl-4">
+                    <Badge variant="outline" className="text-responsive-xs font-semibold">
                       {moduleName}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
@@ -444,7 +444,7 @@ export default function EmploisPage() {
                   </div>
 
                   {/* Emplois du temps pour ce module */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ml-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 ml-3 sm:ml-6">
                     {emploisModule.map((emploi) => (
                       <EmploiCard
                         key={emploi.id}
@@ -460,9 +460,9 @@ export default function EmploisPage() {
 
           {/* Message si aucun résultat */}
           {Object.keys(groupedEmplois()).length === 0 && (
-            <div className="text-center py-12">
-              <FaCalendarAlt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Aucun emploi du temps trouvé</p>
+            <div className="text-center py-8 sm:py-12">
+              <FaCalendarAlt className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+              <p className="text-responsive-sm text-muted-foreground">Aucun emploi du temps trouvé</p>
             </div>
           )}
         </div>
@@ -470,16 +470,16 @@ export default function EmploisPage() {
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[95vw] sm:max-w-[500px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer cet emploi du temps ?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-responsive-base">Êtes-vous sûr de vouloir supprimer cet emploi du temps ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-responsive-sm">
               Cette action est irréversible. Toutes les données associées à cet emploi du temps seront supprimées.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="text-responsive-sm w-full sm:w-auto">Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-responsive-sm w-full sm:w-auto">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

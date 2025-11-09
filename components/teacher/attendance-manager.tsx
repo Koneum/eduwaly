@@ -179,24 +179,24 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Gestion des Présences</h2>
+    <div className="space-y-3 sm:space-y-4">
+      <h2 className="heading-responsive-h2">Gestion des Présences</h2>
 
       <Card>
         <CardHeader>
-          <CardTitle>Sélection</CardTitle>
+          <CardTitle className="text-responsive-lg">Sélection</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <Label>Filière</Label>
+              <Label className="text-responsive-sm">Filière</Label>
               <Select value={selectedFiliere} onValueChange={setSelectedFiliere}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder="Sélectionnez une filière" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {filieres.map((filiere: { id: string; nom: string }) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
                   ))}
@@ -205,16 +205,16 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
             </div>
 
             <div>
-              <Label>Module</Label>
+              <Label className="text-responsive-sm">Module</Label>
               <Select value={selectedModule} onValueChange={setSelectedModule}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder="Sélectionnez un module" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {modules
                     .filter((m) => !selectedFiliere || m.filiere.id === selectedFiliere)
                     .map((module) => (
-                      <SelectItem key={module.id} value={module.id}>
+                      <SelectItem key={module.id} value={module.id} className="text-responsive-sm">
                         {module.nom}
                       </SelectItem>
                     ))}
@@ -223,12 +223,12 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
             </div>
 
             <div>
-              <Label>Date</Label>
+              <Label className="text-responsive-sm">Date</Label>
               <Input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-card"
+                className="bg-card text-responsive-sm"
               />
             </div>
           </div>
@@ -238,14 +238,14 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
       {students.length > 0 && (
         <>
           {/* Statistiques */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <Check className="h-5 w-5 text-green-500" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Présents</p>
-                    <p className="text-2xl font-bold">{stats.present}</p>
+                    <p className="text-responsive-sm text-muted-foreground">Présents</p>
+                    <p className="text-responsive-2xl font-bold">{stats.present}</p>
                   </div>
                 </div>
               </CardContent>
@@ -256,8 +256,8 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                 <div className="flex items-center gap-2">
                   <X className="h-5 w-5 text-red-500" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Absents</p>
-                    <p className="text-2xl font-bold">{stats.absent}</p>
+                    <p className="text-responsive-sm text-muted-foreground">Absents</p>
+                    <p className="text-responsive-2xl font-bold">{stats.absent}</p>
                   </div>
                 </div>
               </CardContent>
@@ -268,8 +268,8 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-orange-500" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Retards</p>
-                    <p className="text-2xl font-bold">{stats.late}</p>
+                    <p className="text-responsive-sm text-muted-foreground">Retards</p>
+                    <p className="text-responsive-2xl font-bold">{stats.late}</p>
                   </div>
                 </div>
               </CardContent>
@@ -280,8 +280,8 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-[var(--link)]" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Excusés</p>
-                    <p className="text-2xl font-bold">{stats.excused}</p>
+                    <p className="text-responsive-sm text-muted-foreground">Excusés</p>
+                    <p className="text-responsive-2xl font-bold">{stats.excused}</p>
                   </div>
                 </div>
               </CardContent>
@@ -291,9 +291,9 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
           {/* Liste des étudiants */}
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Liste des Étudiants ({students.length})</CardTitle>
-                <Button onClick={handleSave} disabled={saving}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                <CardTitle className="text-responsive-lg">Liste des Étudiants ({students.length})</CardTitle>
+                <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
                   {saving ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
@@ -303,11 +303,11 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                 {students.map((student) => (
                   <div
                     key={student.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg gap-3 sm:gap-0"
                   >
                     <div>
-                      <p className="font-medium">{student.user.name}</p>
-                      <p className="text-sm text-muted-foreground">{student.user.email}</p>
+                      <p className="font-medium text-responsive-sm">{student.user.name}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{student.user.email}</p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -316,14 +316,14 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                         value={attendances[student.id] || ''}
                         onValueChange={(value) => handleStatusChange(student.id, value)}
                       >
-                        <SelectTrigger className="w-32 bg-card">
+                        <SelectTrigger className="w-full sm:w-32 bg-card text-responsive-sm">
                           <SelectValue placeholder="Statut" />
                         </SelectTrigger>
                         <SelectContent className="bg-card">
-                          <SelectItem value="PRESENT">Présent</SelectItem>
-                          <SelectItem value="ABSENT">Absent</SelectItem>
-                          <SelectItem value="LATE">Retard</SelectItem>
-                          <SelectItem value="EXCUSED">Excusé</SelectItem>
+                          <SelectItem value="PRESENT" className="text-responsive-sm">Présent</SelectItem>
+                          <SelectItem value="ABSENT" className="text-responsive-sm">Absent</SelectItem>
+                          <SelectItem value="LATE" className="text-responsive-sm">Retard</SelectItem>
+                          <SelectItem value="EXCUSED" className="text-responsive-sm">Excusé</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -337,7 +337,7 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
 
       {!loading && students.length === 0 && selectedModule && selectedFiliere && (
         <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
+          <CardContent className="p-6 sm:p-8 text-center text-muted-foreground text-responsive-sm">
             Aucun étudiant trouvé pour cette filière
           </CardContent>
         </Card>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, MapPin, Calendar } from "lucide-react"
@@ -34,7 +35,7 @@ export default async function StudentSchedulePage({
   const dayNames = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI']
   const currentDay = dayNames[today.getDay()]
 
-  const emploiDuTemps = await prisma.emploiDuTemps.findMany({
+  const emploiDuTemps: any = await prisma.emploiDuTemps.findMany({
     where: {
       schoolId: student.schoolId,
       niveau: student.niveau,
@@ -61,7 +62,7 @@ export default async function StudentSchedulePage({
   const now = new Date()
   const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
   
-  const schedule = emploiDuTemps.map(cours => {
+  const schedule = emploiDuTemps.map((cours: any) => {
     let status = 'upcoming'
     if (currentTime > cours.heureFin) {
       status = 'completed'
@@ -127,13 +128,13 @@ export default async function StudentSchedulePage({
   const attendanceRate = totalSessions > 0 ? Math.round(((totalSessions - totalAbsences) / totalSessions) * 100) : 100
 
   // Prochain cours
-  const nextCourse = schedule.find(c => c.status === 'upcoming') || schedule.find(c => c.status === 'current')
+  const nextCourse = schedule.find((c: any) => c.status === 'upcoming') || schedule.find((c: any) => c.status === 'current')
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mon Emploi du Temps</h1>
-        <p className="text-muted-foreground mt-2">Vos cours du jour - {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Mon Emploi du Temps</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Vos cours du jour - {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
       <Card>
@@ -150,7 +151,7 @@ export default async function StudentSchedulePage({
             </div>
           ) : (
             <div className="space-y-3">
-              {schedule.map((item, idx) => (
+              {schedule.map((item: any, idx: number) => (
               <div
                 key={idx}
                 className={`flex items-center gap-4 p-4 border rounded-lg ${
@@ -203,7 +204,7 @@ export default async function StudentSchedulePage({
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Prochain Cours</CardTitle>

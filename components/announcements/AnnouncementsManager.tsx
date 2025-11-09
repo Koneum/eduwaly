@@ -168,14 +168,14 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
     }
   }
 
-  if (loading) return <div>Chargement...</div>
+  if (loading) return <div className="text-responsive-sm text-muted-foreground">Chargement...</div>
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Annonces</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-responsive-xl font-bold">Annonces</h2>
+          <p className="text-responsive-sm text-muted-foreground">
             {isSuperAdmin ? 'Annonces globales pour toutes les écoles' : 'Annonces pour votre établissement'}
           </p>
         </div>
@@ -185,30 +185,30 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {announcements.length === 0 ? (
           <Card className="p-12">
             <div className="flex flex-col items-center justify-center text-center">
               <Megaphone className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucune annonce</h3>
-              <p className="text-sm text-muted-foreground">Créez votre première annonce</p>
+              <h3 className="text-responsive-lg font-semibold mb-2">Aucune annonce</h3>
+              <p className="text-responsive-sm text-muted-foreground">Créez votre première annonce</p>
             </div>
           </Card>
         ) : (
           announcements.map((announcement) => (
             <Card key={announcement.id} className={!announcement.isActive ? 'opacity-60' : ''}>
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-base">{announcement.title}</CardTitle>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <CardTitle className="text-responsive-base">{announcement.title}</CardTitle>
                       <Badge className={getPriorityColor(announcement.priority)}>
                         {priorityLabels[announcement.priority]}
                       </Badge>
                       {!announcement.isActive && <Badge variant="outline">Désactivée</Badge>}
                     </div>
-                    <p className="text-sm text-muted-foreground">{announcement.content}</p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                    <p className="text-responsive-sm text-muted-foreground">{announcement.content}</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-responsive-xs text-muted-foreground">
                       <span>{announcement.authorName}</span>
                       <span>
                         {formatDistance(new Date(announcement.publishedAt), new Date(), {
@@ -247,67 +247,70 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingAnnouncement ? 'Modifier' : 'Nouvelle'} annonce</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">{editingAnnouncement ? 'Modifier' : 'Nouvelle'} annonce</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               {isSuperAdmin
                 ? 'Cette annonce sera visible par toutes les écoles'
                 : 'Cette annonce sera visible par votre établissement'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label htmlFor="title">Titre</Label>
+              <Label htmlFor="title" className="text-responsive-sm">Titre</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Titre de l'annonce"
+                className="text-responsive-sm"
               />
             </div>
 
             <div>
-              <Label htmlFor="content">Contenu</Label>
+              <Label htmlFor="content" className="text-responsive-sm">Contenu</Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
                 placeholder="Contenu de l'annonce"
+                className="text-responsive-sm"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="priority">Priorité</Label>
+                <Label htmlFor="priority" className="text-responsive-sm">Priorité</Label>
                 <Select value={priority || 'NORMAL'} onValueChange={setPriority}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue placeholder="Sélectionner une priorité" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LOW">Faible</SelectItem>
-                    <SelectItem value="NORMAL">Normal</SelectItem>
-                    <SelectItem value="HIGH">Élevé</SelectItem>
-                    <SelectItem value="URGENT">Urgent</SelectItem>
+                    <SelectItem value="LOW" className="text-responsive-sm">Faible</SelectItem>
+                    <SelectItem value="NORMAL" className="text-responsive-sm">Normal</SelectItem>
+                    <SelectItem value="HIGH" className="text-responsive-sm">Élevé</SelectItem>
+                    <SelectItem value="URGENT" className="text-responsive-sm">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="expiresAt">Date d&apos;expiration (optionnel)</Label>
+                <Label htmlFor="expiresAt" className="text-responsive-sm">Date d&apos;expiration (optionnel)</Label>
                 <Input
                   id="expiresAt"
                   type="datetime-local"
                   value={expiresAt}
                   onChange={(e) => setExpiresAt(e.target.value)}
+                  className="text-responsive-sm"
                 />
               </div>
             </div>
 
             <div>
-              <Label>Public cible</Label>
+              <Label className="text-responsive-sm">Public cible</Label>
               <div className="flex flex-wrap gap-4 mt-2">
                 {['ALL', 'TEACHER', 'STUDENT', 'PARENT'].map((role) => (
                   <div key={role} className="flex items-center space-x-2">
@@ -316,7 +319,7 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
                       checked={targetAudience.includes(role)}
                       onCheckedChange={() => toggleAudience(role)}
                     />
-                    <label htmlFor={role} className="text-sm cursor-pointer">
+                    <label htmlFor={role} className="text-responsive-sm cursor-pointer">
                       {role === 'ALL' ? 'Tous' : role === 'TEACHER' ? 'Enseignants' : role === 'STUDENT' ? 'Étudiants' : 'Parents'}
                     </label>
                   </div>
@@ -325,11 +328,11 @@ export default function AnnouncementsManager({ isSuperAdmin = false }: Props) {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmit}>
+            <Button onClick={handleSubmit} className="w-full sm:w-auto">
               {editingAnnouncement ? 'Mettre à jour' : 'Créer'}
             </Button>
           </DialogFooter>

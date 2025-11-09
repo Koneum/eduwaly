@@ -142,28 +142,29 @@ export function NewConversationDialog({ schoolId, onConversationCreated }: NewCo
           Nouvelle conversation
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Nouvelle conversation</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-responsive-lg">Nouvelle conversation</DialogTitle>
+          <DialogDescription className="text-responsive-sm">
             Sélectionnez les personnes avec qui vous souhaitez discuter
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 sm:space-y-4 py-4">
           {selectedUsers.length > 1 && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Sujet (optionnel)</label>
+              <label className="text-responsive-sm font-medium">Sujet (optionnel)</label>
               <Input
                 placeholder="Ex: Réunion parents-professeurs"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
+                className="text-responsive-sm"
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label className="text-responsive-sm font-medium">
               Destinataires ({selectedUsers.length} sélectionné{selectedUsers.length > 1 ? 's' : ''})
             </label>
             <div className="relative">
@@ -172,18 +173,18 @@ export function NewConversationDialog({ schoolId, onConversationCreated }: NewCo
                 placeholder="Rechercher par nom ou email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-responsive-sm"
               />
             </div>
           </div>
 
-          <ScrollArea className="h-[300px] border rounded-md">
+          <ScrollArea className="h-[40vh] sm:h-[300px] border rounded-md">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
+              <div className="flex items-center justify-center h-full text-muted-foreground text-responsive-sm">
                 Aucun utilisateur trouvé
               </div>
             ) : (
@@ -198,15 +199,15 @@ export function NewConversationDialog({ schoolId, onConversationCreated }: NewCo
                         : 'hover:bg-accent border-2 border-transparent'
                     }`}
                   >
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                       <AvatarImage src={user.image || undefined} />
                       <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="font-medium text-responsive-sm">{user.name}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{user.email}</p>
                     </div>
-                    <Badge className={roleBadgeColors[user.role] || 'bg-gray-500'}>
+                    <Badge className={`${roleBadgeColors[user.role] || 'bg-gray-500'} text-responsive-xs`}>
                       {roleLabels[user.role] || user.role}
                     </Badge>
                   </button>
@@ -216,11 +217,11 @@ export function NewConversationDialog({ schoolId, onConversationCreated }: NewCo
           </ScrollArea>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={creating}>
+        <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={creating} className="w-full sm:w-auto">
             Annuler
           </Button>
-          <Button onClick={handleCreateConversation} disabled={creating || selectedUsers.length === 0}>
+          <Button onClick={handleCreateConversation} disabled={creating || selectedUsers.length === 0} className="w-full sm:w-auto">
             {creating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

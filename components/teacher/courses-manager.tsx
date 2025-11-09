@@ -56,17 +56,17 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Mes Cours</h1>
-          <p className="text-muted-foreground mt-2">Consultez vos cours et gérez les ressources pédagogiques</p>
+          <h1 className="heading-responsive-h1">Mes Cours</h1>
+          <p className="text-responsive-sm text-muted-foreground mt-2">Consultez vos cours et gérez les ressources pédagogiques</p>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {modules.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground">Aucun cours assigné pour le moment</p>
+          <div className="col-span-full text-center py-8 sm:py-12">
+            <p className="text-responsive-sm text-muted-foreground">Aucun cours assigné pour le moment</p>
           </div>
         ) : (
           modules.map((mod) => (
@@ -77,18 +77,18 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
                     <BookOpen className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{mod.nom}</CardTitle>
-                    <CardDescription>{mod.filiere?.nom || 'Non assigné'}</CardDescription>
+                    <CardTitle className="text-responsive-base">{mod.nom}</CardTitle>
+                    <CardDescription className="text-responsive-sm">{mod.filiere?.nom || 'Non assigné'}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-sm">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 text-responsive-sm">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Type: {mod.type}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-responsive-sm">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">{mod.vh}h - {mod.semestre}</span>
                   </div>
@@ -108,17 +108,17 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
 
       {/* Dialog Gérer Documents */}
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Gérer les documents - {selectedModule?.nom}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Gérer les documents - {selectedModule?.nom}</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Ajoutez ou supprimez des documents pour ce cours
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-              <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground mb-3">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-4 sm:p-6 text-center">
+              <Upload className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-responsive-sm text-muted-foreground mb-3">
                 Glissez-déposez vos fichiers ici ou cliquez pour parcourir
               </p>
               <Button onClick={handleUploadDocument}>
@@ -128,9 +128,9 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Documents existants</Label>
+              <Label className="text-responsive-sm">Documents existants</Label>
               {documents.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-responsive-sm text-muted-foreground text-center py-4">
                   Aucun document pour le moment
                 </p>
               ) : (
@@ -138,23 +138,24 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
                   {documents.map((doc) => (
                     <div 
                       key={doc.id} 
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg hover:bg-accent/50 gap-3 sm:gap-0"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
                         <File className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="font-medium text-sm">{doc.name}</p>
-                          <p className="text-xs text-muted-foreground">{doc.type}</p>
+                        <div className="flex-1">
+                          <p className="font-medium text-responsive-sm">{doc.name}</p>
+                          <p className="text-responsive-xs text-muted-foreground">{doc.type}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <Button variant="ghost" size="sm" className="flex-1 sm:flex-none">
                           Télécharger
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleDeleteDocument(doc.id)}
+                          className="flex-1 sm:flex-none"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -165,8 +166,8 @@ export default function CoursesManager({ modules }: CoursesManagerProps) {
               )}
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)} className="w-full sm:w-auto">
               Fermer
             </Button>
           </DialogFooter>

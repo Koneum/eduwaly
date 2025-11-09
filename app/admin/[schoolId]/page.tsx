@@ -44,15 +44,15 @@ export default async function AdminSchoolDashboard({
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Tableau de Bord École</h1>
-        <p className="text-muted-foreground mt-2">Vue d&apos;ensemble de votre établissement</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Tableau de Bord École</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Vue d&apos;ensemble de votre établissement</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Étudiants"
           value={totalStudents}
@@ -84,7 +84,7 @@ export default async function AdminSchoolDashboard({
       </div>
 
       {/* Charts and Quick Actions */}
-      <div className="grid gap-6 lg:grid-cols-7">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-7">
         <div className="lg:col-span-4">
           <PaymentStatusChart data={paymentStatusData} />
         </div>

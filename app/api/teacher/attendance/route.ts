@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
-import { AttendanceStatus } from '@/app/generated/prisma'
+import { sendAbsenceNotification } from '@/lib/brevo'
+import { AttendanceStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,7 +124,41 @@ export async function POST(req: NextRequest) {
         status: att.status as AttendanceStatus, // PRESENT, ABSENT, LATE, EXCUSED
         notes: att.notes ?? null,
       })),
-    }) 
+    })
+
+    // Envoyer notifications pour absences
+    const absences = attendanceInputs.filter(att => att.status === 'ABSENT')
+    if (absences.length > 0) {
+      for (const absence of absences) {
+        try {
+          const student = await prisma.student.findUnique({
+            where: { id: absence.studentId },
+            include: { user: true, filiere: true }
+          })
+          
+          if (student?.user?.email) {
+            // Récupérer le parent si existe
+            const parent = await prisma.parent.findFirst({
+              where: { students: { some: { id: student.id } } },
+              include: { user: true }
+            })
+            
+            const recipientEmail = parent?.user?.email || student.user.email
+            const recipientName = parent?.user?.name || student.user.name
+            
+            await sendAbsenceNotification(
+              recipientEmail,
+              recipientName,
+              student.user.name,
+              new Date(date),
+              false // Absence non justifiée par défaut
+            )
+          }
+        } catch (emailError) {
+          console.error('Erreur email absence:', emailError)
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, count: createdAttendances.count })
   } catch (error) {

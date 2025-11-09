@@ -341,91 +341,92 @@ export default function NotificationsManager({ initialIssues }: NotificationsMan
 
       {/* Dialog */}
       <Dialog open={!!selectedIssue && !!action} onOpenChange={(open) => !open && closeDialog()}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-responsive-lg">
               {action === 'view' && 'Détails du signalement'}
               {action === 'resolve' && 'Traiter le signalement'}
               {action === 'delete' && 'Supprimer le signalement'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-responsive-sm">
               {selectedIssue && selectedIssue.title}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {action === 'view' && selectedIssue && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <Label>École</Label>
-                  <p className="text-sm mt-1">{selectedIssue.school.name}</p>
+                  <Label className="text-responsive-sm">École</Label>
+                  <p className="text-responsive-sm mt-1">{selectedIssue.school.name}</p>
                 </div>
                 <div>
-                  <Label>Rapporté par</Label>
-                  <p className="text-sm mt-1">{selectedIssue.reporterName} ({selectedIssue.reporterEmail})</p>
+                  <Label className="text-responsive-sm">Rapporté par</Label>
+                  <p className="text-responsive-sm mt-1">{selectedIssue.reporterName} ({selectedIssue.reporterEmail})</p>
                 </div>
                 <div>
-                  <Label>Catégorie</Label>
-                  <p className="text-sm mt-1">{categoryLabels[selectedIssue.category] || selectedIssue.category}</p>
+                  <Label className="text-responsive-sm">Catégorie</Label>
+                  <p className="text-responsive-sm mt-1">{categoryLabels[selectedIssue.category] || selectedIssue.category}</p>
                 </div>
                 <div>
-                  <Label>Priorité</Label>
-                  <p className="text-sm mt-1">{priorityLabels[selectedIssue.priority] || selectedIssue.priority}</p>
+                  <Label className="text-responsive-sm">Priorité</Label>
+                  <p className="text-responsive-sm mt-1">{priorityLabels[selectedIssue.priority] || selectedIssue.priority}</p>
                 </div>
                 <div>
-                  <Label>Statut</Label>
-                  <p className="text-sm mt-1">{statusLabels[selectedIssue.status] || selectedIssue.status}</p>
+                  <Label className="text-responsive-sm">Statut</Label>
+                  <p className="text-responsive-sm mt-1">{statusLabels[selectedIssue.status] || selectedIssue.status}</p>
                 </div>
                 <div>
-                  <Label>Description</Label>
-                  <p className="text-sm mt-1">{selectedIssue.description}</p>
+                  <Label className="text-responsive-sm">Description</Label>
+                  <p className="text-responsive-sm mt-1">{selectedIssue.description}</p>
                 </div>
                 {selectedIssue.resolution && (
                   <div>
-                    <Label>Résolution</Label>
-                    <p className="text-sm mt-1">{selectedIssue.resolution}</p>
+                    <Label className="text-responsive-sm">Résolution</Label>
+                    <p className="text-responsive-sm mt-1">{selectedIssue.resolution}</p>
                   </div>
                 )}
               </div>
             )}
 
             {action === 'resolve' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="status">Nouveau statut</Label>
+                  <Label htmlFor="status" className="text-responsive-sm">Nouveau statut</Label>
                   <Select value={newStatus} onValueChange={setNewStatus}>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="IN_PROGRESS">En cours</SelectItem>
-                      <SelectItem value="RESOLVED">Résolu</SelectItem>
-                      <SelectItem value="CLOSED">Fermé</SelectItem>
+                      <SelectItem value="IN_PROGRESS" className="text-responsive-sm">En cours</SelectItem>
+                      <SelectItem value="RESOLVED" className="text-responsive-sm">Résolu</SelectItem>
+                      <SelectItem value="CLOSED" className="text-responsive-sm">Fermé</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="resolution">Résolution / Notes</Label>
+                  <Label htmlFor="resolution" className="text-responsive-sm">Résolution / Notes</Label>
                   <Textarea
                     id="resolution"
                     value={resolution}
                     onChange={(e) => setResolution(e.target.value)}
                     rows={4}
                     placeholder="Décrivez la résolution ou ajoutez des notes..."
+                    className="text-responsive-sm"
                   />
                 </div>
               </div>
             )}
 
             {action === 'delete' && (
-              <p className="text-sm text-destructive">
+              <p className="text-responsive-sm text-destructive">
                 Attention : Cette action est irréversible. Êtes-vous sûr de vouloir supprimer ce signalement ?
               </p>
             )}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={closeDialog} className="w-full sm:w-auto">
               {action === 'view' ? 'Fermer' : 'Annuler'}
             </Button>
             {action !== 'view' && (
@@ -433,6 +434,7 @@ export default function NotificationsManager({ initialIssues }: NotificationsMan
                 onClick={handleAction} 
                 disabled={isLoading}
                 variant={action === 'delete' ? 'destructive' : 'default'}
+                className="w-full sm:w-auto"
               >
                 {isLoading ? 'Traitement...' : 'Confirmer'}
               </Button>

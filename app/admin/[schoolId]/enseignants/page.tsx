@@ -105,31 +105,31 @@ const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo }: {
   };
 
   return (
-    <Card className="shadow-md rounded-lg p-4 hover:bg-accent/50 transition-all duration-200">
-      <div className="flex flex-row items-center gap-4 p-0 mb-4">
-        <Avatar className="h-12 w-12 bg-indigo-50 dark:bg-indigo-900">
+    <Card className="shadow-md rounded-lg p-3 sm:p-4 hover:bg-accent/50 transition-all duration-200">
+      <div className="flex flex-row items-center gap-3 sm:gap-4 p-0 mb-3 sm:mb-4">
+        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 bg-indigo-50 dark:bg-indigo-900">
           <AvatarFallback>{enseignant.nom[0] + enseignant.prenom[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-foreground">
+          <h3 className="text-responsive-base font-semibold text-foreground">
             {enseignant.titre} {enseignant.nom} {enseignant.prenom}
           </h3>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant={enseignant.type === 'PERMANENT' ? 'default' : 'secondary'} className="bg-indigo-50 dark:bg-indigo-800 dark:text-white">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+            <Badge variant={enseignant.type === 'PERMANENT' ? 'default' : 'secondary'} className="bg-indigo-50 dark:bg-indigo-800 dark:text-white text-[10px] sm:text-responsive-xs whitespace-nowrap">
               {enseignant.type}
             </Badge>
-            <Badge className="bg-indigo-50 text-indigo-700" variant="outline">{enseignant.grade}</Badge>
+            <Badge className="bg-indigo-50 text-indigo-700 text-[10px] sm:text-responsive-xs whitespace-nowrap" variant="outline">{enseignant.grade}</Badge>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-2 mt-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="grid grid-cols-1 gap-1.5 sm:gap-2 mt-2">
+        <div className="flex items-center gap-2 text-responsive-sm text-muted-foreground">
           <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
           <span>{enseignant.telephone || 'Non renseigné'}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-responsive-sm text-muted-foreground">
           <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
@@ -137,7 +137,7 @@ const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo }: {
           <span>{enseignant.email || 'Non renseigné'}</span>
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="flex flex-wrap justify-end gap-1.5 sm:gap-2 mt-3 sm:mt-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -365,12 +365,12 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
   // Composants de filtrage et recherche
   const SearchAndFilters = () => (
-    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
       <Input
         placeholder="Rechercher un enseignant..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="flex-1"
+        className="flex-1 text-responsive-sm"
       />
       <Select
         value={selectedFilters.type}
@@ -378,13 +378,13 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
           setSelectedFilters((prev) => ({ ...prev, type: value }))
         }
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px] text-responsive-sm">
           <SelectValue placeholder="Type d'enseignant" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">Tous</SelectItem>
-          <SelectItem value="PERMANENT">Permanent</SelectItem>
-          <SelectItem value="VACATAIRE">Vacataire</SelectItem>
+          <SelectItem value="ALL" className="text-responsive-sm">Tous</SelectItem>
+          <SelectItem value="PERMANENT" className="text-responsive-sm">Permanent</SelectItem>
+          <SelectItem value="VACATAIRE" className="text-responsive-sm">Vacataire</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -392,7 +392,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
   // Affichage en cards
   const TeacherCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {filteredTeachers.map((teacher: EnhancedTeacher) => (
         <TeacherCard
           key={teacher.id}
@@ -531,16 +531,16 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
     <Suspense fallback={<div>Chargement...</div>}>
       <div className="container mx-auto px-4 py-8">
         {/* En-tête avec titre et bouton d'ajout */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Enseignants</h1>
-            <p className="mt-2 text-sm text-gray-700 dark:text-white">Gérez la liste des enseignants et leurs informations</p>
+            <h1 className="heading-responsive-h1 font-bold text-gray-900 dark:text-white">Gestion des Enseignants</h1>
+            <p className="mt-2 text-responsive-sm text-gray-700 dark:text-white">Gérez la liste des enseignants et leurs informations</p>
           </div>
           <PermissionButton
             category="enseignants"
             action="create"
             onClick={handleAdd}
-            className="bg-primary hover:bg-primary/50 text-black"
+            className="bg-primary hover:bg-primary/50 text-black btn-responsive w-full sm:w-auto"
           >
             Ajouter un enseignant
           </PermissionButton>
@@ -577,43 +577,46 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
           setShowModal(isOpen);
           if (!isOpen) resetForm();
         }}>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-responsive-lg">
                 {selectedEnseignant ? 'Modifier l\'enseignant' : 'Ajouter un enseignant'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <Label htmlFor="nom">Nom</Label>
+                  <Label htmlFor="nom" className="text-responsive-sm">Nom</Label>
                   <Input
                     id="nom"
                     value={formData.nom}
                     onChange={(e) => setFormData(prev => ({ ...prev, nom: e.target.value }))}
                     required
+                    className="text-responsive-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prenom">Prénom</Label>
+                  <Label htmlFor="prenom" className="text-responsive-sm">Prénom</Label>
                   <Input
                     id="prenom"
                     value={formData.prenom}
                     onChange={(e) => setFormData(prev => ({ ...prev, prenom: e.target.value }))}
                     required
+                    className="text-responsive-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="titre">Titre</Label>
+                  <Label htmlFor="titre" className="text-responsive-sm">Titre</Label>
                   <Input
                     id="titre"
                     value={formData.titre}
                     onChange={(e) => setFormData(prev => ({ ...prev, titre: e.target.value }))}
                     required
+                    className="text-responsive-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="telephone">Téléphone</Label>
+                  <Label htmlFor="telephone" className="text-responsive-sm">Téléphone</Label>
                   <Input
                     id="telephone"
                     name="telephone"
@@ -623,13 +626,14 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                       validateField('telephone', e.target.value);
                     }}
                     required
+                    className="text-responsive-sm"
                   />
                   {validationErrors.telephone && (
-                    <p className="text-sm text-red-500 mt-1">{validationErrors.telephone}</p>
+                    <p className="text-responsive-xs text-red-500 mt-1">{validationErrors.telephone}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-responsive-sm">Email</Label>
                   <Input
                     id="email"
                     name="email"
@@ -640,23 +644,24 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                       validateField('email', e.target.value);
                     }}
                     required
+                    className="text-responsive-sm"
                   />
                   {validationErrors.email && (
-                    <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+                    <p className="text-responsive-xs text-red-500 mt-1">{validationErrors.email}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="type">Type</Label>
+                  <Label htmlFor="type" className="text-responsive-sm">Type</Label>
                   <Select 
                     value={formData.type} 
                     onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as TypeEnseignant }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue placeholder="Sélectionner un type" />
                     </SelectTrigger>
                     <SelectContent>
                       {TYPE_ENSEIGNANTS.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem key={type.value} value={type.value} className="text-responsive-sm">
                           {type.label}
                         </SelectItem>
                       ))}
@@ -664,17 +669,17 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="grade">Grade</Label>
+                  <Label htmlFor="grade" className="text-responsive-sm">Grade</Label>
                   <Select 
                     value={formData.grade} 
                     onValueChange={(value) => setFormData(prev => ({ ...prev, grade: value as Grade }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue placeholder="Sélectionner un grade" />
                     </SelectTrigger>
                     <SelectContent>
                       {GRADES.map((grade) => (
-                        <SelectItem key={grade.value} value={grade.value}>
+                        <SelectItem key={grade.value} value={grade.value} className="text-responsive-sm">
                           {grade.label}
                         </SelectItem>
                       ))}
@@ -682,20 +687,20 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                   </Select>
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  className="w-full sm:w-auto"
+                >
+                  Annuler
+                </Button>
                 <Button  
-                className='bg-indigo-500 text-white'
+                  className='bg-indigo-500 text-white w-full sm:w-auto'
                   type="submit" 
                   disabled={isSubmitting}>
                   {selectedEnseignant ? 'Modifier' : 'Ajouter'}
-                </Button>
-
-                <Button 
-                  type="button"
-                  variant="destructive"
-                  onClick={handleCloseModal}
-                >
-                  Annuler
                 </Button>
               </DialogFooter>
             </form>
@@ -704,56 +709,56 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
         {/* Dialog des informations de l'enseignant */}
         <Dialog open={showInfoDialog} onOpenChange={setShowInfoDialog}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle className="text-responsive-lg font-bold">
                 Informations de l&apos;enseignant
               </DialogTitle>
             </DialogHeader>
             {selectedTeacherInfo && (
               <div className="space-y-6">
                 {/* Informations personnelles */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg border-b pb-2">Informations personnelles</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="font-semibold text-responsive-base border-b pb-2">Informations personnelles</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Nom complet</Label>
-                      <p className="font-medium">{selectedTeacherInfo.titre} {selectedTeacherInfo.prenom} {selectedTeacherInfo.nom}</p>
+                      <Label className="text-responsive-xs text-muted-foreground">Nom complet</Label>
+                      <p className="font-medium text-responsive-sm">{selectedTeacherInfo.titre} {selectedTeacherInfo.prenom} {selectedTeacherInfo.nom}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Email</Label>
-                      <p className="font-medium break-all">{selectedTeacherInfo.email}</p>
+                      <Label className="text-responsive-xs text-muted-foreground">Email</Label>
+                      <p className="font-medium text-responsive-sm break-all">{selectedTeacherInfo.email}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Téléphone</Label>
-                      <p className="font-medium">{selectedTeacherInfo.telephone}</p>
+                      <Label className="text-responsive-xs text-muted-foreground">Téléphone</Label>
+                      <p className="font-medium text-responsive-sm">{selectedTeacherInfo.telephone}</p>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Type</Label>
-                      <Badge variant={selectedTeacherInfo.type === 'PERMANENT' ? 'default' : 'secondary'}>
+                      <Label className="text-responsive-xs text-muted-foreground">Type</Label>
+                      <Badge variant={selectedTeacherInfo.type === 'PERMANENT' ? 'default' : 'secondary'} className="text-responsive-xs">
                         {selectedTeacherInfo.type}
                       </Badge>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Grade</Label>
-                      <Badge variant="outline">{selectedTeacherInfo.grade}</Badge>
+                      <Label className="text-responsive-xs text-muted-foreground">Grade</Label>
+                      <Badge variant="outline" className="text-responsive-xs">{selectedTeacherInfo.grade}</Badge>
                     </div>
                   </div>
                 </div>
 
                 {/* Informations de connexion */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg border-b pb-2">Compte utilisateur</h3>
-                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="font-semibold text-responsive-base border-b pb-2">Compte utilisateur</h3>
+                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
                     <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <Mail className="icon-responsive text-blue-600 dark:text-blue-400 mt-0.5" />
                       <div className="flex-1">
-                        <p className="font-semibold text-sm mb-2">Identifiants de connexion</p>
-                        <div className="space-y-1 text-sm">
+                        <p className="font-semibold text-responsive-sm mb-2">Identifiants de connexion</p>
+                        <div className="space-y-1 text-responsive-sm">
                           <p><strong>Email :</strong> <span className="font-bold">{selectedTeacherInfo.email}</span></p>
                           <p><strong>Mot de passe initial :</strong> <span className="font-bold">password123</span></p>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-responsive-xs text-muted-foreground mt-2">
                           L&apos;enseignant peut se connecter avec son email et modifier son mot de passe depuis son profil.
                         </p>
                       </div>
@@ -762,8 +767,8 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 </div>
 
                 {/* Note sur le mot de passe */}
-                <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                  <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-2 sm:p-3">
+                  <p className="text-responsive-xs text-yellow-800 dark:text-yellow-200">
                     💡 <strong>Réinitialisation du mot de passe :</strong> Si l&apos;enseignant a oublié son mot de passe, 
                     vous pouvez le réinitialiser depuis la page de gestion des utilisateurs.
                   </p>
@@ -771,23 +776,24 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
               </div>
             )}
             
-            <DialogFooter className="flex gap-2 sm:justify-between">
+            <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+              <Button 
+                onClick={() => setShowInfoDialog(false)}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                Fermer
+              </Button>
               <Button 
                 onClick={() => {
                   setEmailRecipient(selectedTeacherInfo?.email || '');
                   setShowSendEmailDialog(true);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                 disabled={!selectedTeacherInfo?.user}
               >
-                <Mail className="h-4 w-4 mr-2" />
+                <Mail className="icon-responsive mr-2" />
                 Envoyer identifiants
-              </Button>
-              <Button 
-                onClick={() => setShowInfoDialog(false)}
-                variant="outline"
-              >
-                Fermer
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -795,20 +801,20 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
         {/* Dialog d'envoi des identifiants par email */}
         <Dialog open={showSendEmailDialog} onOpenChange={setShowSendEmailDialog}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Envoyer les identifiants</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-responsive-lg">Envoyer les identifiants</DialogTitle>
+              <DialogDescription className="text-responsive-sm">
                 Enseignant: {selectedTeacherInfo?.titre} {selectedTeacherInfo?.prenom} {selectedTeacherInfo?.nom}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950 p-3 sm:p-4 rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-blue-600" />
-                  <p className="font-semibold text-sm">Informations à envoyer</p>
+                  <Mail className="icon-responsive text-blue-600" />
+                  <p className="font-semibold text-responsive-sm">Informations à envoyer</p>
                 </div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-responsive-sm">
                   <p>Email de connexion: <span className="font-bold"><strong>{selectedTeacherInfo?.email}</strong></span></p>
                   <p>Mot de passe initial: <span className="font-bold"><strong>password123</strong></span></p>
                   <p>Type: <span className="font-bold"><strong>{selectedTeacherInfo?.type}</strong></span></p>
@@ -816,21 +822,22 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="recipientEmail">Email du destinataire *</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="recipientEmail" className="text-responsive-sm">Email du destinataire *</Label>
                 <Input
                   id="recipientEmail"
                   type="email"
                   placeholder="enseignant@example.com"
                   value={emailRecipient}
                   onChange={(e) => setEmailRecipient(e.target.value)}
+                  className="text-responsive-sm"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-responsive-xs text-muted-foreground">
                   Un email professionnel sera envoyé avec les identifiants de connexion et les instructions.
                 </p>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -838,6 +845,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                   setEmailRecipient('');
                 }}
                 disabled={isSendingEmail}
+                className="w-full sm:w-auto"
               >
                 Annuler
               </Button>
@@ -878,7 +886,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                   }
                 }}
                 disabled={isSendingEmail || !emailRecipient}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
               >
                 {isSendingEmail ? 'Envoi...' : 'Envoyer'}
               </Button>
@@ -888,26 +896,26 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
 
         {/* Dialog des identifiants de connexion */}
         <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
-          <DialogContent className="bg-white text-black max-w-md">
+          <DialogContent className="bg-white text-black max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-green-600">
+              <DialogTitle className="text-responsive-lg font-bold text-green-600">
                 ✅ Enseignant créé avec succès !
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-responsive-sm text-gray-600">
                 Un compte a été créé pour <strong>{newTeacherCredentials?.prenom} {newTeacherCredentials?.nom}</strong>. 
                 Voici les identifiants de connexion :
               </p>
               
-              <div className="bg-gray-50 p-4 rounded-lg space-y-3 border border-gray-200">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3 border border-gray-200">
                 <div>
-                  <Label className="text-xs text-gray-500">Email</Label>
+                  <Label className="text-responsive-xs text-gray-500">Email</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <Input 
                       value={newTeacherCredentials?.email || ''} 
                       readOnly 
-                      className="bg-white font-mono text-sm"
+                      className="bg-white font-mono text-responsive-sm"
                     />
                     <Button
                       size="sm"
@@ -923,12 +931,12 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 </div>
                 
                 <div>
-                  <Label className="text-xs text-gray-500">Mot de passe temporaire</Label>
+                  <Label className="text-responsive-xs text-gray-500">Mot de passe temporaire</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <Input 
                       value={newTeacherCredentials?.password || ''} 
                       readOnly 
-                      className="bg-white font-mono text-sm"
+                      className="bg-white font-mono text-responsive-sm"
                     />
                     <Button
                       size="sm"
@@ -944,8 +952,8 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-xs text-yellow-800">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 sm:p-3">
+                <p className="text-responsive-xs text-yellow-800">
                   ⚠️ <strong>Important :</strong> Communiquez ces identifiants à l&apos;enseignant. 
                   Il pourra modifier son mot de passe après sa première connexion.
                 </p>
@@ -955,7 +963,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
             {/* Dialog pour envoyer les identifiants par email */}
             <div >
               <form className='flex flex-col justify-center items-center w-full gap-2'>
-                <Input type="email" className="bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white" placeholder="Renseignez l'email" />
+                <Input type="email" className="bg-zinc-300 dark:bg-zinc-700 text-black dark:text-white text-responsive-sm" placeholder="Renseignez l'email" />
                 <Button
                 className="bg-gray-600 hover:bg-green-600 text-white "
                 >
@@ -973,7 +981,7 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
                     description: 'L\'enseignant a été ajouté avec succès',
                   });
                 }}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white w-full"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white w-full btn-responsive"
               >
                 J&apos;ai noté les identifiants
               </Button>

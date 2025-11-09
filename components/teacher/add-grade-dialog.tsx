@@ -72,25 +72,25 @@ export function AddGradeDialog({ students, modules, onSuccess }: AddGradeDialogP
           Saisir une note
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Saisir une note</DialogTitle>
-          <DialogDescription>Ajoutez une nouvelle évaluation</DialogDescription>
+          <DialogTitle className="text-responsive-lg">Saisir une note</DialogTitle>
+          <DialogDescription className="text-responsive-sm">Ajoutez une nouvelle évaluation</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="student">Étudiant *</Label>
+            <Label htmlFor="student" className="text-responsive-sm">Étudiant *</Label>
             <Select
               value={formData.studentId}
               onValueChange={(value) => setFormData({ ...formData, studentId: value })}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger className="text-responsive-sm">
                 <SelectValue placeholder="Sélectionner un étudiant" />
               </SelectTrigger>
               <SelectContent>
                 {students.map(student => (
-                  <SelectItem key={student.id} value={student.id}>
+                  <SelectItem key={student.id} value={student.id} className="text-responsive-sm">
                     {student.user.name} ({student.studentNumber})
                   </SelectItem>
                 ))}
@@ -99,18 +99,18 @@ export function AddGradeDialog({ students, modules, onSuccess }: AddGradeDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="module">Module *</Label>
+            <Label htmlFor="module" className="text-responsive-sm">Module *</Label>
             <Select
               value={formData.moduleId}
               onValueChange={(value) => setFormData({ ...formData, moduleId: value })}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger className="text-responsive-sm">
                 <SelectValue placeholder="Sélectionner un module" />
               </SelectTrigger>
               <SelectContent>
                 {modules.map(module => (
-                  <SelectItem key={module.id} value={module.id}>
+                  <SelectItem key={module.id} value={module.id} className="text-responsive-sm">
                     {module.nom}
                   </SelectItem>
                 ))}
@@ -118,9 +118,9 @@ export function AddGradeDialog({ students, modules, onSuccess }: AddGradeDialogP
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="note">Note /20 *</Label>
+              <Label htmlFor="note" className="text-responsive-sm">Note /20 *</Label>
               <Input
                 id="note"
                 type="number"
@@ -130,10 +130,11 @@ export function AddGradeDialog({ students, modules, onSuccess }: AddGradeDialogP
                 value={formData.note}
                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                 required
+                className="text-responsive-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="coefficient">Coefficient</Label>
+              <Label htmlFor="coefficient" className="text-responsive-sm">Coefficient</Label>
               <Input
                 id="coefficient"
                 type="number"
@@ -142,37 +143,39 @@ export function AddGradeDialog({ students, modules, onSuccess }: AddGradeDialogP
                 step="0.5"
                 value={formData.coefficient}
                 onChange={(e) => setFormData({ ...formData, coefficient: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type" className="text-responsive-sm">Type</Label>
             <Select
               value={formData.type}
               onValueChange={(value) => setFormData({ ...formData, type: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="text-responsive-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="DEVOIR">Devoir</SelectItem>
-                <SelectItem value="CONTROLE">Contrôle</SelectItem>
-                <SelectItem value="EXAMEN">Examen</SelectItem>
-                <SelectItem value="ORAL">Oral</SelectItem>
-                <SelectItem value="TP">TP</SelectItem>
-                <SelectItem value="PROJET">Projet</SelectItem>
+                <SelectItem value="DEVOIR" className="text-responsive-sm">Devoir</SelectItem>
+                <SelectItem value="CONTROLE" className="text-responsive-sm">Contrôle</SelectItem>
+                <SelectItem value="EXAMEN" className="text-responsive-sm">Examen</SelectItem>
+                <SelectItem value="ORAL" className="text-responsive-sm">Oral</SelectItem>
+                <SelectItem value="TP" className="text-responsive-sm">TP</SelectItem>
+                <SelectItem value="PROJET" className="text-responsive-sm">Projet</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="comment">Commentaire (optionnel)</Label>
+            <Label htmlFor="comment" className="text-responsive-sm">Commentaire (optionnel)</Label>
             <Textarea
               id="comment"
               placeholder="Remarques sur l'évaluation..."
               value={formData.comment}
               onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+              className="text-responsive-sm"
             />
           </div>
 

@@ -209,40 +209,40 @@ export default function EnseignantDetailsPage({ params }: { params: Promise<{ sc
   }
 
   return (
-    <div className="p-4 space-y-6 text-black">
-      <div className="flex justify-between items-center">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 text-black">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-responsive-xl font-bold">
             {enseignant.prenom} {enseignant.nom}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-responsive-sm">
             {formatGrade(enseignant.grade)} - {formatType(enseignant.type)}
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="semestre" className="text-sm font-medium text-gray-600">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label htmlFor="semestre" className="text-responsive-xs font-medium text-gray-600 whitespace-nowrap">
               Semestre :
             </label>
             <select
               id="semestre"
               value={selectedSemestre}
               onChange={(e) => setSelectedSemestre(e.target.value as 'S1' | 'S2')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="px-2 sm:px-3 py-2 bg-white border border-gray-300 rounded-lg text-responsive-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1 sm:flex-initial"
             >
               <option value="S1">Semestre 1</option>
               <option value="S2">Semestre 2</option>
             </select>
           </div>
-          <div className="flex items-center gap-2">
-            <label htmlFor="type" className="text-sm font-medium text-gray-600">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label htmlFor="type" className="text-responsive-xs font-medium text-gray-600 whitespace-nowrap">
               Type :
             </label>
             <select
               id="type"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as 'all' | 'CM' | 'TD' | 'TP')}
-              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="px-2 sm:px-3 py-2 bg-white border border-gray-300 rounded-lg text-responsive-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex-1 sm:flex-initial"
             >
               <option value="all">Tous</option>
               <option value="CM">CM</option>
@@ -250,7 +250,7 @@ export default function EnseignantDetailsPage({ params }: { params: Promise<{ sc
               <option value="TP">TP</option>
             </select>
           </div>
-          <Button data-export-pdf onClick={handleExportPDF} className="bg-indigo-600 text-white hover:bg-indigo-700">
+          <Button data-export-pdf onClick={handleExportPDF} className="bg-indigo-600 text-white hover:bg-indigo-700 w-full sm:w-auto text-responsive-xs">
             <FiDownload className="mr-2" />
             Exporter PDF
           </Button>
@@ -258,23 +258,23 @@ export default function EnseignantDetailsPage({ params }: { params: Promise<{ sc
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="p-3 sm:p-4 bg-gray-50 border-b">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <p className="text-sm text-gray-600">Total heures dispensées</p>
-              <p className="text-lg font-semibold">
+              <p className="text-responsive-xs text-gray-600">Total heures dispensées</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-semibold">
                 {calculateTotalHours(enseignant.emplois)}h
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Heures dues ({selectedSemestre})</p>
-              <p className="text-lg font-semibold">
+              <p className="text-responsive-xs text-gray-600">Heures dues ({selectedSemestre})</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-semibold">
                 {getHeuresDues(enseignant.type)}h
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Heures supplémentaires</p>
-              <p className="text-lg font-semibold">
+              <p className="text-responsive-xs text-gray-600">Heures supplémentaires</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-semibold">
                 {Math.max(0, calculateTotalHours(enseignant.emplois) - getHeuresDues(enseignant.type))}h
               </p>
             </div>

@@ -74,23 +74,23 @@ export default async function StudentGradesPage({
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes Notes</h1>
-        <p className="text-muted-foreground mt-2">Consultez vos résultats et votre progression</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Mes Notes</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Consultez vos résultats et votre progression</p>
       </div>
 
       {/* Stats globales */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Moyenne Générale</p>
-                <p className="text-3xl font-bold text-foreground mt-2">{generalAverage}/20</p>
+                <p className="text-responsive-xs font-medium text-muted-foreground">Moyenne Générale</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{generalAverage}/20</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <Award className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-100 p-2 sm:p-3 rounded-xl">
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>

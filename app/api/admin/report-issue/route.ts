@@ -31,6 +31,22 @@ export async function POST(request: NextRequest) {
       other: '📝 Autre',
     };
 
+    // Mapper les types vers les catégories Prisma
+    const categoryMap: Record<string, string> = {
+      bug: 'BUG',
+      suggestion: 'FEATURE_REQUEST',
+      question: 'SUPPORT',
+      other: 'OTHER',
+    };
+
+    // Mapper les types vers les priorités
+    const priorityMap: Record<string, string> = {
+      bug: 'HIGH',
+      suggestion: 'MEDIUM',
+      question: 'LOW',
+      other: 'LOW',
+    };
+
     // Notifier tous les super-admins
     const superAdmins = await prisma.user.findMany({
       where: { role: 'SUPER_ADMIN' },
@@ -60,11 +76,27 @@ export async function POST(request: NextRequest) {
       console.warn('Aucun super admin trouvé dans la base de données');
     }
 
-    // TODO: Créer un modèle Issue dans le schéma Prisma pour stocker les signalements
+    // Créer le signalement dans la base de données
+    const issueReport = await prisma.issueReport.create({
+      data: {
+        schoolId: user?.schoolId as string,
+        reportedBy: session.user.id,
+        reporterName: session.user.name || 'Inconnu',
+        reporterEmail: session.user.email || '',
+        title: `${typeLabels[type] || type} - ${school?.name || 'École'}`,
+        description: message,
+        priority: (priorityMap[type] || 'MEDIUM') as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+        category: (categoryMap[type] || 'OTHER') as 'TECHNICAL' | 'BILLING' | 'FEATURE_REQUEST' | 'BUG' | 'SUPPORT' | 'OTHER',
+        status: 'OPEN',
+      },
+    });
+
+    console.log('IssueReport créé:', issueReport.id);
     
     return NextResponse.json({ 
       success: true, 
       notified: superAdmins.length,
+      issueId: issueReport.id,
       superAdmins: superAdmins.map((sa: { id: string; name?: string | null; email?: string | null }) => ({ id: sa.id, name: sa.name, email: sa.email }))
     });
   } catch (error) {

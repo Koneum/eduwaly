@@ -237,10 +237,10 @@ export default function EditEmploiPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="container mx-auto p-6 text-black">
-      <h1 className="text-2xl font-bold mb-6">Modifier l&apos;emploi du temps</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="container mx-auto p-3 sm:p-4 md:p-6 text-black">
+      <h1 className="text-responsive-xl font-bold mb-4 sm:mb-6">Modifier l&apos;emploi du temps</h1>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Titre */}
           <div>
             <Label>Titre</Label>
@@ -487,16 +487,16 @@ export default function EditEmploiPage({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* Boutons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
         <Button 
             type="button" 
             variant="outline" 
-            className="w-full md:w-auto bg-white text-red-500 hover:bg-red-500 hover:text-white"
+            className="w-full sm:w-auto bg-white text-red-500 hover:bg-red-500 hover:text-white text-responsive-sm"
             onClick={() => router.back()}
           >
             Annuler
           </Button>
-          <Button type="submit" className="w-full md:w-auto bg-indigo-600 text-white">
+          <Button type="submit" className="w-full sm:w-auto bg-indigo-600 text-white text-responsive-sm">
             <FaSave className="mr-2" />
             Enregistrer les modifications
           </Button>

@@ -204,17 +204,17 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
               Nouvelle École
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Ajouter une nouvelle école</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-responsive-lg">Ajouter une nouvelle école</DialogTitle>
+              <DialogDescription className="text-responsive-sm">
                 Créez une nouvelle école avec son administrateur et son abonnement
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleAddSchool} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleAddSchool} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom de l&apos;école *</Label>
+                  <Label htmlFor="name" className="text-responsive-sm">Nom de l&apos;école *</Label>
                   <Input
                     id="name"
                     required
@@ -227,78 +227,83 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                         subdomain: generateSubdomain(name)
                       })
                     }}
+                    className="text-responsive-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subdomain">Sous-domaine *</Label>
+                  <Label htmlFor="subdomain" className="text-responsive-sm">Sous-domaine *</Label>
                   <Input
                     id="subdomain"
                     required
                     value={formData.subdomain}
                     onChange={(e) => setFormData({ ...formData, subdomain: e.target.value })}
                     placeholder="mon-ecole"
+                    className="text-responsive-sm"
                   />
-                  <p className="text-xs text-muted-foreground">Généré automatiquement, modifiable</p>
+                  <p className="text-responsive-xs text-muted-foreground">Généré automatiquement, modifiable</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-responsive-sm">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="text-responsive-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone</Label>
+                  <Label htmlFor="phone" className="text-responsive-sm">Téléphone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="text-responsive-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Adresse</Label>
+                <Label htmlFor="address" className="text-responsive-sm">Adresse</Label>
                 <Input
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="schoolType">Type d&apos;école</Label>
+                  <Label htmlFor="schoolType" className="text-responsive-sm">Type d&apos;école</Label>
                   <Select
                     value={formData.schoolType}
                     onValueChange={(value) => setFormData({ ...formData, schoolType: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="UNIVERSITY">Université</SelectItem>
-                      <SelectItem value="HIGH_SCHOOL">Lycée</SelectItem>
+                      <SelectItem value="UNIVERSITY" className="text-responsive-sm">Université</SelectItem>
+                      <SelectItem value="HIGH_SCHOOL" className="text-responsive-sm">Lycée</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="planId">Plan d&apos;abonnement</Label>
+                  <Label htmlFor="planId" className="text-responsive-sm">Plan d&apos;abonnement</Label>
                   <Select
                     value={formData.planId}
                     onValueChange={(value) => setFormData({ ...formData, planId: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-responsive-sm">
                       <SelectValue placeholder="Sélectionner un plan" />
                     </SelectTrigger>
                     <SelectContent>
                       {plans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
+                        <SelectItem key={plan.id} value={plan.id} className="text-responsive-sm">
                           {plan.name} - ${plan.price}/{plan.interval}
                         </SelectItem>
                       ))}
@@ -307,46 +312,49 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <h4 className="font-semibold mb-4">Administrateur de l&apos;école</h4>
-                <div className="space-y-4">
+              <div className="border-t pt-3 sm:pt-4">
+                <h4 className="font-semibold mb-3 sm:mb-4 text-responsive-base">Administrateur de l&apos;école</h4>
+                <div className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="adminName">Nom complet</Label>
+                    <Label htmlFor="adminName" className="text-responsive-sm">Nom complet</Label>
                     <Input
                       id="adminName"
                       value={formData.adminName}
                       onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                      className="text-responsive-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adminEmail">Email *</Label>
+                    <Label htmlFor="adminEmail" className="text-responsive-sm">Email *</Label>
                     <Input
                       id="adminEmail"
                       type="email"
                       required
                       value={formData.adminEmail}
                       onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                      className="text-responsive-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adminPassword">Mot de passe *</Label>
+                    <Label htmlFor="adminPassword" className="text-responsive-sm">Mot de passe *</Label>
                     <Input
                       id="adminPassword"
                       type="password"
                       required
                       value={formData.adminPassword}
                       onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                      className="text-responsive-sm"
                     />
                   </div>
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full sm:w-auto">
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Création...' : 'Créer l\'école'}
+                <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                  {isLoading ? 'Création...' : 'Créer l\'\u00e9cole'}
                 </Button>
               </DialogFooter>
             </form>
@@ -355,13 +363,13 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
       </div>
 
       {/* Stats rapides */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Écoles</p>
-                <p className="text-2xl font-bold">{schools.length}</p>
+                <p className="text-responsive-sm text-muted-foreground">Total Écoles</p>
+                <p className="text-responsive-2xl font-bold">{schools.length}</p>
               </div>
               <School className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -371,8 +379,8 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Écoles Actives</p>
-                <p className="text-2xl font-bold">{schools.filter(s => s.isActive).length}</p>
+                <p className="text-responsive-sm text-muted-foreground">Écoles Actives</p>
+                <p className="text-responsive-2xl font-bold">{schools.filter(s => s.isActive).length}</p>
               </div>
               <School className="h-8 w-8 text-success" />
             </div>
@@ -382,8 +390,8 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Étudiants</p>
-                <p className="text-2xl font-bold">
+                <p className="text-responsive-sm text-muted-foreground">Total Étudiants</p>
+                <p className="text-responsive-2xl font-bold">
                   {schools.reduce((sum, s) => sum + s._count.students, 0)}
                 </p>
               </div>
@@ -394,7 +402,7 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
       </div>
 
       {/* Liste des écoles */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {schools.map((school) => (
           <Card key={school.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
@@ -405,8 +413,8 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                     onCheckedChange={() => handleSelectSchool(school.id)}
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{school.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">{school.subdomain}</p>
+                    <CardTitle className="text-responsive-base">{school.name}</CardTitle>
+                    <p className="text-responsive-sm text-muted-foreground mt-1">{school.subdomain}</p>
                   </div>
                 </div>
                 <Badge variant={school.isActive ? 'default' : 'destructive'}>
@@ -414,9 +422,9 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               {/* Infos */}
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-responsive-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Users className="h-4 w-4" />
                   <span>{school._count.students} étudiants</span>
@@ -428,7 +436,7 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                 {school.subscription && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>Plan: {school.subscription.plan.name}</span>
+                    <span className="text-responsive-sm">Plan: {school.subscription.plan.name}</span>
                   </div>
                 )}
               </div>
@@ -437,7 +445,7 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
               {school.subscription && (
                 <div className="pt-3 border-t">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Statut</span>
+                    <span className="text-responsive-sm text-muted-foreground">Statut</span>
                     <Badge variant={
                       school.subscription.status === 'ACTIVE' ? 'default' :
                       school.subscription.status === 'TRIAL' ? 'secondary' : 'destructive'

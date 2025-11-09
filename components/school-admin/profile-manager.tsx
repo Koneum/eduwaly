@@ -212,10 +212,10 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Mon Profil</h2>
-        <p className="text-muted-foreground">
+        <h2 className="heading-responsive-h2">Mon Profil</h2>
+        <p className="text-responsive-sm text-muted-foreground">
           Gérez vos informations personnelles et vos paramètres de sécurité
         </p>
       </div>
@@ -223,23 +223,23 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
       {/* Informations de base */}
       <Card>
         <CardHeader>
-          <CardTitle>Informations de base</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-responsive-lg">Informations de base</CardTitle>
+          <CardDescription className="text-responsive-sm">
             Vos informations personnelles enregistrées
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div>
-            <Label className="text-muted-foreground">Nom complet</Label>
-            <p className="text-lg font-medium">{user.name}</p>
+            <Label className="text-responsive-sm text-muted-foreground">Nom complet</Label>
+            <p className="text-responsive-base font-medium">{user.name}</p>
           </div>
           <div>
-            <Label className="text-muted-foreground">Email</Label>
-            <p className="text-lg font-medium">{user.email}</p>
+            <Label className="text-responsive-sm text-muted-foreground">Email</Label>
+            <p className="text-responsive-base font-medium">{user.email}</p>
           </div>
           <div>
-            <Label className="text-muted-foreground">Rôle</Label>
-            <p className="text-lg font-medium">
+            <Label className="text-responsive-sm text-muted-foreground">Rôle</Label>
+            <p className="text-responsive-base font-medium">
               {user.role === 'SCHOOL_ADMIN' ? 'Administrateur École' : user.role}
             </p>
           </div>
@@ -249,15 +249,15 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
       {/* Sécurité */}
       <Card>
         <CardHeader>
-          <CardTitle>Sécurité</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-responsive-lg">Sécurité</CardTitle>
+          <CardDescription className="text-responsive-sm">
             Modifiez votre email ou votre mot de passe
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 sm:space-y-3">
           <Button
             variant="outline"
-            className="w-full justify-start"
+            className="w-full justify-start text-responsive-sm"
             onClick={() => setIsEmailDialogOpen(true)}
           >
             <Mail className="h-4 w-4 mr-2" />
@@ -265,7 +265,7 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
           </Button>
           <Button
             variant="outline"
-            className="w-full justify-start"
+            className="w-full justify-start text-responsive-sm"
             onClick={() => setIsPasswordDialogOpen(true)}
           >
             <Lock className="h-4 w-4 mr-2" />
@@ -287,8 +287,8 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
           </DialogHeader>
 
           {step === 'request' ? (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-responsive-sm text-muted-foreground">
                 Email actuel: <strong>{user.email}</strong>
               </p>
               <Button onClick={handleSendEmailCode} disabled={loading} className="w-full">
@@ -306,39 +306,37 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="new-email">Nouvel email *</Label>
+                <Label htmlFor="new-email" className="text-responsive-sm">Nouvel email *</Label>
                 <Input
                   id="new-email"
                   type="email"
+                  placeholder="nouveau@email.com"
                   value={emailForm.newEmail}
-                  onChange={(e) =>
-                    setEmailForm({ ...emailForm, newEmail: e.target.value })
-                  }
-                  placeholder="nouveau@exemple.com"
+                  onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="email-code">Code de vérification *</Label>
+                <Label htmlFor="email-code" className="text-responsive-sm">Code de vérification *</Label>
                 <div className="relative">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email-code"
-                    className="pl-10"
-                    value={emailForm.code}
-                    onChange={(e) =>
-                      setEmailForm({ ...emailForm, code: e.target.value })
-                    }
+                    type="text"
                     placeholder="123456"
+                    className="pl-10 text-responsive-sm"
+                    value={emailForm.code}
+                    onChange={(e) => setEmailForm({ ...emailForm, code: e.target.value })}
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={closeEmailDialog} disabled={loading}>
+              <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+                <Button variant="outline" onClick={closeEmailDialog} disabled={loading} className="w-full sm:w-auto">
                   Annuler
                 </Button>
-                <Button onClick={handleUpdateEmail} disabled={loading}>
+                <Button onClick={handleUpdateEmail} disabled={loading} className="w-full sm:w-auto">
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -356,10 +354,10 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
 
       {/* Dialog Modifier Mot de passe */}
       <Dialog open={isPasswordDialogOpen} onOpenChange={closePasswordDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier mon mot de passe</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Modifier mon mot de passe</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               {step === 'request'
                 ? 'Un code de vérification sera envoyé à votre email'
                 : 'Entrez le code reçu et votre nouveau mot de passe'}
@@ -367,8 +365,8 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
           </DialogHeader>
 
           {step === 'request' ? (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-responsive-sm text-muted-foreground">
                 Un code sera envoyé à: <strong>{user.email}</strong>
               </p>
               <Button onClick={handleSendPasswordCode} disabled={loading} className="w-full">
@@ -386,20 +384,20 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="new-password">Nouveau mot de passe *</Label>
+                <Label htmlFor="new-password" className="text-responsive-sm">Nouveau mot de passe *</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="new-password"
                     type={showPassword ? 'text' : 'password'}
-                    className="pl-10 pr-10"
+                    placeholder="••••••••"
+                    className="pl-10 pr-10 text-responsive-sm"
                     value={passwordForm.newPassword}
                     onChange={(e) =>
                       setPasswordForm({ ...passwordForm, newPassword: e.target.value })
                     }
-                    placeholder="••••••••"
                   />
                   <button
                     type="button"
@@ -411,18 +409,18 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
                 </div>
               </div>
               <div>
-                <Label htmlFor="confirm-password">Confirmer le mot de passe *</Label>
+                <Label htmlFor="confirm-password" className="text-responsive-sm">Confirmer le mot de passe *</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    className="pl-10 pr-10"
+                    placeholder="••••••••"
+                    className="pl-10 pr-10 text-responsive-sm"
                     value={passwordForm.confirmPassword}
                     onChange={(e) =>
                       setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
                     }
-                    placeholder="••••••••"
                   />
                   <button
                     type="button"
@@ -434,25 +432,26 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
                 </div>
               </div>
               <div>
-                <Label htmlFor="password-code">Code de vérification *</Label>
+                <Label htmlFor="password-code" className="text-responsive-sm">Code de vérification *</Label>
                 <div className="relative">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password-code"
-                    className="pl-10"
+                    type="text"
+                    placeholder="123456"
+                    className="pl-10 text-responsive-sm"
                     value={passwordForm.code}
                     onChange={(e) =>
                       setPasswordForm({ ...passwordForm, code: e.target.value })
                     }
-                    placeholder="123456"
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={closePasswordDialog} disabled={loading}>
+              <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+                <Button variant="outline" onClick={closePasswordDialog} disabled={loading} className="w-full sm:w-auto">
                   Annuler
                 </Button>
-                <Button onClick={handleUpdatePassword} disabled={loading}>
+                <Button onClick={handleUpdatePassword} disabled={loading} className="w-full sm:w-auto">
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />

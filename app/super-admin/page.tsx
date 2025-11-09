@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatCard } from "@/components/stat-card"
 import { RecentActivity } from "@/components/recent-activity"
 import { RevenueChart } from "@/components/revenue-chart"
@@ -17,15 +18,15 @@ export default async function SuperAdminDashboard() {
   const totalStudents = await prisma.student.count()
   
   // Calcul des revenus réels
-  const activeSubscriptions = await prisma.subscription.findMany({
+  const activeSubscriptions: any = await prisma.subscription.findMany({
     where: { status: 'ACTIVE' },
     include: { plan: true }
   })
-  const totalRevenue = activeSubscriptions.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+  const totalRevenue = activeSubscriptions.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
 
   // Calcul du taux de croissance
   const now = new Date()
-  const lastMonthSchools = await prisma.school.count({
+  const lastMonthSchools: any = await prisma.school.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -34,7 +35,7 @@ export default async function SuperAdminDashboard() {
     }
   })
 
-  const currentMonthSchools = await prisma.school.count({
+  const currentMonthSchools: any = await prisma.school.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -47,7 +48,7 @@ export default async function SuperAdminDashboard() {
     : 0
 
   // Calcul de la croissance des étudiants
-  const lastMonthStudents = await prisma.student.count({
+  const lastMonthStudents: any = await prisma.student.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -56,7 +57,7 @@ export default async function SuperAdminDashboard() {
     }
   })
 
-  const currentMonthStudents = await prisma.student.count({
+  const currentMonthStudents: any = await prisma.student.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -69,7 +70,7 @@ export default async function SuperAdminDashboard() {
     : 0
 
   // Calcul de la croissance des revenus
-  const lastMonthRevenue = await prisma.subscription.findMany({
+  const lastMonthRevenue: any = await prisma.subscription.findMany({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -80,7 +81,7 @@ export default async function SuperAdminDashboard() {
     include: { plan: true }
   })
 
-  const currentMonthRevenue = await prisma.subscription.findMany({
+  const currentMonthRevenue: any = await prisma.subscription.findMany({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -90,8 +91,8 @@ export default async function SuperAdminDashboard() {
     include: { plan: true }
   })
 
-  const lastMonthRevenueTotal = lastMonthRevenue.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
-  const currentMonthRevenueTotal = currentMonthRevenue.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+  const lastMonthRevenueTotal = lastMonthRevenue.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
+  const currentMonthRevenueTotal = currentMonthRevenue.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
 
   const revenueGrowthRate = lastMonthRevenueTotal > 0 
     ? ((currentMonthRevenueTotal - lastMonthRevenueTotal) / lastMonthRevenueTotal * 100).toFixed(1)
@@ -105,7 +106,7 @@ export default async function SuperAdminDashboard() {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - 11 + i + 1, 0)
       
-      const subscriptions = await prisma.subscription.findMany({
+      const subscriptions: any = await prisma.subscription.findMany({
         where: {
           createdAt: { gte: monthStart, lte: monthEnd },
           status: { in: ['ACTIVE', 'TRIAL'] }
@@ -113,7 +114,7 @@ export default async function SuperAdminDashboard() {
         include: { plan: true }
       })
 
-      const revenue = subscriptions.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+      const revenue = subscriptions.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
       
       return {
         month: monthNames[monthStart.getMonth()],
@@ -123,27 +124,27 @@ export default async function SuperAdminDashboard() {
   )
 
   // Activités récentes (écoles et abonnements récents)
-  const recentSchools = await prisma.school.findMany({
+  const recentSchools: any = await prisma.school.findMany({
     take: 2,
     orderBy: { createdAt: 'desc' },
     include: { subscription: { include: { plan: true } } }
   })
 
-  const recentSubscriptions = await prisma.subscription.findMany({
+  const recentSubscriptions: any = await prisma.subscription.findMany({
     take: 2,
     orderBy: { createdAt: 'desc' },
     include: { school: true, plan: true }
   })
 
   const activities = [
-    ...recentSchools.map(school => ({
+    ...recentSchools.map((school: any) => ({
       id: school.id,
       schoolName: school.name,
       action: `Nouvelle école inscrite`,
       time: formatDistance(school.createdAt, now, { addSuffix: true, locale: fr }),
       type: "subscription" as const
     })),
-    ...recentSubscriptions.map(sub => ({
+    ...recentSubscriptions.map((sub: any) => ({
       id: sub.id,
       schoolName: sub.school.name,
       action: `Abonnement ${sub.plan.name} - ${Number(sub.plan.price).toLocaleString()} FCFA`,

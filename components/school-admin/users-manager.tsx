@@ -22,14 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { toast } from 'sonner'
 import { UserPlus, Mail, Lock, User, Shield, Loader2, Trash2, Edit, Eye, EyeOff } from 'lucide-react'
 
@@ -223,65 +216,65 @@ export default function UsersManager({ users }: UsersManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Gestion des Utilisateurs</h2>
-          <p className="text-muted-foreground">
+          <h2 className="heading-responsive-h2">Gestion des Utilisateurs</h2>
+          <p className="text-responsive-sm text-muted-foreground">
             Créez et gérez les utilisateurs de votre école
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
+        <Button onClick={() => setIsCreateOpen(true)} className="btn-responsive w-full sm:w-auto">
+          <UserPlus className="icon-responsive mr-2" />
           Créer un utilisateur
         </Button>
       </div>
 
       {/* Statistiques */}
-      <div className="grid md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">
               Total
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{users.length}</p>
+            <p className="text-responsive-xl font-bold">{users.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">
               Étudiants
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-responsive-xl font-bold">
               {users.filter((u) => u.role === 'STUDENT').length}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">
               Enseignants
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-responsive-xl font-bold">
               {users.filter((u) => u.role === 'TEACHER').length}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">
               Actifs
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-success">
+            <p className="text-responsive-xl font-bold text-success">
               {users.filter((u) => u.isActive).length}
             </p>
           </CardContent>
@@ -291,92 +284,94 @@ export default function UsersManager({ users }: UsersManagerProps) {
       {/* Table des utilisateurs */}
       <Card>
         <CardHeader>
-          <CardTitle>Liste des utilisateurs</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-responsive-lg">Liste des utilisateurs</CardTitle>
+          <CardDescription className="text-responsive-sm">
             {users.length} utilisateur(s) au total
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Dernière connexion</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    Aucun utilisateur
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>
-                      {user.isActive ? (
-                        <Badge className="bg-success">Actif</Badge>
-                      ) : (
-                        <Badge variant="secondary">Inactif</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.lastLoginAt
-                        ? new Date(user.lastLoginAt).toLocaleDateString('fr-FR')
-                        : 'Jamais'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openEditDialog(user)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable
+            data={users}
+            columns={[
+              {
+                header: "Nom",
+                accessor: "name",
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Email",
+                accessor: "email",
+                priority: "high"
+              },
+              {
+                header: "Rôle",
+                accessor: (user) => getRoleBadge(user.role),
+                priority: "medium"
+              },
+              {
+                header: "Statut",
+                accessor: (user) => (
+                  user.isActive ? (
+                    <Badge className="bg-success">Actif</Badge>
+                  ) : (
+                    <Badge variant="secondary">Inactif</Badge>
+                  )
+                ),
+                priority: "medium"
+              },
+              {
+                header: "Dernière connexion",
+                accessor: (user) => (
+                  user.lastLoginAt
+                    ? new Date(user.lastLoginAt).toLocaleDateString('fr-FR')
+                    : 'Jamais'
+                ),
+                priority: "low"
+              }
+            ]}
+            keyExtractor={(user) => user.id}
+            actions={(user) => (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openEditDialog(user)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleDeleteUser(user.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Aucun utilisateur"
+          />
         </CardContent>
       </Card>
 
       {/* Dialog Créer un utilisateur */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Créer un utilisateur</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Créer un utilisateur</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Créez un nouveau compte utilisateur pour votre école
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label htmlFor="create-name">Nom complet *</Label>
+              <Label htmlFor="create-name" className="text-responsive-sm">Nom complet *</Label>
               <div className="relative mt-1">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="create-name"
-                  className="pl-10"
+                  className="pl-10 text-responsive-sm"
                   value={createForm.name}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, name: e.target.value })
@@ -387,13 +382,13 @@ export default function UsersManager({ users }: UsersManagerProps) {
             </div>
 
             <div>
-              <Label htmlFor="create-email">Email *</Label>
+              <Label htmlFor="create-email" className="text-responsive-sm">Email *</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="create-email"
                   type="email"
-                  className="pl-10"
+                  className="pl-10 text-responsive-sm"
                   value={createForm.email}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, email: e.target.value })
@@ -404,7 +399,7 @@ export default function UsersManager({ users }: UsersManagerProps) {
             </div>
 
             <div>
-              <Label htmlFor="create-role">Rôle *</Label>
+              <Label htmlFor="create-role" className="text-responsive-sm">Rôle *</Label>
               <div className="relative mt-1">
                 <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                 <Select
@@ -427,13 +422,13 @@ export default function UsersManager({ users }: UsersManagerProps) {
             </div>
 
             <div>
-              <Label htmlFor="create-password">Mot de passe *</Label>
+              <Label htmlFor="create-password" className="text-responsive-sm">Mot de passe *</Label>
               <div className="relative mt-1">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="create-password"
                   type={showPassword ? 'text' : 'password'}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 text-responsive-sm"
                   value={createForm.password}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, password: e.target.value })
@@ -455,7 +450,7 @@ export default function UsersManager({ users }: UsersManagerProps) {
             </div>
 
             <div>
-              <Label htmlFor="create-confirm-password">
+              <Label htmlFor="create-confirm-password" className="text-responsive-sm">
                 Confirmer le mot de passe *
               </Label>
               <div className="relative mt-1">
@@ -463,7 +458,7 @@ export default function UsersManager({ users }: UsersManagerProps) {
                 <Input
                   id="create-confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 text-responsive-sm"
                   value={createForm.confirmPassword}
                   onChange={(e) =>
                     setCreateForm({
@@ -488,15 +483,16 @@ export default function UsersManager({ users }: UsersManagerProps) {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setIsCreateOpen(false)}
               disabled={loading}
+              className="btn-responsive w-full sm:w-auto"
             >
               Annuler
             </Button>
-            <Button onClick={handleCreateUser} disabled={loading}>
+            <Button onClick={handleCreateUser} disabled={loading} className="btn-responsive w-full sm:w-auto">
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -512,15 +508,15 @@ export default function UsersManager({ users }: UsersManagerProps) {
 
       {/* Dialog Modifier un utilisateur */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Modifier l&apos;utilisateur</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Modifiez les informations de {selectedUser?.name}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <Label htmlFor="edit-name">Nom complet</Label>
               <Input

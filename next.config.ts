@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   // typescript: {
   //   ignoreBuildErrors: true,
   // },
+  
+  // Externaliser Prisma pour Next.js 16 + Turbopack
+  // Doc Prisma 6.18: https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-monorepo
+  serverExternalPackages: ['@prisma/client', 'prisma'],
+  
+  // Configuration Turbopack (optionnel, mais silences les warnings)
+  turbopack: {},
+  
   headers: async () => [
   {
     source: '/api/:path*',

@@ -13,7 +13,7 @@ export default function SubscriptionButton({ schoolId }: SubscriptionButtonProps
   return (
     <Button 
       onClick={() => router.push(`/admin/${schoolId}/subscription`)}
-      className="px-6 py-2"
+      className="btn-responsive px-4 sm:px-6 py-2"
     >
       Gérer l&apos;abonnement
     </Button>

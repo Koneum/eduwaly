@@ -34,55 +34,55 @@ export default async function ParentDashboard() {
   const overdueCount = allPayments.filter(p => p.status === 'OVERDUE').length
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Espace Parent</h1>
-          <p className="text-muted-foreground mt-2">{user.name}</p>
+          <h1 className="text-responsive-xl font-bold text-foreground">Espace Parent</h1>
+          <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">{user.name}</p>
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium">Mes enfants</CardTitle>
+                <CardTitle className="text-responsive-xs font-medium">Mes enfants</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{parent.students.length}</div>
+            <CardContent className="pt-0">
+              <div className="text-responsive-lg sm:text-responsive-xl font-bold">{parent.students.length}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total à payer</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Total à payer</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalDue.toLocaleString()} FCFA</div>
+            <CardContent className="pt-0">
+              <div className="text-responsive-lg sm:text-responsive-xl font-bold">{totalDue.toLocaleString()} FCFA</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium">Paiements à jour</CardTitle>
+                <CardTitle className="text-responsive-xs font-medium">Paiements à jour</CardTitle>
                 <CheckCircle className="h-4 w-4 text-green-600" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{paidCount}</div>
+            <CardContent className="pt-0">
+              <div className="text-responsive-lg sm:text-responsive-xl font-bold text-green-600">{paidCount}</div>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium">En retard</CardTitle>
+                <CardTitle className="text-responsive-xs font-medium">En retard</CardTitle>
                 <AlertCircle className="h-4 w-4 text-red-600" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{overdueCount}</div>
+            <CardContent className="pt-0">
+              <div className="text-responsive-lg sm:text-responsive-xl font-bold text-red-600">{overdueCount}</div>
             </CardContent>
           </Card>
         </div>

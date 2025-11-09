@@ -19,10 +19,10 @@ export default async function AdminMessagesPage({
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Messagerie</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-responsive-xl font-bold text-foreground">Messagerie</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
           Communiquez avec les enseignants, étudiants et parents
         </p>
       </div>

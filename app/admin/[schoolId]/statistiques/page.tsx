@@ -6,7 +6,7 @@ import { FiEye } from 'react-icons/fi'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -49,8 +49,8 @@ const data = [
   { month: 'Déc', value: 140 }
 ]
 
-export default function StatistiquesPage({ params }: { params: { schoolId: string } }) {
-  const schoolId = params.schoolId
+export default function StatistiquesPage({ params }: { params: Promise<{ schoolId: string }> }) {
+  const { schoolId } = use(params)
   const [enseignants, setEnseignants] = useState<Enseignant[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -105,39 +105,39 @@ export default function StatistiquesPage({ params }: { params: { schoolId: strin
   }
 
   return (
-    <div className="p-4 space-y-6 ">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Statistiques des Enseignants</h1>
-        <div className="flex gap-2  text-indigo-700">
-          <Button variant="outline" className="bg-indigo-50" size="sm" onClick={() => setStatusFilter('all')}>
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+        <h1 className="text-responsive-xl font-bold">Statistiques des Enseignants</h1>
+        <div className="flex flex-wrap gap-2 text-indigo-700">
+          <Button variant="outline" className="bg-indigo-50 text-responsive-xs" size="sm" onClick={() => setStatusFilter('all')}>
             Tous
           </Button>
-          <Button variant="outline" className="bg-indigo-50" size="sm" onClick={() => setStatusFilter('PERMANENT')}>
+          <Button variant="outline" className="bg-indigo-50 text-responsive-xs" size="sm" onClick={() => setStatusFilter('PERMANENT')}>
             Permanents
           </Button>
-          <Button variant="outline" className="bg-indigo-50" size="sm" onClick={() => setStatusFilter('VACATAIRE')}>
+          <Button variant="outline" className="bg-indigo-50 text-responsive-xs" size="sm" onClick={() => setStatusFilter('VACATAIRE')}>
             Vacataires
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4">
-          <h3 className="font-semibold mb-2">Total Enseignants</h3>
-          <p className="text-2xl">{totalEnseignants}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-4">
+          <h3 className="text-responsive-sm font-semibold mb-2">Total Enseignants</h3>
+          <p className="text-responsive-lg sm:text-responsive-xl">{totalEnseignants}</p>
         </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-2">Total Heures</h3>
-          <p className="text-2xl">{totalHeures}h</p>
+        <Card className="p-3 sm:p-4">
+          <h3 className="text-responsive-sm font-semibold mb-2">Total Heures</h3>
+          <p className="text-responsive-lg sm:text-responsive-xl">{totalHeures}h</p>
         </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-2">Total Modules</h3>
-          <p className="text-2xl">{totalModules}</p>
+        <Card className="p-3 sm:p-4">
+          <h3 className="text-responsive-sm font-semibold mb-2">Total Modules</h3>
+          <p className="text-responsive-lg sm:text-responsive-xl">{totalModules}</p>
         </Card>
       </div>
 
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">Heures de cours par mois</h2>
+      <Card className="p-3 sm:p-4">
+        <h2 className="text-responsive-base sm:text-responsive-lg font-semibold mb-3 sm:mb-4">Heures de cours par mois</h2>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
@@ -151,19 +151,19 @@ export default function StatistiquesPage({ params }: { params: { schoolId: strin
         </div>
       </Card>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Liste des Enseignants</h2>
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+          <h2 className="text-responsive-base sm:text-responsive-lg font-semibold">Liste des Enseignants</h2>
           <input
             type="text"
             placeholder="Rechercher un enseignant..."
-            className="px-4 py-2 border rounded-lg"
+            className="px-3 sm:px-4 py-2 border rounded-lg w-full sm:w-auto text-responsive-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {filteredEnseignants.map(enseignant => (
             <Card key={enseignant.id} className="p-4">
               <div className="flex items-start justify-between">

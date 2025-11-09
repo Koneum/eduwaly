@@ -32,23 +32,23 @@ export default async function StudentAbsencesPage({
   const attendanceRate = totalAbsences > 0 ? ((1 - (totalAbsences / 100)) * 100).toFixed(1) : '100'
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes Absences</h1>
-        <p className="text-muted-foreground mt-2">Consultez votre historique de présence</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Mes Absences</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Consultez votre historique de présence</p>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Taux de Présence</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{attendanceRate}%</p>
+                <p className="text-responsive-xs font-medium text-muted-foreground">Taux de Présence</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-green-600 mt-1 sm:mt-2">{attendanceRate}%</p>
               </div>
-              <div className="bg-green-100 p-3 rounded-xl">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
+              <div className="bg-green-100 p-2 sm:p-3 rounded-xl">
+                <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
               </div>
             </div>
           </CardContent>

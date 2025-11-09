@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { vitepay } from '@/lib/vitepay/client'
 import type { VitepayCallbackData } from '@/lib/vitepay/client'
 import prisma from '@/lib/prisma'
+import { handleCorsOptions, corsJsonResponse } from '@/lib/cors'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -9,7 +10,15 @@ export const dynamic = 'force-dynamic'
 /**
  * Webhook VitePay - Reçoit les callbacks serveur-à-serveur
  * Documentation: https://api.vitepay.com/developers section 5
+ * 
+ * Support CORS pour les requêtes cross-origin de VitePay
  */
+
+// Gérer les requêtes OPTIONS (CORS preflight)
+export async function OPTIONS() {
+  return handleCorsOptions()
+}
+
 export async function POST(request: NextRequest) {
   try {
     // VitePay envoie les données en form-urlencoded
@@ -37,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     if (!result.isValid) {
       console.error('❌ Signature invalide pour order_id:', callbackData.order_id)
-      return NextResponse.json(result.response)
+      return corsJsonResponse(result.response)
     }
 
     // Extraire les informations de l'order_id (format: SUB-{schoolId}-{timestamp})
@@ -75,12 +84,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Retourner la réponse attendue par VitePay
-    return NextResponse.json(result.response)
+    // Retourner la réponse attendue par VitePay (avec CORS)
+    return corsJsonResponse(result.response)
   } catch (error) {
     console.error('❌ Erreur webhook VitePay:', error)
-    // Même en cas d'erreur, retourner un statut 200 avec status: "0"
-    return NextResponse.json({
+    // Même en cas d'erreur, retourner un statut 200 avec status: "0" (avec CORS)
+    return corsJsonResponse({
       status: '0',
       message: 'Erreur lors du traitement du callback'
     })

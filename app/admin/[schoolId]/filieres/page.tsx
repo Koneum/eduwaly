@@ -35,21 +35,21 @@ const FiliereCard = ({
   onDelete: () => void;
 }) => {
   return (
-    <Card className="shadow-md rounded-lg p-4 hover:bg-accent/50 transition-all duration-200">
-      <div className="flex flex-row items-center gap-4 p-0 mb-4">
-        <Avatar className="h-12 w-12 bg-indigo-100 dark:bg-indigo-900">
+    <Card className="shadow-md rounded-lg p-3 sm:p-4 hover:bg-accent/50 transition-all duration-200">
+      <div className="flex flex-row items-center gap-3 sm:gap-4 p-0 mb-3 sm:mb-4">
+        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 bg-indigo-100 dark:bg-indigo-900">
           <AvatarFallback className="text-indigo-700 dark:text-indigo-300">
             <FaGraduationCap className="h-6 w-6" />
           </AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">{filiere.nom}</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-responsive-base font-semibold text-foreground">{filiere.nom}</h3>
+          <p className="text-responsive-sm text-muted-foreground">
             Créée le {new Date(filiere.createdAt).toLocaleDateString()}
           </p>
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="flex justify-end gap-1.5 sm:gap-2 mt-3 sm:mt-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -213,22 +213,22 @@ export default function FilieresPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="heading-responsive-h1 font-semibold text-foreground">
             {schoolType === 'UNIVERSITY' ? 'Filières' : 'Classes'}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-responsive-sm text-muted-foreground">
             Liste des {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'} disponibles
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-4 lg:ml-16 shrink-0">
+        <div className="sm:ml-4 lg:ml-16 shrink-0">
           <PermissionButton
             category="filieres"
             action="create"
             type="button"
-            className="bg-primary hover:bg-primary/80 text-white"
+            className="bg-primary hover:bg-primary/80 text-white btn-responsive w-full sm:w-auto"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -244,7 +244,7 @@ export default function FilieresPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filieres.map((filiere) => (
           <FiliereCard
             key={filiere.id}
@@ -257,16 +257,16 @@ export default function FilieresPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Card className="w-full max-w-lg mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="text-responsive-lg">
                 {editingFiliere 
                   ? `Modifier ${schoolType === 'UNIVERSITY' ? 'la filière' : 'la classe'}` 
                   : `Nouvelle ${schoolType === 'UNIVERSITY' ? 'filière' : 'classe'}`
                 }
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-responsive-sm">
                 {editingFiliere 
                   ? `Modifiez les informations ${schoolType === 'UNIVERSITY' ? 'de la filière' : 'de la classe'}`
                   : `Ajoutez ${schoolType === 'UNIVERSITY' ? 'une nouvelle filière' : 'une nouvelle classe'} à votre établissement`
@@ -274,9 +274,9 @@ export default function FilieresPage() {
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nom">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="nom" className="text-responsive-sm">
                     Nom {schoolType === 'UNIVERSITY' ? 'de la filière' : 'de la classe'}
                   </Label>
                   <Input
@@ -287,10 +287,11 @@ export default function FilieresPage() {
                     placeholder={`Ex: ${schoolType === 'UNIVERSITY' ? 'Informatique, Génie Civil...' : 'Terminale S, Première L...'}`}
                     required
                     autoFocus
+                    className="text-responsive-sm"
                   />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end gap-3">
+              <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                 <Button
                   type="button"
                   variant="outline"
@@ -299,10 +300,11 @@ export default function FilieresPage() {
                     setEditingFiliere(null);
                     setNomFiliere('');
                   }}
+                  className="w-full sm:w-auto"
                 >
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-primary hover:bg-primary/90">
+                <Button type="submit" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
                   {editingFiliere ? 'Modifier' : 'Ajouter'}
                 </Button>
               </CardFooter>

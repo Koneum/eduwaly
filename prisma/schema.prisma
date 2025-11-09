@@ -6,7 +6,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  // Ne PAS mettre output dans app/ - Next.js le bundlerait côté client
+  // Prisma utilise node_modules/.prisma/client par défaut
 }
 
 datasource db {

@@ -46,11 +46,11 @@ export function PaymentStatusChart({ schoolId }: PaymentStatusChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Statut des Paiements</CardTitle>
+          <CardTitle className="text-responsive-lg">Statut des Paiements</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[250px] flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <p className="text-responsive-sm text-muted-foreground">Chargement...</p>
           </div>
         </CardContent>
       </Card>
@@ -63,11 +63,11 @@ export function PaymentStatusChart({ schoolId }: PaymentStatusChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Statut des Paiements</CardTitle>
+          <CardTitle className="text-responsive-lg">Statut des Paiements</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[250px] flex items-center justify-center">
-            <p className="text-muted-foreground">Aucun paiement enregistré</p>
+            <p className="text-responsive-sm text-muted-foreground">Aucun paiement enregistré</p>
           </div>
         </CardContent>
       </Card>
@@ -77,7 +77,7 @@ export function PaymentStatusChart({ schoolId }: PaymentStatusChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Statut des Paiements</CardTitle>
+        <CardTitle className="text-responsive-lg">Statut des Paiements</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
@@ -105,18 +105,18 @@ export function PaymentStatusChart({ schoolId }: PaymentStatusChartProps) {
             />
           </PieChart>
         </ResponsiveContainer>
-        <div className="flex justify-center gap-6 mt-4">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4">
           {chartData.map((entry) => (
             <div key={entry.name} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-responsive-sm text-muted-foreground">
                 {entry.name}: <span className="font-medium text-foreground">{entry.value}</span>
               </span>
             </div>
           ))}
         </div>
         <div className="mt-4 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-responsive-sm text-muted-foreground">
             Total: <span className="font-semibold text-foreground">{total}</span> paiements
           </p>
         </div>

@@ -34,7 +34,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Revenus Mensuels</CardTitle>
+        <CardTitle className="text-responsive-lg">Revenus Mensuels</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

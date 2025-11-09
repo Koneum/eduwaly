@@ -413,10 +413,10 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
 
       {/* Dialog de création */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter un membre du personnel</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Ajouter un membre du personnel</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Créez un nouveau membre du personnel et définissez ses permissions
             </DialogDescription>
           </DialogHeader>
@@ -429,66 +429,70 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
 
             <TabsContent value="info" className="space-y-4">
               <div>
-                <Label htmlFor="name">Nom complet *</Label>
+                <Label htmlFor="name" className="text-responsive-sm">Nom complet *</Label>
                 <Input
                   id="name"
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="Jean Dupont"
+                  className="text-responsive-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email" className="text-responsive-sm">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                   placeholder="jean@example.com"
+                  className="text-responsive-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="role">Rôle *</Label>
+                <Label htmlFor="role" className="text-responsive-sm">Rôle *</Label>
                 <Select value={createForm.role} onValueChange={(value) => setCreateForm({ ...createForm, role: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MANAGER">Manager</SelectItem>
-                    <SelectItem value="PERSONNEL">Personnel</SelectItem>
-                    <SelectItem value="ASSISTANT">Assistant</SelectItem>
-                    <SelectItem value="SECRETARY">Secrétaire</SelectItem>
+                    <SelectItem value="MANAGER" className="text-responsive-sm">Manager</SelectItem>
+                    <SelectItem value="PERSONNEL" className="text-responsive-sm">Personnel</SelectItem>
+                    <SelectItem value="ASSISTANT" className="text-responsive-sm">Assistant</SelectItem>
+                    <SelectItem value="SECRETARY" className="text-responsive-sm">Secrétaire</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="password">Mot de passe *</Label>
+                <Label htmlFor="password" className="text-responsive-sm">Mot de passe *</Label>
                 <Input
                   id="password"
                   type="password"
                   value={createForm.password}
                   onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                   placeholder="Minimum 8 caractères"
+                  className="text-responsive-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+                <Label htmlFor="confirmPassword" className="text-responsive-sm">Confirmer le mot de passe *</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={createForm.confirmPassword}
                   onChange={(e) => setCreateForm({ ...createForm, confirmPassword: e.target.value })}
                   placeholder="Confirmer le mot de passe"
+                  className="text-responsive-sm"
                 />
               </div>
             </TabsContent>
 
-            <TabsContent value="permissions" className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <TabsContent value="permissions" className="space-y-3 sm:space-y-4">
+              <p className="text-responsive-sm text-muted-foreground">
                 Sélectionnez les permissions pour ce membre du personnel
               </p>
 
@@ -498,12 +502,12 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2 px-2 text-sm font-medium">Permission</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Tout</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Voir</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Créer</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Modifier</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Supprimer</th>
+                          <th className="text-left py-2 px-2 text-responsive-sm font-medium">Permission</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Tout</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Voir</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Créer</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Modifier</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Supprimer</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -517,7 +521,7 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                           return (
                             <tr key={category} className="border-b last:border-0 hover:bg-muted/50">
                               <td className="py-3 px-2">
-                                <p className="text-sm font-medium capitalize">{category}</p>
+                                <p className="text-responsive-sm font-medium capitalize">{category}</p>
                               </td>
                               <td className="text-center py-3 px-2">
                                 <Checkbox
@@ -568,11 +572,11 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
             </TabsContent>
           </Tabs>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isSubmitting}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isSubmitting} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleCreateStaff} disabled={isSubmitting}>
+            <Button onClick={handleCreateStaff} disabled={isSubmitting} className="w-full sm:w-auto">
               {isSubmitting ? 'Création...' : 'Créer le membre'}
             </Button>
           </DialogFooter>
@@ -581,10 +585,10 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
 
       {/* Dialog de modification (similaire au dialog de création) */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier le membre du personnel</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Modifier le membre du personnel</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Modifiez les informations et permissions du membre
             </DialogDescription>
           </DialogHeader>
@@ -595,44 +599,46 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
               <TabsTrigger value="permissions">Permissions</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info" className="space-y-4">
+            <TabsContent value="info" className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="edit-name">Nom complet *</Label>
+                <Label htmlFor="edit-name" className="text-responsive-sm">Nom complet *</Label>
                 <Input
                   id="edit-name"
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="edit-email">Email *</Label>
+                <Label htmlFor="edit-email" className="text-responsive-sm">Email *</Label>
                 <Input
                   id="edit-email"
                   type="email"
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="edit-role">Rôle *</Label>
+                <Label htmlFor="edit-role" className="text-responsive-sm">Rôle *</Label>
                 <Select value={createForm.role} onValueChange={(value) => setCreateForm({ ...createForm, role: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-responsive-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MANAGER">Manager</SelectItem>
-                    <SelectItem value="PERSONNEL">Personnel</SelectItem>
-                    <SelectItem value="ASSISTANT">Assistant</SelectItem>
-                    <SelectItem value="SECRETARY">Secrétaire</SelectItem>
+                    <SelectItem value="MANAGER" className="text-responsive-sm">Manager</SelectItem>
+                    <SelectItem value="PERSONNEL" className="text-responsive-sm">Personnel</SelectItem>
+                    <SelectItem value="ASSISTANT" className="text-responsive-sm">Assistant</SelectItem>
+                    <SelectItem value="SECRETARY" className="text-responsive-sm">Secrétaire</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </TabsContent>
 
-            <TabsContent value="permissions" className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <TabsContent value="permissions" className="space-y-3 sm:space-y-4">
+              <p className="text-responsive-sm text-muted-foreground">
                 Modifiez les permissions pour ce membre du personnel
               </p>
 
@@ -642,12 +648,12 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2 px-2 text-sm font-medium">Permission</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Tout</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Voir</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Créer</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Modifier</th>
-                          <th className="text-center py-2 px-2 text-xs font-medium">Supprimer</th>
+                          <th className="text-left py-2 px-2 text-responsive-sm font-medium">Permission</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Tout</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Voir</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Créer</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Modifier</th>
+                          <th className="text-center py-2 px-2 text-responsive-xs font-medium">Supprimer</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -661,7 +667,7 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                           return (
                             <tr key={category} className="border-b last:border-0 hover:bg-muted/50">
                               <td className="py-3 px-2">
-                                <p className="text-sm font-medium capitalize">{category}</p>
+                                <p className="text-responsive-sm font-medium capitalize">{category}</p>
                               </td>
                               <td className="text-center py-3 px-2">
                                 <Checkbox
@@ -712,11 +718,11 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
             </TabsContent>
           </Tabs>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isSubmitting}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isSubmitting} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleEditStaff} disabled={isSubmitting}>
+            <Button onClick={handleEditStaff} disabled={isSubmitting} className="w-full sm:w-auto">
               {isSubmitting ? 'Modification...' : 'Enregistrer'}
             </Button>
           </DialogFooter>

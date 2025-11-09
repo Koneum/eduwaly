@@ -62,12 +62,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleSignIn = async (email: string, password: string) => {
     try {
+      console.log('🔐 [AUTH CONTEXT] Calling betterAuthSignIn.email with:', { email })
+      console.log('🔐 [AUTH CONTEXT] betterAuthSignIn object:', betterAuthSignIn)
+      console.log('🔐 [AUTH CONTEXT] betterAuthSignIn.email type:', typeof betterAuthSignIn.email)
+      
       const result = await betterAuthSignIn.email({
         email,
         password,
       })
+      
+      console.log('🔐 [AUTH CONTEXT] SignIn result:', result)
       return result
     } catch (error) {
+      console.error('🔐 [AUTH CONTEXT] SignIn error:', error)
       return { error }
     }
   }

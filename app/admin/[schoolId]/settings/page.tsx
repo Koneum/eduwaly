@@ -135,25 +135,25 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
   })
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground text-balance">Paramètres</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-responsive-xl font-bold text-foreground text-balance">Paramètres</h1>
+          <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
             Gérez les paramètres de votre école et votre profil
           </p>
         </div>
         <ReportIssueButton />
       </div>
 
-      <Tabs defaultValue="school" className="space-y-6">
+      <Tabs defaultValue="school" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 bg-card">
-          <TabsTrigger value="school">École</TabsTrigger>
-          <TabsTrigger value="users">Utilisateurs</TabsTrigger>
-          <TabsTrigger value="profile">Mon Profil</TabsTrigger>
+          <TabsTrigger value="school" className="text-responsive-xs">École</TabsTrigger>
+          <TabsTrigger value="users" className="text-responsive-xs">Utilisateurs</TabsTrigger>
+          <TabsTrigger value="profile" className="text-responsive-xs">Mon Profil</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="school" className="space-y-6">
+        <TabsContent value="school" className="space-y-4 sm:space-y-6">
           <SchoolSettingsManager 
             schoolId={schoolId} 
             schoolType={school.schoolType}
@@ -168,7 +168,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
           />
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-6">
+        <TabsContent value="users" className="space-y-4 sm:space-y-6">
           <UsersManager 
                   users={users.map((u) => ({
                     ...u,
@@ -189,7 +189,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
           />
         </TabsContent>
 
-        <TabsContent value="profile" className="space-y-6">
+        <TabsContent value="profile" className="space-y-4 sm:space-y-6">
           <ProfileManager 
             user={{
               name: user.name || '',

@@ -36,11 +36,31 @@ export default function LoginPage() {
       // Attendre que la session soit bien créée
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      console.log('🚀 [LOGIN] TEST: Redirection directe vers /super-admin')
+      console.log('🔄 [LOGIN] Récupération de l\'URL de redirection...')
       
-      // TEST: Redirection directe vers super-admin
-      // Sans passer par l'API pour isoler le problème
-      window.location.href = '/super-admin'
+      // Récupérer l'URL de redirection depuis le serveur
+      const redirectResponse = await fetch('/api/auth/redirect-url', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      console.log('📡 [LOGIN] Response status:', redirectResponse.status)
+      
+      if (!redirectResponse.ok) {
+        console.error('❌ [LOGIN] Erreur lors de la récupération de l\'URL:', redirectResponse.status)
+        // Fallback: rediriger vers la page d'accueil
+        window.location.href = '/'
+        return
+      }
+      
+      const data = await redirectResponse.json()
+      console.log('📍 [LOGIN] Données de redirection:', data)
+      const { redirectUrl } = data
+      
+      console.log('🚀 [LOGIN] Redirection vers:', redirectUrl)
+      window.location.href = redirectUrl
     } catch (err) {
       console.error('💥 [LOGIN] Exception:', err)
       setError('Une erreur est survenue')
@@ -71,7 +91,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
+              <label htmlFor="email" className="block text-responsive-sm font-medium text-muted-foreground mb-2">
                 Email
               </label>
               <div className="relative">
@@ -90,7 +110,7 @@ export default function LoginPage() {
 
             {/* Mot de passe */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
+              <label htmlFor="password" className="block text-responsive-sm font-medium text-muted-foreground mb-2">
                 Mot de passe
               </label>
               <div className="relative">
@@ -144,7 +164,7 @@ export default function LoginPage() {
         </div>
 
         {/* Comptes de test */}
-        {/* <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
+        <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
           <h3 className="font-semibold text-foreground mb-3">Comptes de test :</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
@@ -171,7 +191,7 @@ export default function LoginPage() {
               Mot de passe pour tous : <code className="bg-muted px-2 py-1 rounded">password123</code>
             </p>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   )

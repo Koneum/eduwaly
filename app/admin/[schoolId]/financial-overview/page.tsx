@@ -79,24 +79,24 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Vue d&apos;ensemble Financière</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-responsive-xl font-bold text-foreground">Vue d&apos;ensemble Financière</h1>
+          <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
             Tableau de bord des paiements et statistiques financières
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/admin/${schoolId}/finance-settings`}>
-            <PermissionButton category="finance" action="edit" variant="outline">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Link href={`/admin/${schoolId}/finance-settings`} className="w-full sm:w-auto">
+            <PermissionButton category="finance" action="edit" variant="outline" className="w-full text-responsive-sm">
               <Settings className="mr-2 h-4 w-4" />
               Configuration
             </PermissionButton>
           </Link>
-          <Link href={`/admin/${schoolId}/finance`}>
-            <PermissionButton category="finance" action="view">
+          <Link href={`/admin/${schoolId}/finance`} className="w-full sm:w-auto">
+            <PermissionButton category="finance" action="view" className="w-full text-responsive-sm">
               <FileText className="mr-2 h-4 w-4" />
               Tous les Paiements
             </PermissionButton>
@@ -108,15 +108,15 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
       <FinancialDashboard stats={stats} />
 
       {/* Actions rapides */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Link href={`/admin/${schoolId}/students`}>
           <PermissionButton 
             category="students" 
             action="view" 
             variant="outline" 
-            className="w-full h-20 flex flex-col gap-2"
+            className="w-full h-16 sm:h-20 flex flex-col gap-2 text-responsive-xs"
           >
-            <Users className="h-6 w-6" />
+            <Users className="h-5 w-5 sm:h-6 sm:w-6" />
             <span>Gérer les Étudiants</span>
           </PermissionButton>
         </Link>
@@ -125,9 +125,9 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
             category="finance" 
             action="create" 
             variant="outline" 
-            className="w-full h-20 flex flex-col gap-2"
+            className="w-full h-16 sm:h-20 flex flex-col gap-2 text-responsive-xs"
           >
-            <FileText className="h-6 w-6" />
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
             <span>Enregistrer un Paiement</span>
           </PermissionButton>
         </Link>
@@ -136,9 +136,9 @@ export default async function FinancialOverviewPage({ params }: { params: Promis
             category="finance" 
             action="edit" 
             variant="outline" 
-            className="w-full h-20 flex flex-col gap-2"
+            className="w-full h-16 sm:h-20 flex flex-col gap-2 text-responsive-xs"
           >
-            <Settings className="h-6 w-6" />
+            <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
             <span>Envoyer des Rappels</span>
           </PermissionButton>
         </Link>

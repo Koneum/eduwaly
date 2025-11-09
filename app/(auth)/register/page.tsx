@@ -136,7 +136,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Nom de l'école */}
             <div>
-              <label htmlFor="schoolName" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="schoolName" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Nom de l&apos;école
               </label>
               <div className="relative">
@@ -156,7 +156,7 @@ export default function RegisterPage() {
 
             {/* Nom complet */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="name" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Nom complet
               </label>
               <div className="relative">
@@ -176,7 +176,7 @@ export default function RegisterPage() {
 
             {/* Type d'établissement */}
             <div>
-              <label htmlFor="schoolType" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="schoolType" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Type d&apos;établissement
               </label>
               <div className="relative">
@@ -197,7 +197,7 @@ export default function RegisterPage() {
 
             {/* Email école */}
             <div>
-              <label htmlFor="schoolEmail" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="schoolEmail" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Email de l&apos;école
               </label>
               <div className="relative">
@@ -217,7 +217,7 @@ export default function RegisterPage() {
 
             {/* Téléphone école */}
             <div>
-              <label htmlFor="schoolPhone" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="schoolPhone" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Téléphone de l&apos;école
               </label>
               <div className="relative">
@@ -236,7 +236,7 @@ export default function RegisterPage() {
 
             {/* Adresse école */}
             <div>
-              <label htmlFor="schoolAddress" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="schoolAddress" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Adresse de l&apos;école
               </label>
               <div className="relative">
@@ -255,7 +255,7 @@ export default function RegisterPage() {
 
             {/* Email admin */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="email" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Votre email (Admin)
               </label>
               <div className="relative">
@@ -275,7 +275,7 @@ export default function RegisterPage() {
 
             {/* Mot de passe */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="password" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Mot de passe
               </label>
               <div className="relative">
@@ -295,7 +295,7 @@ export default function RegisterPage() {
 
             {/* Confirmation mot de passe */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+              <label htmlFor="confirmPassword" className="block text-responsive-sm font-medium text-foreground mb-2">
                 Confirmer le mot de passe
               </label>
               <div className="relative">

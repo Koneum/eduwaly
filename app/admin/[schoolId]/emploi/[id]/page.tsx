@@ -160,29 +160,29 @@ export default function EmploiPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-black">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-black">
       {/* En-tête avec logo et boutons */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6 md:mb-8">
+        <div className="flex items-center">
           <Link
             href="/emploi"
-            className="inline-flex items-center text-gray-600 hover:text-gray-800"
+            className="inline-flex items-center text-gray-600 hover:text-gray-800 text-responsive-sm"
           >
             <FaArrowLeft className="mr-2" />
             Retour
           </Link>
         </div>
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           <Link
             href={`/emploi/${params.id}/edit`}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-responsive-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
           >
             <FaEdit className="mr-2" />
             Modifier
           </Link>
           <button
             onClick={handleExportPDF}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-responsive-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
           >
             <FaDownload className="mr-2" />
             Exporter PDF
@@ -191,7 +191,7 @@ export default function EmploiPage() {
       </div>
 
       {/* En-tête de l'emploi du temps */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-center">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6 text-center">
         <Image
           src="/logo.png"
           alt="Logo"
@@ -199,11 +199,11 @@ export default function EmploiPage() {
           height={60}
           className="mx-auto"
         />
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-responsive-lg sm:text-responsive-xl font-bold text-gray-900">
           Institut Universitaire de Formation Professionnelle
         </h1>
-        <p className="text-lg text-gray-600">FORMATION CONTINUE</p>
-        <p className="text-lg font-semibold mt-4">
+        <p className="text-responsive-base text-gray-600">FORMATION CONTINUE</p>
+        <p className="text-responsive-base font-semibold mt-3 sm:mt-4">
           EDT DU {formatDateForDisplay(new Date(emploi.dateDebut))} AU{' '}
           {formatDateForDisplay(new Date(emploi.dateFin))}
           {emploi.ueCommune && ' - UE'}
@@ -211,42 +211,42 @@ export default function EmploiPage() {
       </div>
 
       {/* Informations de l'emploi */}
-      <div className="grid text-center md:grid-cols-5 gap-4 mb-8">
+      <div className="grid text-center grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
         <div>
-          <p className="font-semibold">FILIERES :</p>
-          <p>{emploi.ueCommune ? 'UE COMMUNE' : emploi.filiere?.nom}</p>
+          <p className="font-semibold text-responsive-xs sm:text-responsive-sm">FILIERES :</p>
+          <p className="text-responsive-xs sm:text-responsive-sm">{emploi.ueCommune ? 'UE COMMUNE' : emploi.filiere?.nom}</p>
         </div>
         <div>
-          <p className="font-semibold">NIVEAU :</p>
+          <p className="font-semibold text-responsive-xs sm:text-responsive-sm">NIVEAU :</p>
           <p>{emploi.niveau}-{emploi.semestre}</p>
         </div>
         <div>
-          <p className="font-semibold">Salle CM :</p>
+          <p className="font-semibold text-responsive-xs sm:text-responsive-sm">Salle CM :</p>
           <p>{emploi.salle}</p>
         </div>
         <div>
-          <p className="font-semibold">VH :</p>
+          <p className="font-semibold text-responsive-xs sm:text-responsive-sm">VH :</p>
           <p>{emploi.vh}</p>
         </div>
         <div>
-          <p className="font-semibold">ANNÉE UNIVERSITAIRE :</p>
+          <p className="font-semibold text-responsive-xs sm:text-responsive-sm">ANNÉE UNIVERSITAIRE :</p>
           <p>{emploi.anneeUniv.annee}</p>
         </div>
       </div>
 
       {/* Tableau des horaires */}
-      <div className="bg-white rounded-lg shadow-md overflow-x-auto text-center text-black">
+      <div className="bg-white rounded-lg shadow-md overflow-x-auto text-center text-black mb-4 sm:mb-6">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-center text-xs font-medium text-black uppercase tracking-wider">
+              <th className="px-3 sm:px-6 py-2 sm:py-3 text-center text-responsive-xs font-medium text-black uppercase tracking-wider">
                 Horaires
               </th>
               {['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'].map(
                 (jour) => (
                   <th
                     key={jour}
-                    className="px-6 py-3 text-center text-xs font-medium text-black uppercase tracking-wider"
+                    className="px-3 sm:px-6 py-2 sm:py-3 text-center text-responsive-xs font-medium text-black uppercase tracking-wider"
                   >
                     {jour}
                   </th>
@@ -256,12 +256,12 @@ export default function EmploiPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             <tr>
-              <td className="border px-6 py-4 whitespace-nowrap text-sm text-black">
+              <td className="border px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-responsive-xs text-black">
                 {formatHeure(emploi.heureDebut)}-{formatHeure(emploi.heureFin)}
               </td>
               {['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'].map(
                 (jour) => (
-                  <td key={jour} className="border px-6 py-4 whitespace-nowrap text-sm text-black">
+                  <td key={jour} className="border px-3 sm:px-6 py-3 sm:py-4 text-responsive-xs text-black">
                     {isCoursDay(emploi, jour) && !isEvaluationDay(emploi, jour) && (
                       <div>
                         <p className="font-semibold">{emploi.module.nom}</p>
@@ -287,21 +287,21 @@ export default function EmploiPage() {
       </div>
 
       {/* Signatures */}
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between">
+      <div className="mt-4 sm:mt-6 md:mt-8 bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-0">
           <div>
-            <p>
+            <p className="text-responsive-sm">
               {emploi.enseignant.titre} {emploi.enseignant.prenom}{' '}
               {emploi.enseignant.nom}
             </p>
-            <p className="mt-4">Ségou, le {formatDateForDisplay(new Date())}</p>
+            <p className="mt-3 sm:mt-4 text-responsive-sm">Ségou, le {formatDateForDisplay(new Date())}</p>
           </div>
-          <div className="text-right">
-            <p className="mt-1">Le Chef de Département</p>
+          <div className="text-left sm:text-right">
+            <p className="mt-1 text-responsive-sm">Le Chef de Département</p>
             {parametres && (
               <>
-                <p>{parametres.titre} {parametres.chefDepartement}</p>
-                <p>{parametres.grade}</p>
+                <p className="text-responsive-sm">{parametres.titre} {parametres.chefDepartement}</p>
+                <p className="text-responsive-sm">{parametres.grade}</p>
               </>
             )}
           </div>

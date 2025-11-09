@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {  Clock } from "lucide-react"
 import prisma from "@/lib/prisma"
@@ -31,7 +32,7 @@ export default async function TeacherSchedulePage({
   }
 
   // Récupérer l'emploi du temps de l'enseignant
-  const schedules = await prisma.emploiDuTemps.findMany({
+  const schedules: any = await prisma.emploiDuTemps.findMany({
     where: {
       enseignantId: teacher.id,
       schoolId: schoolId
@@ -62,7 +63,7 @@ export default async function TeacherSchedulePage({
   const currentDay = dayMapping[dayOfWeek]
 
   // Cours d'aujourd'hui - vérifier si le jour actuel est dans joursCours
-  const todaySchedules = schedules.filter(s => {
+  const todaySchedules = schedules.filter((s: any) => {
     try {
       const joursCours = JSON.parse(s.joursCours)
       return Array.isArray(joursCours) && joursCours.includes(currentDay)
@@ -72,15 +73,15 @@ export default async function TeacherSchedulePage({
   })
 
   // Statistiques
-  const totalHours = schedules.reduce((sum, s) => {
+  const totalHours = schedules.reduce((sum: number, s: any) => {
     const [startH, startM] = s.heureDebut.split(':').map(Number)
     const [endH, endM] = s.heureFin.split(':').map(Number)
     const duration = (endH * 60 + endM) - (startH * 60 + startM)
     return sum + duration / 60
   }, 0)
 
-  const uniqueClasses = new Set(schedules.map(s => s.filiereId).filter(Boolean)).size
-  const uniqueRooms = new Set(schedules.map(s => s.salle).filter(Boolean)).size
+  const uniqueClasses = new Set(schedules.map((s: any) => s.filiereId).filter(Boolean)).size
+  const uniqueRooms = new Set(schedules.map((s: any) => s.salle).filter(Boolean)).size
 
   // Jours de la semaine
   const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
@@ -88,26 +89,26 @@ export default async function TeacherSchedulePage({
   
   // Créneaux horaires uniques
   const allTimeSlots = new Set<string>()
-  schedules.forEach(s => {
+  schedules.forEach((s: any) => {
     allTimeSlots.add(`${s.heureDebut} - ${s.heureFin}`)
   })
   const timeSlots = Array.from(allTimeSlots).sort()
 
   // Organiser les cours par jour et créneau
   const scheduleGrid: Record<string, Record<string, typeof schedules[0][]>> = {}
-  timeSlots.forEach(slot => {
+  timeSlots.forEach((slot: string) => {
     scheduleGrid[slot] = {}
-    dayKeys.forEach(day => {
+    dayKeys.forEach((day: string) => {
       scheduleGrid[slot][day] = []
     })
   })
 
-  schedules.forEach(schedule => {
+  schedules.forEach((schedule: any) => {
     const slot = `${schedule.heureDebut} - ${schedule.heureFin}`
     try {
       const joursCours = JSON.parse(schedule.joursCours)
       if (Array.isArray(joursCours)) {
-        joursCours.forEach(jour => {
+        joursCours.forEach((jour: string) => {
           if (dayKeys.includes(jour)) {
             scheduleGrid[slot][jour].push(schedule)
           }
@@ -164,7 +165,7 @@ export default async function TeacherSchedulePage({
                               {coursesInSlot.map((schedule, idx) => (
                                 <div key={idx} className="bg-primary/10 border-l-4 border-primary p-2 rounded text-xs">
                                   <p className="font-semibold text-foreground">
-                                    {schedule.module.nom}
+                                    {schedule.module?.nom || 'Module non défini'}
                                   </p>
                                   {schedule.filiere && (
                                     <p className="text-muted-foreground">
@@ -173,7 +174,7 @@ export default async function TeacherSchedulePage({
                                   )}
                                   {schedule.salle && (
                                     <p className="text-muted-foreground">
-                                      {schedule.salle}
+                                      Salle: {schedule.salle}
                                     </p>
                                   )}
                                 </div>
@@ -203,7 +204,7 @@ export default async function TeacherSchedulePage({
               </p>
             ) : (
               <div className="space-y-3">
-                {todaySchedules.map((schedule, idx) => (
+                {todaySchedules.map((schedule: any, idx: number) => (
                   <div 
                     key={schedule.id} 
                     className={`p-4 border border-border rounded-lg ${idx === 0 ? 'bg-accent/50' : ''}`}
@@ -213,10 +214,10 @@ export default async function TeacherSchedulePage({
                       <span className="font-medium">{schedule.heureDebut} - {schedule.heureFin}</span>
                     </div>
                     <p className="font-semibold text-foreground">
-                      {schedule.module.nom}{schedule.filiere && ` - ${schedule.filiere.nom}`}
+                      {schedule.module?.nom || 'Module non défini'}{schedule.filiere && ` - ${schedule.filiere.nom}`}
                     </p>
                     {schedule.salle && (
-                      <p className="text-sm text-muted-foreground">{schedule.salle}</p>
+                      <p className="text-sm text-muted-foreground">Salle: {schedule.salle}</p>
                     )}
                   </div>
                 ))}

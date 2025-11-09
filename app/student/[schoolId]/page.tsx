@@ -134,27 +134,27 @@ export default async function StudentDashboard({
   ]
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard Étudiant</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-responsive-xl font-bold text-foreground">Dashboard Étudiant</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">
           Bienvenue, {student.user?.name || 'Étudiant'} - {student.filiere?.nom || 'Non assigné'}
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {stats.map((stat) => (
           <Card key={stat.label}>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                  <p className="text-3xl font-bold text-foreground mt-2">{stat.value}</p>
+                  <p className="text-responsive-xs font-medium text-muted-foreground">{stat.label}</p>
+                  <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{stat.value}</p>
                 </div>
-                <div className={`${stat.bg} p-3 rounded-xl`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`${stat.bg} p-2 sm:p-3 rounded-xl`}>
+                  <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color}`} />
                 </div>
               </div>
             </CardContent>
@@ -204,7 +204,7 @@ export default async function StudentDashboard({
         </Card>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
 

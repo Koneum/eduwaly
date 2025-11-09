@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { AlertCircle, CheckCircle, Clock, Eye, Trash2, Loader2 } from "lucide-react"
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -245,108 +245,115 @@ export default function IssuesManager() {
           </div>
         </CardHeader>
         <CardContent>
-          {issues.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              Aucun signalement trouvé
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>École</TableHead>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Priorité</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {issues.map((issue) => (
-                  <TableRow key={issue.id}>
-                    <TableCell className="font-medium">{issue.school.name}</TableCell>
-                    <TableCell>{issue.title}</TableCell>
-                    <TableCell>{getCategoryLabel(issue.category)}</TableCell>
-                    <TableCell>{getPriorityBadge(issue.priority)}</TableCell>
-                    <TableCell>{getStatusBadge(issue.status)}</TableCell>
-                    <TableCell>{new Date(issue.createdAt).toLocaleDateString('fr-FR')}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleViewDetails(issue)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {issue.status !== 'RESOLVED' && issue.status !== 'CLOSED' && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleResolve(issue)}
-                          >
-                            <CheckCircle className="h-4 w-4 text-success" />
-                          </Button>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDelete(issue.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <ResponsiveTable
+            data={issues}
+            columns={[
+              {
+                header: "École",
+                accessor: (issue) => issue.school.name,
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Titre",
+                accessor: "title",
+                priority: "high"
+              },
+              {
+                header: "Catégorie",
+                accessor: (issue) => getCategoryLabel(issue.category),
+                priority: "medium"
+              },
+              {
+                header: "Priorité",
+                accessor: (issue) => getPriorityBadge(issue.priority),
+                priority: "high"
+              },
+              {
+                header: "Statut",
+                accessor: (issue) => getStatusBadge(issue.status),
+                priority: "high"
+              },
+              {
+                header: "Date",
+                accessor: (issue) => new Date(issue.createdAt).toLocaleDateString('fr-FR'),
+                priority: "low"
+              }
+            ]}
+            keyExtractor={(issue) => issue.id}
+            actions={(issue) => (
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleViewDetails(issue)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                {issue.status !== 'RESOLVED' && issue.status !== 'CLOSED' && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handleResolve(issue)}
+                  >
+                    <CheckCircle className="h-4 w-4 text-success" />
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleDelete(issue.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Aucun signalement trouvé"
+          />
         </CardContent>
       </Card>
 
       {/* Dialog Détails */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Détails du Signalement</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Détails du Signalement</DialogTitle>
           </DialogHeader>
           {selectedIssue && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <Label className="text-muted-foreground">École</Label>
-                  <p className="font-medium">{selectedIssue.school.name}</p>
+                  <Label className="text-responsive-xs text-muted-foreground">École</Label>
+                  <p className="font-medium text-responsive-sm">{selectedIssue.school.name}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Catégorie</Label>
-                  <p className="font-medium">{getCategoryLabel(selectedIssue.category)}</p>
+                  <Label className="text-responsive-xs text-muted-foreground">Catégorie</Label>
+                  <p className="font-medium text-responsive-sm">{getCategoryLabel(selectedIssue.category)}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Priorité</Label>
+                  <Label className="text-responsive-xs text-muted-foreground">Priorité</Label>
                   <div className="mt-1">{getPriorityBadge(selectedIssue.priority)}</div>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Statut</Label>
+                  <Label className="text-responsive-xs text-muted-foreground">Statut</Label>
                   <div className="mt-1">{getStatusBadge(selectedIssue.status)}</div>
                 </div>
               </div>
               <div>
-                <Label className="text-muted-foreground">Titre</Label>
-                <p className="font-medium">{selectedIssue.title}</p>
+                <Label className="text-responsive-xs text-muted-foreground">Titre</Label>
+                <p className="font-medium text-responsive-sm">{selectedIssue.title}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Description</Label>
-                <p className="text-sm whitespace-pre-wrap">{selectedIssue.description}</p>
+                <Label className="text-responsive-xs text-muted-foreground">Description</Label>
+                <p className="text-responsive-sm whitespace-pre-wrap">{selectedIssue.description}</p>
               </div>
               {selectedIssue.resolution && (
                 <div>
-                  <Label className="text-muted-foreground">Résolution</Label>
-                  <p className="text-sm whitespace-pre-wrap">{selectedIssue.resolution}</p>
+                  <Label className="text-responsive-xs text-muted-foreground">Résolution</Label>
+                  <p className="text-responsive-sm whitespace-pre-wrap">{selectedIssue.resolution}</p>
                 </div>
               )}
-              <div className="text-xs text-muted-foreground">
+              <div className="text-responsive-xs text-muted-foreground">
                 Créé le {new Date(selectedIssue.createdAt).toLocaleString('fr-FR')}
               </div>
             </div>
@@ -356,30 +363,32 @@ export default function IssuesManager() {
 
       {/* Dialog Résoudre */}
       <Dialog open={isResolveOpen} onOpenChange={setIsResolveOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Traiter le Signalement</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Traiter le Signalement</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label htmlFor="resolution">Note de résolution (optionnel)</Label>
+              <Label htmlFor="resolution" className="text-responsive-sm">Note de résolution (optionnel)</Label>
               <Textarea
                 id="resolution"
                 placeholder="Décrivez comment le problème a été résolu..."
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
                 rows={4}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsResolveOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsResolveOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
             <Button 
               variant="secondary"
               onClick={() => handleUpdateStatus('IN_PROGRESS')}
               disabled={submitting}
+              className="w-full sm:w-auto"
             >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Marquer en cours
@@ -387,6 +396,7 @@ export default function IssuesManager() {
             <Button 
               onClick={() => handleUpdateStatus('RESOLVED')}
               disabled={submitting}
+              className="w-full sm:w-auto"
             >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Marquer résolu

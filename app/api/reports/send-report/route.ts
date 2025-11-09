@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { headers } from 'next/headers';
+import { sendReportEmail } from '@/lib/brevo';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,23 +42,66 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // TODO: Gérer l'envoi aux parents quand la relation sera clarifiée dans le schéma
-    // TODO: Envoyer les emails avec le PDF en pièce jointe via Resend/SendGrid
-
+    // Envoyer les emails
     const recipients = [];
+    const emailsSent = [];
+
     if (recipient === 'student' || recipient === 'both') {
-      recipients.push({ type: 'student', email: student.user?.email || 'N/A' });
-    }
-    if (recipient === 'parent' || recipient === 'both') {
-      recipients.push({ type: 'parent', email: 'À implémenter' });
+      if (student.user?.email) {
+        recipients.push({ type: 'student', email: student.user.email });
+        
+        // Générer l'URL du PDF (à adapter selon votre stockage)
+        const pdfUrl = reportType === 'bulletin' 
+          ? `${process.env.NEXT_PUBLIC_APP_URL}/api/reports/report-card?studentId=${studentId}&semester=${semester}`
+          : `${process.env.NEXT_PUBLIC_APP_URL}/api/reports/certificate?studentId=${studentId}`;
+
+        const reportTypeName = reportType === 'bulletin' ? 'Bulletin de notes' : 'Certificat de scolarité';
+        
+        await sendReportEmail(
+          student.user.email,
+          student.user.name,
+          reportTypeName,
+          pdfUrl
+        );
+        emailsSent.push(student.user.email);
+      }
     }
 
-    // TODO: Envoyer les emails avec le PDF en pièce jointe
-    // Cette partie sera implémentée avec Resend ou SendGrid
+    // Envoyer aux parents si relation existe
+    if (recipient === 'parent' || recipient === 'both') {
+      const parents = await prisma.parent.findMany({
+        where: {
+          students: {
+            some: { id: studentId }
+          }
+        },
+        include: { user: true }
+      });
+
+      for (const parent of parents) {
+        if (parent.user?.email) {
+          recipients.push({ type: 'parent', email: parent.user.email });
+          
+          const pdfUrl = reportType === 'bulletin' 
+            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/reports/report-card?studentId=${studentId}&semester=${semester}`
+            : `${process.env.NEXT_PUBLIC_APP_URL}/api/reports/certificate?studentId=${studentId}`;
+
+          const reportTypeName = reportType === 'bulletin' ? 'Bulletin de notes' : 'Certificat de scolarité';
+          
+          await sendReportEmail(
+            parent.user.email,
+            parent.user.name,
+            reportTypeName,
+            pdfUrl
+          );
+          emailsSent.push(parent.user.email);
+        }
+      }
+    }
 
     return NextResponse.json({ 
       success: true, 
-      sentTo: recipients.length,
+      sentTo: emailsSent.length,
       recipients: recipients.map(r => ({ email: r.email, type: r.type }))
     });
   } catch (error) {

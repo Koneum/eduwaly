@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RevenueChart } from "@/components/revenue-chart"
 import { StatCard } from "@/components/stat-card"
@@ -18,7 +19,7 @@ export default async function AnalyticsPage() {
   const totalTeachers = await prisma.enseignant.count()
 
   // Abonnements par statut
-  const subscriptionsByStatus = await prisma.subscription.groupBy({
+  const subscriptionsByStatus: any = await prisma.subscription.groupBy({
     by: ['status'],
     _count: { id: true }
   })
@@ -27,7 +28,7 @@ export default async function AnalyticsPage() {
   const now = new Date()
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
   
-  const subscriptions = await prisma.subscription.findMany({
+  const subscriptions: any = await prisma.subscription.findMany({
     where: {
       createdAt: { gte: twelveMonthsAgo },
       status: { in: ['ACTIVE', 'TRIAL'] }
@@ -36,7 +37,7 @@ export default async function AnalyticsPage() {
   })
 
   // Top 5 écoles par nombre d'étudiants
-  const topSchools = await prisma.school.findMany({
+  const topSchools: any = await prisma.school.findMany({
     take: 5,
     include: {
       subscription: { include: { plan: true } },
@@ -53,14 +54,14 @@ export default async function AnalyticsPage() {
   })
 
   // Plans les plus populaires
-  const planStats = await prisma.subscription.groupBy({
+  const planStats: any = await prisma.subscription.groupBy({
     by: ['planId'],
     _count: { id: true },
     where: { status: 'ACTIVE' }
   })
 
   const plansWithDetails = await Promise.all(
-    planStats.map(async (stat) => {
+    planStats.map(async (stat: any) => {
       const plan = await prisma.plan.findUnique({
         where: { id: stat.planId }
       })
@@ -72,7 +73,7 @@ export default async function AnalyticsPage() {
   )
 
   // Calcul du taux de croissance
-  const lastMonthSchools = await prisma.school.count({
+  const lastMonthSchools: any = await prisma.school.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -81,7 +82,7 @@ export default async function AnalyticsPage() {
     }
   })
 
-  const currentMonthSchools = await prisma.school.count({
+  const currentMonthSchools: any = await prisma.school.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -94,10 +95,10 @@ export default async function AnalyticsPage() {
     : 0
 
   // Revenus totaux
-  const totalRevenue = subscriptions.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+  const totalRevenue = subscriptions.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
 
   // Calcul de la croissance des étudiants
-  const lastMonthStudents = await prisma.student.count({
+  const lastMonthStudents: any = await prisma.student.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -106,7 +107,7 @@ export default async function AnalyticsPage() {
     }
   })
 
-  const currentMonthStudents = await prisma.student.count({
+  const currentMonthStudents: any = await prisma.student.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -119,7 +120,7 @@ export default async function AnalyticsPage() {
     : 0
 
   // Calcul de la croissance des enseignants
-  const lastMonthTeachers = await prisma.enseignant.count({
+  const lastMonthTeachers: any = await prisma.enseignant.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -128,7 +129,7 @@ export default async function AnalyticsPage() {
     }
   })
 
-  const currentMonthTeachers = await prisma.enseignant.count({
+  const currentMonthTeachers: any = await prisma.enseignant.count({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -141,7 +142,7 @@ export default async function AnalyticsPage() {
     : 0
 
   // Calcul de la croissance des revenus
-  const lastMonthRevenue = await prisma.subscription.findMany({
+  const lastMonthRevenue: any = await prisma.subscription.findMany({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
@@ -152,7 +153,7 @@ export default async function AnalyticsPage() {
     include: { plan: true }
   })
 
-  const currentMonthRevenueData = await prisma.subscription.findMany({
+  const currentMonthRevenueData: any = await prisma.subscription.findMany({
     where: {
       createdAt: {
         gte: new Date(now.getFullYear(), now.getMonth(), 1)
@@ -162,8 +163,8 @@ export default async function AnalyticsPage() {
     include: { plan: true }
   })
 
-  const lastMonthRevenueTotal = lastMonthRevenue.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
-  const currentMonthRevenueTotal = currentMonthRevenueData.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+  const lastMonthRevenueTotal = lastMonthRevenue.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
+  const currentMonthRevenueTotal = currentMonthRevenueData.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
 
   const revenueGrowthRate = lastMonthRevenueTotal > 0 
     ? ((currentMonthRevenueTotal - lastMonthRevenueTotal) / lastMonthRevenueTotal * 100).toFixed(1)
@@ -177,7 +178,7 @@ export default async function AnalyticsPage() {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - 11 + i + 1, 0)
       
-      const monthSubscriptions = await prisma.subscription.findMany({
+      const monthSubscriptions: any = await prisma.subscription.findMany({
         where: {
           createdAt: { gte: monthStart, lte: monthEnd },
           status: { in: ['ACTIVE', 'TRIAL'] }
@@ -185,7 +186,7 @@ export default async function AnalyticsPage() {
         include: { plan: true }
       })
 
-      const revenue = monthSubscriptions.reduce((sum, sub) => sum + Number(sub.plan.price), 0)
+      const revenue = monthSubscriptions.reduce((sum: number, sub: any) => sum + Number(sub.plan.price), 0)
       
       return {
         month: monthNames[monthStart.getMonth()],
@@ -245,7 +246,7 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {subscriptionsByStatus.map((stat) => (
+              {subscriptionsByStatus.map((stat: any) => (
                 <div key={stat.status} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Badge variant={
@@ -312,7 +313,7 @@ export default async function AnalyticsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topSchools.map((school, index) => (
+                {topSchools.map((school: any, index: number) => (
                   <TableRow key={school.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">

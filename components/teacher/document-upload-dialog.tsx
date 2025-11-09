@@ -122,35 +122,35 @@ export function DocumentUploadDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-card text-black">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
         <DialogHeader>
-          <DialogTitle>Ajouter un document</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-responsive-lg">Ajouter un document</DialogTitle>
+          <DialogDescription className="text-responsive-sm">
             Partagez des ressources pédagogiques avec vos étudiants
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="title">Titre *</Label>
+            <Label htmlFor="title" className="text-responsive-sm">Titre *</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Cours Chapitre 1"
-              className="bg-card"
+              className="bg-card text-responsive-sm"
             />
           </div>
 
           <div>
-            <Label htmlFor="category">Catégorie *</Label>
+            <Label htmlFor="category" className="text-responsive-sm">Catégorie *</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="bg-card">
+              <SelectTrigger className="bg-card text-responsive-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-card">
                 {DOCUMENT_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
+                  <SelectItem key={cat.value} value={cat.value} className="text-responsive-sm">
                     {cat.label}
                   </SelectItem>
                 ))}
@@ -159,19 +159,19 @@ export function DocumentUploadDialog({
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-responsive-sm">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description du document..."
               rows={3}
-              className="bg-card"
+              className="bg-card text-responsive-sm"
             />
           </div>
 
           <div>
-            <Label>Fichier *</Label>
+            <Label className="text-responsive-sm">Fichier *</Label>
             <FileUpload
               onUpload={handleUpload}
               onError={(error) => {
@@ -188,18 +188,19 @@ export function DocumentUploadDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
+            className="w-full sm:w-auto"
           >
             Annuler
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !title || !uploadedFile}
-            className="bg-primary hover:bg-primary hover:bg-[#E6B000]"
+            className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto"
           >
             {isSubmitting ? 'Ajout en cours...' : 'Ajouter le document'}
           </Button>

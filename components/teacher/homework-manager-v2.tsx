@@ -409,26 +409,26 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
 
       {/* Dialog Nouveau Devoir */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card ">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
           <DialogHeader>
-            <DialogTitle>Créer un Devoir</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Créer un Devoir</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Assignez un devoir {schoolType === 'UNIVERSITY' ? 'par module' : 'par matière'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label>
+              <Label className="text-responsive-sm">
                 {schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'} *
               </Label>
               <Select value={selectedFiliere} onValueChange={setSelectedFiliere}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder={`Sélectionnez ${schoolType === 'UNIVERSITY' ? 'une filière' : 'une classe'}`} />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {filieres.map((filiere: { id: string; nom: string }) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
                   ))}
@@ -437,18 +437,18 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
 
             <div>
-              <Label>
+              <Label className="text-responsive-sm">
                 {schoolType === 'UNIVERSITY' ? 'Module' : 'Matière'} *
               </Label>
               <Select value={selectedModule} onValueChange={setSelectedModule}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder={`Sélectionnez ${schoolType === 'UNIVERSITY' ? 'un module' : 'une matière'}`} />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {modules
                     .filter((m) => !selectedFiliere || (m.filiere && m.filiere.id === selectedFiliere))
                     .map((module) => (
-                      <SelectItem key={module.id} value={module.id}>
+                      <SelectItem key={module.id} value={module.id} className="text-responsive-sm">
                         {module.nom}
                       </SelectItem>
                     ))}
@@ -457,23 +457,23 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
 
             <div>
-              <Label>Type d&apos;assignation *</Label>
+              <Label className="text-responsive-sm">Type d&apos;assignation *</Label>
               <Select value={assignmentType} onValueChange={setAssignmentType}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
-                  <SelectItem value="INDIVIDUAL">Individuel</SelectItem>
-                  <SelectItem value="GROUP">Groupe</SelectItem>
+                  <SelectItem value="INDIVIDUAL" className="text-responsive-sm">Individuel</SelectItem>
+                  <SelectItem value="GROUP" className="text-responsive-sm">Groupe</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {assignmentType === 'GROUP' && (
               <div>
-                <Label>Groupes de travail *</Label>
+                <Label className="text-responsive-sm">Groupes de travail *</Label>
                 {workGroups.length === 0 ? (
-                  <div className="border rounded-md p-4 text-center text-sm text-muted-foreground">
+                  <div className="border rounded-md p-3 sm:p-4 text-center text-responsive-sm text-muted-foreground">
                     Aucun groupe de travail disponible. 
                     <br />
                     Sélectionnez une filière/classe et un module, ou créez un nouveau groupe.
@@ -493,7 +493,7 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
                             }
                           }}
                         />
-                        <label htmlFor={group.id} className="text-sm cursor-pointer">
+                        <label htmlFor={group.id} className="text-responsive-sm cursor-pointer">
                           {group.name} ({group.members.length} membres)
                         </label>
                       </div>
@@ -504,41 +504,41 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             )}
 
             <div>
-              <Label htmlFor="title">Titre *</Label>
+              <Label htmlFor="title" className="text-responsive-sm">Titre *</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Devoir Chapitre 1"
-                className="bg-card"
+                className="bg-card text-responsive-sm"
               />
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-responsive-sm">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Instructions pour le devoir..."
                 rows={4}
-                className="bg-card"
+                className="bg-card text-responsive-sm"
               />
             </div>
 
             <div>
-              <Label htmlFor="dueDate">Date limite *</Label>
+              <Label htmlFor="dueDate" className="text-responsive-sm">Date limite *</Label>
               <Input
                 id="dueDate"
                 type="datetime-local"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="bg-card"
+                className="bg-card text-responsive-sm"
               />
             </div>
 
             <div>
-              <Label>Fichier (optionnel)</Label>
+              <Label className="text-responsive-sm">Fichier (optionnel)</Label>
               <FileUpload
                 onUpload={(files) => setUploadedFile(files[0])}
                 onError={(error) => {
@@ -555,18 +555,19 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setShowDialog(false)}
               disabled={isSubmitting}
+              className="w-full sm:w-auto"
             >
               Annuler
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !title || !selectedModule || !dueDate}
-              className="bg-primary hover:bg-primary hover:bg-[#E6B000]"
+              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto"
             >
               {isSubmitting ? 'Création...' : 'Créer le Devoir'}
             </Button>
@@ -576,37 +577,37 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
 
       {/* Dialog Nouveau Groupe */}
       <Dialog open={showGroupDialog} onOpenChange={setShowGroupDialog}>
-        <DialogContent className="bg-card ">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto bg-card">
           <DialogHeader>
-            <DialogTitle>Créer un Groupe de Travail</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Créer un Groupe de Travail</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Les étudiants pourront également créer leurs propres groupes
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label htmlFor="groupName">Nom du groupe *</Label>
+              <Label htmlFor="groupName" className="text-responsive-sm">Nom du groupe *</Label>
               <Input
                 id="groupName"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="Ex: Groupe A"
-                className="bg-card"
+                className="bg-card text-responsive-sm"
               />
             </div>
 
             <div>
-              <Label>
+              <Label className="text-responsive-sm">
                 {schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'}
               </Label>
               <Select value={groupFiliere} onValueChange={setGroupFiliere}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder="Sélectionnez" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {filieres.map((filiere: { id: string; nom: string }) => (
-                    <SelectItem key={filiere.id} value={filiere.id}>
+                    <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
                   ))}
@@ -615,18 +616,18 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
 
             <div>
-              <Label>
+              <Label className="text-responsive-sm">
                 {schoolType === 'UNIVERSITY' ? 'Module' : 'Matière'}
               </Label>
               <Select value={groupModule} onValueChange={setGroupModule}>
-                <SelectTrigger className="bg-card">
+                <SelectTrigger className="bg-card text-responsive-sm">
                   <SelectValue placeholder="Sélectionnez" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
                   {modules
                     .filter((m) => !groupFiliere || (m.filiere && m.filiere.id === groupFiliere))
                     .map((module) => (
-                      <SelectItem key={module.id} value={module.id}>
+                      <SelectItem key={module.id} value={module.id} className="text-responsive-sm">
                         {module.nom}
                       </SelectItem>
                     ))}
@@ -635,17 +636,18 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setShowGroupDialog(false)}
+              className="w-full sm:w-auto"
             >
               Annuler
             </Button>
             <Button
               onClick={handleCreateGroup}
               disabled={!groupName}
-              className="bg-primary hover:bg-primary hover:bg-[#E6B000]"
+              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto"
             >
               Créer le Groupe
             </Button>

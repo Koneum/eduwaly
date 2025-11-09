@@ -39,24 +39,24 @@ export default async function StudentPaymentsPage({
   const balance = totalDue - totalPaid
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Scolarité & Paiements</h1>
-        <p className="text-muted-foreground mt-2">Gérez vos frais de scolarité et paiements</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Scolarité & Paiements</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Gérez vos frais de scolarité et paiements</p>
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total à payer</p>
-                <p className="text-2xl font-bold text-foreground mt-2">{totalDue.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mt-1">FCFA</p>
+                <p className="text-responsive-xs font-medium text-muted-foreground">Total à payer</p>
+                <p className="text-responsive-base sm:text-responsive-lg font-bold text-foreground mt-1 sm:mt-2">{totalDue.toLocaleString()}</p>
+                <p className="text-responsive-xs text-muted-foreground mt-1">FCFA</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <DollarSign className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-100 p-2 sm:p-3 rounded-xl">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>

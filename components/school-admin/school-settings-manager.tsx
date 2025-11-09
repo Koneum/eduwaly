@@ -344,68 +344,72 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
   }
 
   return (
-    <Tabs defaultValue="general" className="space-y-4">
-      <TabsList className="bg-card">
-        <TabsTrigger value="general">Informations Générales</TabsTrigger>
-        <TabsTrigger value="years">Années Scolaires</TabsTrigger>
-        <TabsTrigger value="rooms">{schoolType === 'HIGH_SCHOOL' ? 'Classes' : 'Salles'}</TabsTrigger>
+    <Tabs defaultValue="general" className="space-y-3 sm:space-y-4">
+      <TabsList className="bg-card w-full sm:w-auto flex-col sm:flex-row h-auto sm:h-10">
+        <TabsTrigger value="general" className="text-responsive-sm w-full sm:w-auto">Informations Générales</TabsTrigger>
+        <TabsTrigger value="years" className="text-responsive-sm w-full sm:w-auto">Années Scolaires</TabsTrigger>
+        <TabsTrigger value="rooms" className="text-responsive-sm w-full sm:w-auto">{schoolType === 'HIGH_SCHOOL' ? 'Classes' : 'Salles'}</TabsTrigger>
       </TabsList>
 
       {/* Onglet Informations Générales */}
-      <TabsContent value="general" className="space-y-4">
+      <TabsContent value="general" className="space-y-3 sm:space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>Informations de l&apos;école</CardTitle>
-            <CardDescription>Gérez les informations de base de votre établissement</CardDescription>
+            <CardTitle className="text-responsive-lg">Informations de l&apos;école</CardTitle>
+            <CardDescription className="text-responsive-sm">Gérez les informations de base de votre établissement</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="schoolName">Nom de l&apos;école *</Label>
+          <CardContent className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="schoolName" className="text-responsive-sm">Nom de l&apos;école *</Label>
                 <Input 
                   id="schoolName" 
                   placeholder="École Excellence" 
                   defaultValue={schoolData?.name || ''}
+                  className="text-responsive-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="schoolType">Type d&apos;établissement</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="schoolType" className="text-responsive-sm">Type d&apos;établissement</Label>
                 <Input 
                   id="schoolType" 
                   value={schoolType === 'HIGH_SCHOOL' ? 'Lycée' : 'Université'}
                   disabled
-                  className="bg-muted"
+                  className="bg-muted text-responsive-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="schoolEmail">Email *</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="schoolEmail" className="text-responsive-sm">Email *</Label>
                 <Input 
                   id="schoolEmail" 
                   type="email" 
                   placeholder="contact@ecole.com" 
                   defaultValue={schoolData?.email || ''}
+                  className="text-responsive-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="schoolPhone">Téléphone</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="schoolPhone" className="text-responsive-sm">Téléphone</Label>
                 <Input 
                   id="schoolPhone" 
                   type="tel" 
                   placeholder="+221 77 123 4567" 
                   defaultValue={schoolData?.phone || ''}
+                  className="text-responsive-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="schoolAddress">Adresse</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="schoolAddress" className="text-responsive-sm">Adresse</Label>
                 <Input 
                   id="schoolAddress" 
                   placeholder="Dakar, Sénégal" 
                   defaultValue={schoolData?.address || ''}
+                  className="text-responsive-sm"
                 />
               </div>
             </div>
             <div className="flex justify-end">
-              <Button onClick={() => toast.success('Informations mises à jour')}>
+              <Button onClick={() => toast.success('Informations mises à jour')} className="btn-responsive w-full sm:w-auto">
                 Enregistrer les modifications
               </Button>
             </div>
@@ -414,19 +418,19 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
       </TabsContent>
 
       {/* Onglet Années Scolaires */}
-      <TabsContent value="years" className="space-y-4">
+      <TabsContent value="years" className="space-y-3 sm:space-y-4">
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
               <div>
-                <CardTitle>Années Scolaires</CardTitle>
-                <CardDescription>Gérez les années scolaires/universitaires</CardDescription>
+                <CardTitle className="text-responsive-lg">Années Scolaires</CardTitle>
+                <CardDescription className="text-responsive-sm">Gérez les années scolaires/universitaires</CardDescription>
               </div>
               <Button onClick={() => {
                 setYearFormData({ annee: '', startDate: '', endDate: '' })
                 setIsYearDialogOpen(true)
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
+              }} className="btn-responsive w-full sm:w-auto">
+                <Plus className="icon-responsive mr-2" />
                 Ajouter
               </Button>
             </div>
@@ -435,32 +439,32 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Année</TableHead>
-                  <TableHead>Date de création</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-responsive-sm">Année</TableHead>
+                  <TableHead className="text-responsive-sm">Date de création</TableHead>
+                  <TableHead className="text-right text-responsive-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {annees.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-10 text-muted-foreground">
+                    <TableCell colSpan={3} className="text-center py-10 text-responsive-sm text-muted-foreground">
                       Aucune année scolaire configurée
                     </TableCell>
                   </TableRow>
                 ) : (
                   annees.map((annee, index) => (
                     <TableRow key={annee.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-responsive-sm">
                         <div className="flex items-center gap-2">
                           {annee.annee}
-                          {index === 0 && <Badge>Actuelle</Badge>}
+                          {index === 0 && <Badge className="text-responsive-xs">Actuelle</Badge>}
                         </div>
                       </TableCell>
-                      <TableCell>{new Date(annee.createdAt).toLocaleDateString('fr-FR')}</TableCell>
+                      <TableCell className="text-responsive-sm">{new Date(annee.createdAt).toLocaleDateString('fr-FR')}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEditYear(annee)}>
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="icon-responsive" />
                           </Button>
                         </div>
                       </TableCell>
@@ -473,22 +477,23 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
         </Card>
       </TabsContent>
 
+
       {/* Onglet Salles/Classes */}
-      <TabsContent value="rooms" className="space-y-4">
+      <TabsContent value="rooms" className="space-y-3 sm:space-y-4">
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
               <div>
-                <CardTitle>{schoolType === 'HIGH_SCHOOL' ? 'Classes' : 'Salles'}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-responsive-lg">{schoolType === 'HIGH_SCHOOL' ? 'Classes' : 'Salles'}</CardTitle>
+                <CardDescription className="text-responsive-sm">
                   Gérez les {schoolType === 'HIGH_SCHOOL' ? 'classes' : 'salles'} de votre établissement
                 </CardDescription>
               </div>
               <Button onClick={() => {
                 setFormData({ name: '', code: '', capacity: '', type: 'CLASSROOM' })
                 setIsRoomDialogOpen(true)
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
+              }} className="btn-responsive w-full sm:w-auto">
+                <Plus className="icon-responsive mr-2" />
                 Ajouter
               </Button>
             </div>
@@ -496,33 +501,33 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
           <CardContent>
             {rooms.length === 0 ? (
               <div className="text-center py-10 text-muted-foreground">
-                <p>Aucune {schoolType === 'HIGH_SCHOOL' ? 'classe' : 'salle'} configurée.</p>
-                <p className="text-sm mt-2">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
+                <p className="text-responsive-sm">Aucune {schoolType === 'HIGH_SCHOOL' ? 'classe' : 'salle'} configurée.</p>
+                <p className="text-responsive-xs mt-2">Cliquez sur &quot;Ajouter&quot; pour commencer.</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>{schoolType === 'HIGH_SCHOOL' ? 'Niveau' : 'Type'}</TableHead>
-                    <TableHead className="text-right">Capacité</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-responsive-sm">Nom</TableHead>
+                    <TableHead className="text-responsive-sm">Code</TableHead>
+                    <TableHead className="text-responsive-sm">{schoolType === 'HIGH_SCHOOL' ? 'Niveau' : 'Type'}</TableHead>
+                    <TableHead className="text-right text-responsive-sm">Capacité</TableHead>
+                    <TableHead className="text-right text-responsive-sm">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rooms.map((room) => (
                     <TableRow key={room.id}>
-                      <TableCell className="font-medium">{room.name}</TableCell>
-                      <TableCell>{room.code}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium text-responsive-sm">{room.name}</TableCell>
+                      <TableCell className="text-responsive-sm">{room.code}</TableCell>
+                      <TableCell className="text-responsive-sm">
                         {schoolType === 'HIGH_SCHOOL' ? room.niveau : 
                          room.type === 'AMPHITHEATER' ? 'Amphithéâtre' :
                          room.type === 'LABORATORY' ? 'Laboratoire' :
                          room.type === 'COMPUTER_LAB' ? 'Salle informatique' :
                          'Salle de classe'}
                       </TableCell>
-                      <TableCell className="text-right">{room.capacity} places</TableCell>
+                      <TableCell className="text-right text-responsive-sm">{room.capacity} places</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button 
@@ -530,14 +535,14 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
                             size="icon"
                             onClick={() => handleEditRoom(room)}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="icon-responsive" />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="icon"
                             onClick={() => handleDeleteRoom(room.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="icon-responsive text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
@@ -552,69 +557,72 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
 
       {/* Dialog Ajouter Salle/Classe */}
       <Dialog open={isRoomDialogOpen} onOpenChange={setIsRoomDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter {schoolType === 'HIGH_SCHOOL' ? 'une classe' : 'une salle'}</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Ajouter {schoolType === 'HIGH_SCHOOL' ? 'une classe' : 'une salle'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="roomName">Nom *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="roomName" className="text-responsive-sm">Nom *</Label>
               <Input 
                 id="roomName" 
                 placeholder={schoolType === 'HIGH_SCHOOL' ? "Ex: Terminale S1" : "Ex: Salle A101"}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="roomCode">Code *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="roomCode" className="text-responsive-sm">Code *</Label>
               <Input 
                 id="roomCode" 
                 placeholder={schoolType === 'HIGH_SCHOOL' ? "Ex: TS1" : "Ex: A101"}
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="roomType">Type</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="roomType" className="text-responsive-sm">Type</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
                   {schoolType === 'HIGH_SCHOOL' ? (
                     <>
-                      <SelectItem value="CLASSROOM">Classe normale</SelectItem>
-                      <SelectItem value="LABORATORY">Laboratoire</SelectItem>
-                      <SelectItem value="COMPUTER_LAB">Salle informatique</SelectItem>
+                      <SelectItem value="CLASSROOM" className="text-responsive-sm">Classe normale</SelectItem>
+                      <SelectItem value="LABORATORY" className="text-responsive-sm">Laboratoire</SelectItem>
+                      <SelectItem value="COMPUTER_LAB" className="text-responsive-sm">Salle informatique</SelectItem>
                     </>
                   ) : (
                     <>
-                      <SelectItem value="AMPHITHEATER">Amphithéâtre</SelectItem>
-                      <SelectItem value="CLASSROOM">Salle de classe</SelectItem>
-                      <SelectItem value="LABORATORY">Laboratoire</SelectItem>
-                      <SelectItem value="COMPUTER_LAB">Salle informatique</SelectItem>
+                      <SelectItem value="AMPHITHEATER" className="text-responsive-sm">Amphithéâtre</SelectItem>
+                      <SelectItem value="CLASSROOM" className="text-responsive-sm">Salle de classe</SelectItem>
+                      <SelectItem value="LABORATORY" className="text-responsive-sm">Laboratoire</SelectItem>
+                      <SelectItem value="COMPUTER_LAB" className="text-responsive-sm">Salle informatique</SelectItem>
                     </>
                   )}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="roomCapacity">Capacité *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="roomCapacity" className="text-responsive-sm">Capacité *</Label>
               <Input 
                 id="roomCapacity" 
                 type="number" 
                 placeholder="40"
                 value={formData.capacity}
                 onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRoomDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsRoomDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleCreateRoom} disabled={loading}>
+            <Button onClick={handleCreateRoom} disabled={loading} className="w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ajouter
             </Button>
@@ -624,69 +632,72 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
 
       {/* Dialog Modifier Salle/Classe */}
       <Dialog open={isEditRoomDialogOpen} onOpenChange={setIsEditRoomDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier {schoolType === 'HIGH_SCHOOL' ? 'la classe' : 'la salle'}</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Modifier {schoolType === 'HIGH_SCHOOL' ? 'la classe' : 'la salle'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="editRoomName">Nom *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editRoomName" className="text-responsive-sm">Nom *</Label>
               <Input 
                 id="editRoomName" 
                 placeholder={schoolType === 'HIGH_SCHOOL' ? "Ex: Terminale S1" : "Ex: Salle A101"}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="editRoomCode">Code *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editRoomCode" className="text-responsive-sm">Code *</Label>
               <Input 
                 id="editRoomCode" 
                 placeholder={schoolType === 'HIGH_SCHOOL' ? "Ex: TS1" : "Ex: A101"}
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="editRoomType">Type</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editRoomType" className="text-responsive-sm">Type</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
                   {schoolType === 'HIGH_SCHOOL' ? (
                     <>
-                      <SelectItem value="CLASSROOM">Classe normale</SelectItem>
-                      <SelectItem value="LABORATORY">Laboratoire</SelectItem>
-                      <SelectItem value="COMPUTER_LAB">Salle informatique</SelectItem>
+                      <SelectItem value="CLASSROOM" className="text-responsive-sm">Classe normale</SelectItem>
+                      <SelectItem value="LABORATORY" className="text-responsive-sm">Laboratoire</SelectItem>
+                      <SelectItem value="COMPUTER_LAB" className="text-responsive-sm">Salle informatique</SelectItem>
                     </>
                   ) : (
                     <>
-                      <SelectItem value="AMPHITHEATER">Amphithéâtre</SelectItem>
-                      <SelectItem value="CLASSROOM">Salle de classe</SelectItem>
-                      <SelectItem value="LABORATORY">Laboratoire</SelectItem>
-                      <SelectItem value="COMPUTER_LAB">Salle informatique</SelectItem>
+                      <SelectItem value="AMPHITHEATER" className="text-responsive-sm">Amphithéâtre</SelectItem>
+                      <SelectItem value="CLASSROOM" className="text-responsive-sm">Salle de classe</SelectItem>
+                      <SelectItem value="LABORATORY" className="text-responsive-sm">Laboratoire</SelectItem>
+                      <SelectItem value="COMPUTER_LAB" className="text-responsive-sm">Salle informatique</SelectItem>
                     </>
                   )}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="editRoomCapacity">Capacité *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editRoomCapacity" className="text-responsive-sm">Capacité *</Label>
               <Input 
                 id="editRoomCapacity" 
                 type="number" 
                 placeholder="40"
                 value={formData.capacity}
                 onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditRoomDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsEditRoomDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleUpdateRoom} disabled={loading}>
+            <Button onClick={handleUpdateRoom} disabled={loading} className="w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Modifier
             </Button>
@@ -696,44 +707,47 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
 
       {/* Dialog Ajouter Année Scolaire */}
       <Dialog open={isYearDialogOpen} onOpenChange={setIsYearDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter une année scolaire</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Ajouter une année scolaire</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="yearName">Année *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="yearName" className="text-responsive-sm">Année *</Label>
               <Input 
                 id="yearName" 
                 placeholder="Ex: 2024-2025"
                 value={yearFormData.annee}
                 onChange={(e) => setYearFormData({ ...yearFormData, annee: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="yearStart">Date de début (optionnel)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="yearStart" className="text-responsive-sm">Date de début (optionnel)</Label>
               <Input 
                 id="yearStart" 
                 type="date"
                 value={yearFormData.startDate}
                 onChange={(e) => setYearFormData({ ...yearFormData, startDate: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="yearEnd">Date de fin (optionnel)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="yearEnd" className="text-responsive-sm">Date de fin (optionnel)</Label>
               <Input 
                 id="yearEnd" 
                 type="date"
                 value={yearFormData.endDate}
                 onChange={(e) => setYearFormData({ ...yearFormData, endDate: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsYearDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsYearDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleCreateYear} disabled={loading}>
+            <Button onClick={handleCreateYear} disabled={loading} className="w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Ajouter
             </Button>
@@ -743,44 +757,47 @@ export default function SchoolSettingsManager({ schoolId, schoolType, schoolData
 
       {/* Dialog Modifier Année Scolaire */}
       <Dialog open={isEditYearDialogOpen} onOpenChange={setIsEditYearDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l&apos;année scolaire</DialogTitle>
+            <DialogTitle className="text-responsive-lg">Modifier l&apos;année scolaire</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="editYearName">Année *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editYearName" className="text-responsive-sm">Année *</Label>
               <Input 
                 id="editYearName" 
                 placeholder="Ex: 2024-2025"
                 value={yearFormData.annee}
                 onChange={(e) => setYearFormData({ ...yearFormData, annee: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="editYearStart">Date de début (optionnel)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editYearStart" className="text-responsive-sm">Date de début (optionnel)</Label>
               <Input 
                 id="editYearStart" 
                 type="date"
                 value={yearFormData.startDate}
                 onChange={(e) => setYearFormData({ ...yearFormData, startDate: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="editYearEnd">Date de fin (optionnel)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="editYearEnd" className="text-responsive-sm">Date de fin (optionnel)</Label>
               <Input 
                 id="editYearEnd" 
                 type="date"
                 value={yearFormData.endDate}
                 onChange={(e) => setYearFormData({ ...yearFormData, endDate: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditYearDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsEditYearDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleUpdateYear} disabled={loading}>
+            <Button onClick={handleUpdateYear} disabled={loading} className="w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Modifier
             </Button>

@@ -126,33 +126,33 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-responsive-lg">
             Saisir les notes - {evaluation.subject}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-responsive-sm">
             {evaluation.className} • {evaluation.type} • Coef. {evaluation.coefficient} • {new Date(evaluation.date).toLocaleDateString('fr-FR')}
           </DialogDescription>
         </DialogHeader>
 
         {/* Statistiques */}
-        <div className="grid grid-cols-4 gap-4 py-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 py-3 sm:py-4">
           <div className="bg-muted p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground">Total étudiants</p>
-            <p className="text-2xl font-bold">{students.length}</p>
+            <p className="text-responsive-xs text-muted-foreground">Total étudiants</p>
+            <p className="text-responsive-2xl font-bold">{students.length}</p>
           </div>
           <div className="bg-muted p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground">Notes saisies</p>
-            <p className="text-2xl font-bold text-blue-600">{gradedCount}</p>
+            <p className="text-responsive-xs text-muted-foreground">Notes saisies</p>
+            <p className="text-responsive-2xl font-bold text-blue-600">{gradedCount}</p>
           </div>
           <div className="bg-muted p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground">Absents</p>
-            <p className="text-2xl font-bold text-orange-600">{absentCount}</p>
+            <p className="text-responsive-xs text-muted-foreground">Absents</p>
+            <p className="text-responsive-2xl font-bold text-orange-600">{absentCount}</p>
           </div>
           <div className="bg-muted p-3 rounded-lg">
-            <p className="text-xs text-muted-foreground">Moyenne</p>
-            <p className={`text-2xl font-bold ${getGradeColor(average)}`}>
+            <p className="text-responsive-xs text-muted-foreground">Moyenne</p>
+            <p className={`text-responsive-2xl font-bold ${getGradeColor(average)}`}>
               {average > 0 ? average.toFixed(2) : '-'}/20
             </p>
           </div>
@@ -161,21 +161,21 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
         {/* Liste des étudiants */}
         <div className="flex-1 overflow-y-auto border rounded-lg">
           {loading ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="p-6 sm:p-8 text-center text-muted-foreground text-responsive-sm">
               Chargement des étudiants...
             </div>
           ) : students.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="p-6 sm:p-8 text-center text-muted-foreground text-responsive-sm">
               Aucun étudiant trouvé pour cette évaluation
             </div>
           ) : (
             <table className="w-full">
               <thead className="bg-muted sticky top-0">
                 <tr>
-                  <th className="text-left p-3 font-medium">Matricule</th>
-                  <th className="text-left p-3 font-medium">Nom</th>
-                  <th className="text-center p-3 font-medium">Note /20</th>
-                  <th className="text-center p-3 font-medium">Absent</th>
+                  <th className="text-left p-2 sm:p-3 font-medium text-responsive-sm">Matricule</th>
+                  <th className="text-left p-2 sm:p-3 font-medium text-responsive-sm">Nom</th>
+                  <th className="text-center p-2 sm:p-3 font-medium text-responsive-sm">Note /20</th>
+                  <th className="text-center p-2 sm:p-3 font-medium text-responsive-sm">Absent</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,9 +184,9 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
                     key={student.id} 
                     className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'} ${student.isAbsent ? 'opacity-50' : ''}`}
                   >
-                    <td className="p-3 text-sm">{student.studentNumber}</td>
-                    <td className="p-3 font-medium">{student.name}</td>
-                    <td className="p-3">
+                    <td className="p-2 sm:p-3 text-responsive-sm">{student.studentNumber}</td>
+                    <td className="p-2 sm:p-3 font-medium text-responsive-sm">{student.name}</td>
+                    <td className="p-2 sm:p-3">
                       <Input
                         type="number"
                         min="0"
@@ -195,11 +195,11 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
                         value={student.note ?? ''}
                         onChange={(e) => handleNoteChange(student.id, e.target.value)}
                         disabled={student.isAbsent}
-                        className={`w-24 mx-auto text-center ${getGradeColor(student.note)}`}
+                        className={`w-20 sm:w-24 mx-auto text-center text-responsive-sm ${getGradeColor(student.note)}`}
                         placeholder="--"
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-2 sm:p-3">
                       <div className="flex justify-center">
                         <Checkbox
                           checked={student.isAbsent || false}
@@ -214,13 +214,14 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
           )}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2 flex-col sm:flex-row">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
             Annuler
           </Button>
           <Button 
             variant="outline"
             onClick={() => toast.info('Export disponible prochainement')}
+            className="w-full sm:w-auto"
           >
             <Download className="h-4 w-4 mr-2" />
             Exporter
@@ -228,7 +229,7 @@ export default function GradeInputDialog({ open, onOpenChange, evaluation }: Gra
           <Button 
             onClick={handleSave}
             disabled={saving || loading}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
           >
             <Save className="h-4 w-4 mr-2" />
             {saving ? 'Enregistrement...' : 'Enregistrer'}

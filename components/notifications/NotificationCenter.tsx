@@ -169,33 +169,33 @@ export default function NotificationCenter() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96 p-0">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Notifications</h3>
+      <DropdownMenuContent align="end" className="w-[95vw] sm:w-96 p-0">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b">
+          <h3 className="font-semibold text-responsive-base">Notifications</h3>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={markAllAsRead}
-              className="text-xs"
+              className="text-responsive-xs"
             >
               <CheckCheck className="h-4 w-4 mr-1" />
               Tout marquer comme lu
             </Button>
           )}
         </div>
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[60vh] sm:h-[400px]">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
               <Bell className="h-12 w-12 mb-2 opacity-50" />
-              <p className="text-sm">Aucune notification</p>
+              <p className="text-responsive-sm">Aucune notification</p>
             </div>
           ) : (
             <div className="divide-y">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 transition-colors ${
+                  className={`p-3 sm:p-4 transition-colors ${
                     !notification.isRead ? 'bg-primary/5' : ''
                   } ${
                     notification.actionUrl ? 'hover:bg-accent cursor-pointer' : ''
@@ -208,16 +208,16 @@ export default function NotificationCenter() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h4 className="font-semibold text-sm">{notification.title}</h4>
+                        <h4 className="font-semibold text-responsive-sm">{notification.title}</h4>
                         {!notification.isRead && (
                           <div className="h-2 w-2 bg-primary rounded-full shrink-0 mt-1" />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-responsive-sm text-muted-foreground line-clamp-2">
                         {notification.message}
                       </p>
                       <div className="flex items-center justify-between mt-2">
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-responsive-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(notification.createdAt), {
                             addSuffix: true,
                             locale: fr

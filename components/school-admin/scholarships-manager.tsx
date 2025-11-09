@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Users, TrendingUp, Plus, Pencil, Trash2, Loader2 } from "lucide-react"
@@ -177,17 +177,17 @@ export default function ScholarshipsManager({ schoolId, scholarships }: Scholars
   return (
     <>
       {/* Statistiques */}
-      <div className="grid gap-4 md:grid-cols-2 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-responsive-xs font-medium">
               Bourses Attribuées
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="icon-responsive text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalScholarships}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-responsive-xl font-bold">{totalScholarships}</div>
+            <p className="text-responsive-xs text-muted-foreground">
               Étudiants bénéficiaires
             </p>
           </CardContent>
@@ -195,16 +195,16 @@ export default function ScholarshipsManager({ schoolId, scholarships }: Scholars
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-responsive-xs font-medium">
               Réduction Totale
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="icon-responsive text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-responsive-xl font-bold">
               {totalReduction.toLocaleString()} FCFA
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-responsive-xs text-muted-foreground">
               Montant total des réductions
             </p>
           </CardContent>
@@ -214,102 +214,102 @@ export default function ScholarshipsManager({ schoolId, scholarships }: Scholars
       {/* Bourses Attribuées */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
             <div>
-              <CardTitle>Bourses Attribuées</CardTitle>
-              <CardDescription>Liste des bourses accordées aux étudiants</CardDescription>
+              <CardTitle className="text-responsive-lg">Bourses Attribuées</CardTitle>
+              <CardDescription className="text-responsive-sm">Liste des bourses accordées aux étudiants</CardDescription>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={() => handleOpenDialog()} className="btn-responsive w-full sm:w-auto">
+                <Plus className="icon-responsive mr-2" />
                 Créer une Bourse
               </Button>
-              <Button variant="outline" onClick={() => router.push(`/admin/${schoolId}/students`)}>
-                <Users className="mr-2 h-4 w-4" />
+              <Button variant="outline" onClick={() => router.push(`/admin/${schoolId}/students`)} className="btn-responsive w-full sm:w-auto">
+                <Users className="icon-responsive mr-2" />
                 Gérer les Étudiants
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {assignedScholarships.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              <p>Aucune bourse attribuée pour le moment.</p>
-              <p className="text-sm mt-2">
-                Allez dans la <strong>Gestion des Étudiants</strong> pour attribuer des bourses.
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Étudiant</TableHead>
-                  <TableHead>Matricule</TableHead>
-                  <TableHead>Niveau</TableHead>
-                  <TableHead>Filière</TableHead>
-                  <TableHead>Nom de la Bourse</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Réduction</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assignedScholarships.map((scholarship) => (
-                  <TableRow key={scholarship.id}>
-                    <TableCell className="font-medium">
-                      {scholarship.student?.user?.name || 'Non inscrit'}
-                    </TableCell>
-                    <TableCell>{scholarship.student?.studentNumber || '-'}</TableCell>
-                    <TableCell>{scholarship.student?.niveau || '-'}</TableCell>
-                    <TableCell>{scholarship.student?.filiere?.nom || '-'}</TableCell>
-                    <TableCell>{scholarship.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={getScholarshipTypeBadge(scholarship.type) as "default" | "secondary" | "outline" | "destructive"}>
-                        {getScholarshipTypeLabel(scholarship.type)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {scholarship.percentage 
-                        ? `${scholarship.percentage}%` 
-                        : scholarship.amount 
-                          ? `${scholarship.amount.toLocaleString()} FCFA` 
-                          : '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleOpenDialog(scholarship)}
-                          title="Modifier"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDelete(scholarship.id)}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <ResponsiveTable
+            data={assignedScholarships}
+            columns={[
+              {
+                header: "Étudiant",
+                accessor: (s) => s.student?.user?.name || 'Non inscrit',
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Matricule",
+                accessor: (s) => s.student?.studentNumber || '-',
+                priority: "medium"
+              },
+              {
+                header: "Niveau",
+                accessor: (s) => s.student?.niveau || '-',
+                priority: "low"
+              },
+              {
+                header: "Filière",
+                accessor: (s) => s.student?.filiere?.nom || '-',
+                priority: "low"
+              },
+              {
+                header: "Nom de la Bourse",
+                accessor: "name",
+                priority: "high"
+              },
+              {
+                header: "Type",
+                accessor: (s) => (
+                  <Badge variant={getScholarshipTypeBadge(s.type) as "default" | "secondary" | "outline" | "destructive"}>
+                    {getScholarshipTypeLabel(s.type)}
+                  </Badge>
+                ),
+                priority: "medium"
+              },
+              {
+                header: "Réduction",
+                accessor: (s) => s.percentage ? `${s.percentage}%` : s.amount ? `${s.amount.toLocaleString()} FCFA` : '-',
+                priority: "high",
+                className: "text-right font-semibold"
+              }
+            ]}
+            keyExtractor={(s) => s.id}
+            actions={(s) => (
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenDialog(s)}
+                  title="Modifier"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleDelete(s.id)}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Aucune bourse attribuée. Allez dans la Gestion des Étudiants pour attribuer des bourses."
+          />
         </CardContent>
       </Card>
 
       {/* Bourses Non Attribuées */}
       <Card className="border-orange-200 bg-orange-50">
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
             <div>
-              <CardTitle className="text-orange-800">Bourses Non Attribuées</CardTitle>
-              <CardDescription className="text-orange-700">
+              <CardTitle className="text-responsive-lg text-orange-800">Bourses Non Attribuées</CardTitle>
+              <CardDescription className="text-responsive-sm text-orange-700">
                 Bourses créées en attente d&apos;attribution
               </CardDescription>
             </div>
@@ -319,73 +319,66 @@ export default function ScholarshipsManager({ schoolId, scholarships }: Scholars
           </div>
         </CardHeader>
         <CardContent>
-          {unassignedScholarships.length === 0 ? (
-            <div className="text-center py-6 text-orange-700">
-              <p>Toutes les bourses sont attribuées.</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom de la Bourse</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Réduction</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {unassignedScholarships.map((scholarship) => (
-                  <TableRow key={scholarship.id}>
-                    <TableCell className="font-medium">{scholarship.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={getScholarshipTypeBadge(scholarship.type) as "default" | "secondary" | "outline" | "destructive"}>
-                        {getScholarshipTypeLabel(scholarship.type)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {scholarship.percentage 
-                        ? `${scholarship.percentage}%` 
-                        : scholarship.amount 
-                          ? `${scholarship.amount.toLocaleString()} FCFA` 
-                          : '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleOpenDialog(scholarship)}
-                          title="Modifier"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDelete(scholarship.id)}
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <ResponsiveTable
+            data={unassignedScholarships}
+            columns={[
+              {
+                header: "Nom de la Bourse",
+                accessor: "name",
+                priority: "high",
+                className: "font-medium"
+              },
+              {
+                header: "Type",
+                accessor: (s) => (
+                  <Badge variant={getScholarshipTypeBadge(s.type) as "default" | "secondary" | "outline" | "destructive"}>
+                    {getScholarshipTypeLabel(s.type)}
+                  </Badge>
+                ),
+                priority: "medium"
+              },
+              {
+                header: "Réduction",
+                accessor: (s) => s.percentage ? `${s.percentage}%` : s.amount ? `${s.amount.toLocaleString()} FCFA` : '-',
+                priority: "high",
+                className: "text-right font-semibold"
+              }
+            ]}
+            keyExtractor={(s) => s.id}
+            actions={(s) => (
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleOpenDialog(s)}
+                  title="Modifier"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => handleDelete(s.id)}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            )}
+            emptyMessage="Toutes les bourses sont attribuées."
+          />
         </CardContent>
       </Card>
 
       {/* Informations */}
       <Card className="border-blue-200 bg-blue-50">
         <CardHeader>
-          <CardTitle className="text-blue-800 text-sm">
+          <CardTitle className="text-responsive-sm text-blue-800">
             💡 Comment attribuer une bourse ?
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-[var(--link)] text-sm">
+          <p className="text-responsive-sm text-link">
             Pour attribuer une bourse à un étudiant, rendez-vous dans la section{' '}
             <strong>Gestion des Étudiants</strong>, sélectionnez un étudiant et cliquez sur{' '}
             <strong>&quot;Attribuer une Bourse&quot;</strong>. Vous pourrez définir le type de bourse, 
@@ -396,88 +389,92 @@ export default function ScholarshipsManager({ schoolId, scholarships }: Scholars
 
       {/* Dialog Créer/Modifier Bourse */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-responsive-lg">
               {editingScholarship ? 'Modifier la bourse' : 'Créer une bourse'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-responsive-sm">
               {editingScholarship 
                 ? 'Modifiez les informations de la bourse' 
                 : 'Créez une nouvelle bourse qui pourra être attribuée aux étudiants'}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom de la bourse *</Label>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="name" className="text-responsive-sm">Nom de la bourse *</Label>
               <Input 
                 id="name" 
                 placeholder="Ex: Bourse d'excellence"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Type de bourse *</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="type" className="text-responsive-sm">Type de bourse *</Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="text-responsive-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MERIT">Mérite</SelectItem>
-                  <SelectItem value="NEED_BASED">Sociale</SelectItem>
-                  <SelectItem value="DISCOUNT">Réduction</SelectItem>
-                  <SelectItem value="SPORTS">Sportive</SelectItem>
+                  <SelectItem value="MERIT" className="text-responsive-sm">Mérite</SelectItem>
+                  <SelectItem value="NEED_BASED" className="text-responsive-sm">Sociale</SelectItem>
+                  <SelectItem value="SPORTS" className="text-responsive-sm">Sportive</SelectItem>
+                  <SelectItem value="OTHER" className="text-responsive-sm">Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="percentage">Pourcentage (%)</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="percentage" className="text-responsive-sm">Pourcentage (%)</Label>
                 <Input 
                   id="percentage" 
                   type="number"
                   min="0"
                   max="100"
-                  placeholder="20"
+                  placeholder="50"
                   value={formData.percentage}
-                  onChange={(e) => setFormData({ ...formData, percentage: e.target.value, amount: '' })}
+                  onChange={(e) => setFormData({ ...formData, percentage: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="amount">Montant (FCFA)</Label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="amount" className="text-responsive-sm">Montant (FCFA)</Label>
                 <Input 
                   id="amount" 
                   type="number"
-                  placeholder="50000"
+                  placeholder="100000"
                   value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value, percentage: '' })}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  className="text-responsive-sm"
                 />
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              * Spécifiez soit un pourcentage, soit un montant fixe
+            <p className="text-responsive-xs text-muted-foreground">
+              ⚠️ Remplissez soit le pourcentage, soit le montant (pas les deux)
             </p>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (optionnel)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="description" className="text-responsive-sm">Description (optionnel)</Label>
               <Input 
                 id="description" 
                 placeholder="Critères d'attribution..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="text-responsive-sm"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="btn-responsive w-full sm:w-auto">
               Annuler
             </Button>
-            <Button onClick={handleSubmit} disabled={loading}>
+            <Button onClick={handleSubmit} disabled={loading} className="btn-responsive w-full sm:w-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingScholarship ? 'Modifier' : 'Créer'}
             </Button>

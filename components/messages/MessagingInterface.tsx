@@ -186,12 +186,12 @@ export default function MessagingInterface({
   }
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 h-[calc(100vh-12rem)]">
       {/* Liste des conversations */}
       <Card className="md:col-span-1">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Messages</CardTitle>
+            <CardTitle className="text-responsive-lg">Messages</CardTitle>
             <NewConversationDialog 
               schoolId={schoolId}
               onConversationCreated={(convId) => {
@@ -206,14 +206,14 @@ export default function MessagingInterface({
               placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-responsive-sm"
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[calc(100vh-20rem)]">
+          <ScrollArea className="h-[calc(100vh-22rem)] sm:h-[calc(100vh-20rem)]">
             {filteredConversations.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground">
+              <div className="p-6 text-center text-muted-foreground text-responsive-sm">
                 <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>Aucune conversation</p>
               </div>
@@ -234,7 +234,7 @@ export default function MessagingInterface({
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                           <AvatarImage src={otherUser?.avatar || undefined} />
                           <AvatarFallback>
                             {otherUser?.name?.charAt(0) || '?'}
@@ -243,27 +243,27 @@ export default function MessagingInterface({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-lg truncate">
+                              <h4 className="font-semibold text-responsive-base truncate">
                                 {otherUser?.name || 'Utilisateur'} 
                               </h4>
-                              <p className="text-xs text-muted-foreground truncate">{otherUser?.role}</p>
+                              <p className="text-responsive-xs text-muted-foreground truncate">{otherUser?.role}</p>
                               {otherUser?.schoolName && (
-                                <p className="text-xs text-muted-foreground truncate">
+                                <p className="text-responsive-xs text-muted-foreground truncate">
                                   {otherUser.schoolName}
                                 </p>
                                 
                               )}
                             </div>
                             {conv.unreadCount > 0 && (
-                              <Badge variant="default" className="text-xs">
+                              <Badge variant="default" className="text-responsive-xs">
                                 {conv.unreadCount}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-md text-foreground dark:text-foreground font-medium truncate">
+                          <p className="text-responsive-sm text-foreground dark:text-foreground font-medium truncate">
                             {conv.lastMessage?.content || 'Aucun message'}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-responsive-xs text-muted-foreground mt-1">
                             {conv.lastMessage?.createdAt &&
                               formatDistanceToNow(new Date(conv.lastMessage.createdAt), {
                                 addSuffix: true,
@@ -295,11 +295,11 @@ export default function MessagingInterface({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-semibold">
+                    <h3 className="font-semibold text-responsive-base">
                       {selectedConv.otherUsers[0]?.name || 'Utilisateur'}
                     </h3>
                     {selectedConv.otherUsers[0]?.schoolName && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-responsive-xs text-muted-foreground">
                         {selectedConv.otherUsers[0].schoolName}
                       </p>
                     )}
@@ -325,9 +325,9 @@ export default function MessagingInterface({
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[calc(100vh-28rem)] p-4">
+              <ScrollArea className="h-[calc(100vh-30rem)] sm:h-[calc(100vh-28rem)] p-4">
                 {messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-responsive-sm">
                     <p>Aucun message. Commencez la conversation !</p>
                   </div>
                 ) : (
@@ -347,13 +347,13 @@ export default function MessagingInterface({
                             }`}
                           >
                             {!isOwn && (
-                              <p className="text-xs font-semibold mb-1">
+                              <p className="text-responsive-xs font-semibold mb-1">
                                 {message.senderName}
                               </p>
                             )}
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <p className="text-responsive-sm whitespace-pre-wrap">{message.content}</p>
                             <p
-                              className={`text-xs mt-1 ${
+                              className={`text-responsive-xs mt-1 ${
                                 isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
                               }`}
                             >
@@ -370,13 +370,14 @@ export default function MessagingInterface({
                   </div>
                 )}
               </ScrollArea>
-              <div className="border-t p-4">
+              <div className="border-t p-3 sm:p-4">
                 <div className="flex gap-2">
                   <Input
                     placeholder="Écrivez votre message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    className="text-responsive-sm"
                   />
                   <Button onClick={sendMessage} disabled={!newMessage.trim()}>
                     <Send className="h-4 w-4" />

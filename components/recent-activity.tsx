@@ -57,21 +57,21 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Activité Récente</CardTitle>
+        <CardTitle className="text-responsive-lg">Activité Récente</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {activityData.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-4">
-              <Avatar className="h-9 w-9">
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+            <div key={activity.id} className="flex items-start gap-3 sm:gap-4">
+              <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+                <AvatarFallback className="bg-primary/10 text-primary text-responsive-xs">
                   {activity.schoolName.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none text-foreground">{activity.schoolName}</p>
-                <p className="text-sm text-muted-foreground">{activity.action}</p>
-                <p className="text-xs text-muted-foreground">{activity.time}</p>
+                <p className="text-responsive-sm font-medium leading-none text-foreground">{activity.schoolName}</p>
+                <p className="text-responsive-sm text-muted-foreground">{activity.action}</p>
+                <p className="text-responsive-xs text-muted-foreground">{activity.time}</p>
               </div>
               <Badge
                 variant={
@@ -85,7 +85,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                     ? "default"
                     : "secondary"
                 }
-                className="shrink-0"
+                className="shrink-0 text-responsive-xs"
               >
                 {activity.subscriptionStatus === "active"
                   ? "Abonné"

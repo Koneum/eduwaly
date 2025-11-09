@@ -182,18 +182,18 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
 
       {/* Dialog Gérer Documents */}
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
           <DialogHeader>
-            <DialogTitle>Gérer les documents - {selectedModule?.nom}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-responsive-lg">Gérer les documents - {selectedModule?.nom}</DialogTitle>
+            <DialogDescription className="text-responsive-sm">
               Ajoutez ou supprimez des documents pour ce cours
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Upload de fichiers */}
             <div>
-              <Label>Ajouter des ressources pédagogiques</Label>
+              <Label className="text-responsive-sm">Ajouter des ressources pédagogiques</Label>
               <FileUpload
                 onUpload={handleUploadComplete}
                 onError={(error) => toast.error(error)}
@@ -203,7 +203,7 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
                 disabled={uploading}
               />
               {uploading && (
-                <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                <p className="text-responsive-sm text-muted-foreground mt-2 flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Enregistrement en cours...
                 </p>
@@ -212,13 +212,20 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
 
             {/* Liste des documents */}
             <div className="space-y-2">
-              <Label>Documents existants</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-responsive-sm">Documents existants</Label>
+                {!loading && documents.length > 0 && (
+                  <span className="text-responsive-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                    {documents.length} {documents.length === 1 ? 'document' : 'documents'}
+                  </span>
+                )}
+              </div>
               {loading ? (
                 <div className="text-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                 </div>
               ) : documents.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-responsive-sm text-muted-foreground text-center py-4">
                   Aucun document pour le moment
                 </p>
               ) : (
@@ -226,22 +233,23 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
                   {documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 gap-3 sm:gap-0"
                     >
-                      <div className="flex items-center gap-3 flex-1">
+                      <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
                         <FileText className="h-5 w-5 text-primary" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{doc.title || doc.fileName}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="font-medium truncate text-responsive-sm">{doc.title || doc.fileName}</p>
+                          <p className="text-responsive-xs text-muted-foreground">
                             {doc.mimeType} • {formatFileSize(doc.fileSize)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => window.open(doc.fileUrl, '_blank')}
+                          className="flex-1 sm:flex-none"
                         >
                           Voir
                         </Button>
@@ -249,6 +257,7 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteDocument(doc.id)}
+                          className="flex-1 sm:flex-none"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -260,8 +269,8 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)} className="w-full sm:w-auto">
               Fermer
             </Button>
           </DialogFooter>

@@ -30,20 +30,20 @@ export default async function ParentSchedulePage({
   if (!parent) redirect('/auth/login')
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Emplois du Temps</h1>
-        <p className="text-muted-foreground mt-2">Consultez les emplois du temps de vos enfants</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Emplois du Temps</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Consultez les emplois du temps de vos enfants</p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Emplois du Temps par Enfant</CardTitle>
-          <CardDescription>Sélectionnez un enfant pour voir son planning</CardDescription>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-responsive-base">Emplois du Temps par Enfant</CardTitle>
+          <CardDescription className="text-responsive-xs">Sélectionnez un enfant pour voir son planning</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6">
           <Tabs defaultValue={parent.students[0]?.id || "0"} className="w-full">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${parent.students.length}, 1fr)` }}>
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: parent.students.length <= 2 ? `repeat(${parent.students.length}, 1fr)` : 'repeat(auto-fit, minmax(120px, 1fr))' }}>
               {parent.students.map((student) => (
                 <TabsTrigger key={student.id} value={student.id}>
                   {student.user?.name.split(' ')[0]}

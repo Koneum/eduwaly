@@ -30,6 +30,9 @@ const getBaseURL = () => {
   return baseURL
 }
 
+console.log('🔧 [AUTH CONFIG] Initializing Better Auth with baseURL:', getBaseURL())
+console.log('🔧 [AUTH CONFIG] basePath:', '/api/auth')
+
 export const auth = betterAuth({
   baseURL: getBaseURL(),
   basePath: '/api/auth',

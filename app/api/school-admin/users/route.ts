@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthUser } from '@/lib/auth-utils'
+import { getAuthUser, UserRole } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { UserRole } from '@/app/generated/prisma'
+import { sendCredentialsEmail } from '@/lib/brevo'
 
 // GET - Récupérer tous les utilisateurs de l'école
 export async function GET() {
@@ -165,6 +165,14 @@ export async function POST(request: NextRequest) {
         { error: 'Erreur lors de la récupération de l\'utilisateur' },
         { status: 500 }
       )
+    }
+
+    // Envoyer email avec identifiants
+    try {
+      await sendCredentialsEmail(email, name, email, password, role)
+    } catch (emailError) {
+      console.error('Erreur lors de l\'envoi de l\'email:', emailError)
+      // Ne pas bloquer la création si l'email échoue
     }
 
     return NextResponse.json({

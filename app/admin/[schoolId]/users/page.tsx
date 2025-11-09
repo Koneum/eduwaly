@@ -102,18 +102,18 @@ export default async function UsersManagementPage({
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestion des Utilisateurs</h1>
-          <p className="text-muted-foreground mt-2">Créez et gérez les comptes utilisateurs</p>
+          <h1 className="text-responsive-xl font-bold text-foreground">Gestion des Utilisateurs</h1>
+          <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Créez et gérez les comptes utilisateurs</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" className="w-full sm:w-auto text-responsive-sm">
             <Key className="h-4 w-4 mr-2" />
             Générer Identifiants
           </Button>
-          <Button>
+          <Button className="w-full sm:w-auto text-responsive-sm">
             <Plus className="h-4 w-4 mr-2" />
             Nouvel Utilisateur
           </Button>
@@ -121,49 +121,49 @@ export default async function UsersManagementPage({
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-3xl font-bold text-foreground mt-2">{totalUsers}</p>
+                <p className="text-responsive-xs font-medium text-muted-foreground">Total</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{totalUsers}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-100 p-2 sm:p-3 rounded-xl">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Admins</p>
-              <p className="text-2xl font-bold text-purple-600 mt-2">{adminUsers}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Admins</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-bold text-purple-600 mt-1 sm:mt-2">{adminUsers}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Enseignants</p>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{teacherUsers}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Enseignants</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-bold text-blue-600 mt-1 sm:mt-2">{teacherUsers}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Étudiants</p>
-              <p className="text-2xl font-bold text-green-600 mt-2">{studentUsers}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Étudiants</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-bold text-green-600 mt-1 sm:mt-2">{studentUsers}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Parents</p>
-              <p className="text-2xl font-bold text-orange-600 mt-2">{parentUsers}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Parents</p>
+              <p className="text-responsive-base sm:text-responsive-lg font-bold text-orange-600 mt-1 sm:mt-2">{parentUsers}</p>
             </div>
           </CardContent>
         </Card>
@@ -171,26 +171,26 @@ export default async function UsersManagementPage({
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="all">Tous ({totalUsers})</TabsTrigger>
-          <TabsTrigger value="students">Étudiants ({studentUsers})</TabsTrigger>
-          <TabsTrigger value="teachers">Enseignants ({teacherUsers})</TabsTrigger>
-          <TabsTrigger value="parents">Parents ({parentUsers})</TabsTrigger>
-          <TabsTrigger value="pending">En attente ({pendingStudents})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+          <TabsTrigger value="all" className="text-responsive-xs">Tous ({totalUsers})</TabsTrigger>
+          <TabsTrigger value="students" className="text-responsive-xs">Étudiants ({studentUsers})</TabsTrigger>
+          <TabsTrigger value="teachers" className="text-responsive-xs">Enseignants ({teacherUsers})</TabsTrigger>
+          <TabsTrigger value="parents" className="text-responsive-xs">Parents ({parentUsers})</TabsTrigger>
+          <TabsTrigger value="pending" className="text-responsive-xs">En attente ({pendingStudents})</TabsTrigger>
         </TabsList>
 
         {/* Tous les utilisateurs */}
-        <TabsContent value="all" className="space-y-4">
+        <TabsContent value="all" className="space-y-3 sm:space-y-4">
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <div>
-                  <CardTitle>Tous les Utilisateurs</CardTitle>
-                  <CardDescription>{totalUsers} comptes actifs</CardDescription>
+                  <CardTitle className="text-responsive-base">Tous les Utilisateurs</CardTitle>
+                  <CardDescription className="text-responsive-xs">{totalUsers} comptes actifs</CardDescription>
                 </div>
-                <div className="relative">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Rechercher..." className="pl-9 w-64" />
+                  <Input placeholder="Rechercher..." className="pl-9 w-full text-responsive-sm" />
                 </div>
               </div>
             </CardHeader>

@@ -89,22 +89,22 @@ export function CertificateGenerator({ students, academicYear }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-responsive-lg">
           <Award className="h-5 w-5 text-primary" />
           Certificat de Scolarité
         </CardTitle>
-        <CardDescription>Générer un certificat de scolarité PDF</CardDescription>
+        <CardDescription className="text-responsive-sm">Générer un certificat de scolarité PDF</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         <div>
-          <label className="text-sm font-medium mb-2 block">Étudiant</label>
+          <label className="text-responsive-sm font-medium mb-2 block">Étudiant</label>
           <Select value={selectedStudent} onValueChange={setSelectedStudent}>
-            <SelectTrigger>
+            <SelectTrigger className="text-responsive-sm">
               <SelectValue placeholder="Sélectionner un étudiant" />
             </SelectTrigger>
             <SelectContent>
               {students.map((student) => (
-                <SelectItem key={student.id} value={student.id}>
+                <SelectItem key={student.id} value={student.id} className="text-responsive-sm">
                   {student.name} ({student.enrollmentId})
                 </SelectItem>
               ))}
@@ -113,15 +113,16 @@ export function CertificateGenerator({ students, academicYear }: Props) {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-2 block">Objet du certificat</label>
+          <label className="text-responsive-sm font-medium mb-2 block">Objet du certificat</label>
           <Input
             placeholder="Ex: demande de bourse, stage, etc."
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
+            className="text-responsive-sm"
           />
         </div>
 
-        <Button onClick={handleGenerate} disabled={loading || sending} className="w-full">
+        <Button onClick={handleGenerate} disabled={loading || sending} className="w-full text-responsive-sm">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -136,14 +137,14 @@ export function CertificateGenerator({ students, academicYear }: Props) {
         </Button>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium block">Envoyer à</label>
-          <div className="grid grid-cols-3 gap-2">
+          <label className="text-responsive-sm font-medium block">Envoyer à</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleSendTo('student')}
               disabled={loading || sending}
-              className="w-full"
+              className="w-full text-responsive-xs"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="mr-1 h-4 w-4" />}
               Étudiant
@@ -153,7 +154,7 @@ export function CertificateGenerator({ students, academicYear }: Props) {
               size="sm"
               onClick={() => handleSendTo('parent')}
               disabled={loading || sending}
-              className="w-full"
+              className="w-full text-responsive-xs"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="mr-1 h-4 w-4" />}
               Parent
@@ -163,7 +164,7 @@ export function CertificateGenerator({ students, academicYear }: Props) {
               size="sm"
               onClick={() => handleSendTo('both')}
               disabled={loading || sending}
-              className="w-full"
+              className="w-full text-responsive-xs"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="mr-1 h-4 w-4" />}
               Les deux

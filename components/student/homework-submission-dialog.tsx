@@ -97,29 +97,29 @@ export function HomeworkSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-card text-black">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
         <DialogHeader>
-          <DialogTitle>Soumettre le devoir</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-responsive-lg">Soumettre le devoir</DialogTitle>
+          <DialogDescription className="text-responsive-sm">
             {homeworkTitle}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="content">Commentaire</Label>
+            <Label htmlFor="content" className="text-responsive-sm">Commentaire</Label>
             <Textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Ajoutez un commentaire à votre soumission..."
               rows={4}
-              className="bg-card"
+              className="bg-card text-responsive-sm"
             />
           </div>
 
           <div>
-            <Label>Fichier (optionnel)</Label>
+            <Label className="text-responsive-sm">Fichier (optionnel)</Label>
             <FileUpload
               onUpload={handleUpload}
               onError={(error) => {
@@ -139,8 +139,8 @@ export function HomeworkSubmissionDialog({
             <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
               <FileText className="h-5 w-5 text-success" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-900">{uploadedFile.name}</p>
-                <p className="text-xs text-success">
+                <p className="text-responsive-sm font-medium text-green-900">{uploadedFile.name}</p>
+                <p className="text-responsive-xs text-success">
                   {(uploadedFile.size / 1024).toFixed(2)} KB
                 </p>
               </div>
@@ -148,18 +148,19 @@ export function HomeworkSubmissionDialog({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
+            className="w-full sm:w-auto"
           >
             Annuler
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || (!content && !uploadedFile)}
-            className="bg-primary hover:bg-primary hover:bg-[#E6B000]"
+            className="w-full sm:w-auto bg-primary hover:bg-primary"
           >
             {isSubmitting ? 'Soumission en cours...' : 'Soumettre le devoir'}
           </Button>

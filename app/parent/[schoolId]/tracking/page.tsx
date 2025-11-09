@@ -38,14 +38,14 @@ export default async function ParentTrackingPage({
   if (!parent) redirect('/login')
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Suivi Scolaire</h1>
-        <p className="text-muted-foreground mt-2">Notes et absences de vos enfants</p>
+        <h1 className="text-responsive-xl font-bold text-foreground">Suivi Scolaire</h1>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Notes et absences de vos enfants</p>
       </div>
 
       <Tabs defaultValue={parent.students[0]?.id} className="w-full">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${parent.students.length}, 1fr)` }}>
+        <TabsList className="grid w-full" style={{ gridTemplateColumns: parent.students.length <= 2 ? `repeat(${parent.students.length}, 1fr)` : 'repeat(auto-fit, minmax(120px, 1fr))' }}>
           {parent.students.map(student => (
             <TabsTrigger key={student.id} value={student.id}>
               {student.user?.name || 'Étudiant'}
@@ -64,43 +64,43 @@ export default async function ParentTrackingPage({
           const attendanceRate = totalAbsences > 0 ? ((1 - (totalAbsences / 100)) * 100).toFixed(1) : '100'
 
           return (
-            <TabsContent key={student.id} value={student.id} className="space-y-6">
+            <TabsContent key={student.id} value={student.id} className="space-y-4 sm:space-y-6">
               {/* Stats de l'enfant */}
-              <div className="grid md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Moyenne Générale</p>
-                        <p className="text-3xl font-bold text-foreground mt-2">{generalAverage}/20</p>
+                        <p className="text-responsive-xs font-medium text-muted-foreground">Moyenne Générale</p>
+                        <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{generalAverage}/20</p>
                       </div>
-                      <div className="bg-blue-100 p-3 rounded-xl">
-                        <Award className="h-6 w-6 text-blue-600" />
+                      <div className="bg-blue-100 p-2 sm:p-3 rounded-xl">
+                        <Award className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Présence</p>
-                      <p className="text-3xl font-bold text-green-600 mt-2">{attendanceRate}%</p>
+                      <p className="text-responsive-xs font-medium text-muted-foreground">Présence</p>
+                      <p className="text-responsive-lg sm:text-responsive-xl font-bold text-green-600 mt-1 sm:mt-2">{attendanceRate}%</p>
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Notes</p>
-                      <p className="text-3xl font-bold text-foreground mt-2">{totalEvals}</p>
+                      <p className="text-responsive-xs font-medium text-muted-foreground">Notes</p>
+                      <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{totalEvals}</p>
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-3 sm:p-4 md:p-6">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Absences</p>
-                      <p className={`text-3xl font-bold mt-2 ${unjustifiedAbsences > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                      <p className="text-responsive-xs font-medium text-muted-foreground">Absences</p>
+                      <p className={`text-responsive-lg sm:text-responsive-xl font-bold mt-1 sm:mt-2 ${unjustifiedAbsences > 0 ? 'text-orange-600' : 'text-green-600'}`}>
                         {totalAbsences}
                       </p>
                     </div>
@@ -125,7 +125,7 @@ export default async function ParentTrackingPage({
                 </Card>
               )}
 
-              <div className="grid lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Notes récentes */}
                 <Card>
                   <CardHeader>
