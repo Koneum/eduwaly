@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, School, CreditCard, Bell, LogOut, Menu, BarChart3, MessageSquare, Megaphone } from "lucide-react"
+import { LayoutDashboard, School, CreditCard, Bell, LogOut, Menu, BarChart3, MessageSquare, Megaphone, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -21,6 +21,11 @@ const navItems = [
     title: "Écoles",
     href: "/super-admin/schools",
     icon: School,
+  },
+  {
+    title: "Plans & Tarifs",
+    href: "/super-admin/plans", 
+    icon: Package,
   },
   {
     title: "Abonnements",

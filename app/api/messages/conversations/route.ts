@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
+import { checkFeatureAccess } from '@/lib/check-plan-limit'
 
 // GET - Récupérer toutes les conversations de l'utilisateur
 export async function GET() {
@@ -8,6 +9,18 @@ export async function GET() {
     const user = await getAuthUser()
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+
+    // Vérifier si la messagerie est disponible dans le plan
+    if (user.schoolId) {
+      const featureCheck = await checkFeatureAccess(user.schoolId, 'messaging')
+      if (!featureCheck.allowed) {
+        return NextResponse.json({ 
+          error: 'Fonctionnalité non disponible',
+          message: featureCheck.error,
+          upgradeRequired: true
+        }, { status: 403 })
+      }
     }
 
     // Récupérer les conversations où l'utilisateur est participant
@@ -135,6 +148,18 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUser()
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+
+    // Vérifier si la messagerie est disponible dans le plan
+    if (user.schoolId) {
+      const featureCheck = await checkFeatureAccess(user.schoolId, 'messaging')
+      if (!featureCheck.allowed) {
+        return NextResponse.json({ 
+          error: 'Fonctionnalité non disponible',
+          message: featureCheck.error,
+          upgradeRequired: true
+        }, { status: 403 })
+      }
     }
 
     const body = await req.json()

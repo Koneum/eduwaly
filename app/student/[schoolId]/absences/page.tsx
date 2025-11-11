@@ -54,26 +54,26 @@ export default async function StudentAbsencesPage({
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Absences</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{totalAbsences}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Total Absences</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{totalAbsences}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Justifiées</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{justifiedAbsences}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Justifiées</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-green-600 dark:text-green-400 mt-1 sm:mt-2">{justifiedAbsences}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Non Justifiées</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">{unjustifiedAbsences}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Non Justifiées</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-orange-600 dark:text-orange-400 mt-1 sm:mt-2">{unjustifiedAbsences}</p>
             </div>
           </CardContent>
         </Card>
@@ -82,20 +82,20 @@ export default async function StudentAbsencesPage({
       {/* Barre de progression */}
       <Card>
         <CardHeader>
-          <CardTitle>Assiduité</CardTitle>
-          <CardDescription>Votre taux de présence global</CardDescription>
+          <CardTitle className="text-responsive-lg">Assiduité</CardTitle>
+          <CardDescription className="text-responsive-sm">Votre taux de présence global</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">Présence</span>
-              <span className="text-sm font-medium text-green-600">{attendanceRate}%</span>
+              <span className="text-responsive-sm font-medium text-foreground">Présence</span>
+              <span className="text-responsive-sm font-medium text-green-600 dark:text-green-400">{attendanceRate}%</span>
             </div>
             <Progress value={parseFloat(attendanceRate)} className="h-3" />
             {unjustifiedAbsences > 5 && (
-              <div className="flex items-center gap-2 mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                <p className="text-sm text-orange-700">
+              <div className="flex items-center gap-2 mt-4 p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <AlertTriangle className="icon-responsive text-orange-600 dark:text-orange-400" />
+                <p className="text-responsive-xs sm:text-responsive-sm text-orange-700 dark:text-orange-300">
                   Attention : Vous avez {unjustifiedAbsences} absences non justifiées
                 </p>
               </div>
@@ -107,20 +107,20 @@ export default async function StudentAbsencesPage({
       {/* Liste des absences */}
       <Card>
         <CardHeader>
-          <CardTitle>Historique des Absences</CardTitle>
-          <CardDescription>Liste de toutes vos absences</CardDescription>
+          <CardTitle className="text-responsive-lg">Historique des Absences</CardTitle>
+          <CardDescription className="text-responsive-sm">Liste de toutes vos absences</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {student.absences.map((absence) => (
-              <div key={absence.id} className="p-4 border border-border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-lg ${absence.justified ? 'bg-green-100' : 'bg-orange-100'}`}>
-                      <Calendar className={`h-5 w-5 ${absence.justified ? 'text-green-600' : 'text-orange-600'}`} />
+              <div key={absence.id} className="p-3 sm:p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1">
+                    <div className={`p-2 rounded-lg ${absence.justified ? 'bg-green-100 dark:bg-green-900/30' : 'bg-orange-100 dark:bg-orange-900/30'}`}>
+                      <Calendar className={`icon-responsive ${absence.justified ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} />
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-responsive-sm sm:text-responsive-base font-medium text-foreground">
                         {new Date(absence.date).toLocaleDateString('fr-FR', {
                           weekday: 'long',
                           day: 'numeric',
@@ -129,20 +129,20 @@ export default async function StudentAbsencesPage({
                         })}
                       </p>
                       {absence.justification && (
-                        <p className="text-sm text-muted-foreground mt-1 italic">
+                        <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground mt-1 italic">
                           &quot;{absence.justification}&quot;
                         </p>
                       )}
                     </div>
                   </div>
-                  <div>
+                  <div className="self-end sm:self-auto">
                     {absence.justified ? (
-                      <Badge className="bg-green-100 text-green-700">
+                      <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-responsive-xs">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
                         Justifiée
                       </Badge>
                     ) : (
-                      <Badge variant="destructive">
+                      <Badge variant="destructive" className="text-responsive-xs">
                         <XCircle className="h-3 w-3 mr-1" />
                         Non justifiée
                       </Badge>
@@ -154,9 +154,9 @@ export default async function StudentAbsencesPage({
 
             {student.absences.length === 0 && (
               <div className="text-center py-12">
-                <CheckCircle2 className="h-12 w-12 mx-auto text-green-600 mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Aucune absence</h3>
-                <p className="text-muted-foreground">Vous avez une présence parfaite !</p>
+                <CheckCircle2 className="h-12 w-12 mx-auto text-green-600 dark:text-green-400 mb-4" />
+                <h3 className="text-responsive-base sm:text-responsive-lg font-semibold text-foreground mb-2">Aucune absence</h3>
+                <p className="text-responsive-sm text-muted-foreground">Vous avez une présence parfaite !</p>
               </div>
             )}
           </div>

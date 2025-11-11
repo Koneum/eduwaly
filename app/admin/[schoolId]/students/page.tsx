@@ -13,7 +13,7 @@ type FeeStructureRow = {
   filiereId?: string | null
   filiere?: { id?: string; nom?: string } | null
 }
-type PaymentRow = { status: string; amountDue: unknown; amountPaid: unknown; dueDate: Date }
+type PaymentRow = { status: string; amountDue: unknown; amountPaid: unknown; dueDate: Date; feeStructureId: string }
 type ScholarshipRow = { id?: string; name?: string; amount?: unknown | null; percentage?: number | null; isActive?: boolean }
 type StudentRow = {
   id: string
@@ -129,7 +129,8 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
       status: payment.status,
       amountDue: Number(payment.amountDue),
       amountPaid: Number(payment.amountPaid),
-      dueDate: payment.dueDate
+      dueDate: payment.dueDate,
+      feeStructureId: payment.feeStructureId
     })),
     scholarships: student.scholarships.map((scholarship: ScholarshipRow) => ({
       id: scholarship.id ?? '',

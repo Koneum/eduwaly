@@ -27,10 +27,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: '**.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'eduwaly.s3.us-east-1.amazonaws.com',
       },
     ],
-    unoptimized: false,
+    // Désactiver l'optimisation pour éviter les timeouts S3
+    unoptimized: true,
+    // Augmenter le timeout pour les images distantes
+    minimumCacheTTL: 60,
   },
 };
 

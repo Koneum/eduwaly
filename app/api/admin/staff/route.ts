@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import prisma from '@/lib/prisma'
+import { sendStaffCredentials } from '@/lib/brevo-email'
+import { checkCanAddResource } from '@/lib/check-plan-limit'
 
 // GET - Récupérer tous les membres du staff
 export async function GET() {
@@ -89,6 +91,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'schoolId requis' }, { status: 400 })
     }
 
+    // Vérifier la limite du plan pour les enseignants/staff
+    if (schoolId) {
+      const limitCheck = await checkCanAddResource(schoolId, 'teacher')
+      if (!limitCheck.allowed) {
+        return NextResponse.json({ 
+          error: limitCheck.error,
+          upgradeRequired: true
+        }, { status: 403 })
+      }
+    }
+
     // Vérifier si l'email existe déjà
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -161,6 +174,30 @@ export async function POST(request: Request) {
         }
       }
     })
+
+    // Envoyer l'email avec les identifiants (en arrière-plan, ne pas bloquer la réponse)
+    const school = await prisma.school.findUnique({
+      where: { id: schoolId || undefined },
+      select: { name: true }
+    })
+
+    if (school) {
+      sendStaffCredentials(
+        name,
+        email,
+        password,
+        role,
+        school.name
+      ).then(result => {
+        if (result.success) {
+          console.log(`Email envoyé avec succès à ${email}`)
+        } else {
+          console.error(`Erreur envoi email à ${email}:`, result.error)
+        }
+      }).catch(error => {
+        console.error(`Erreur envoi email à ${email}:`, error)
+      })
+    }
 
     return NextResponse.json(staffWithPermissions, { status: 201 })
   } catch (error) {

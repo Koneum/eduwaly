@@ -14,6 +14,9 @@ type PaymentRow = {
     niveau: string
     filiere?: { nom?: string } | null
   }
+  feeStructure?: {
+    type: string
+  } | null
 }
 import FinanceManager from "@/components/school-admin/finance-manager"
 
@@ -33,6 +36,11 @@ export default async function FinancePage({ params }: { params: Promise<{ school
           user: true,
           filiere: true
         }
+      },
+      feeStructure: {
+        select: {
+          type: true
+        }
       }
     },
     orderBy: {
@@ -49,6 +57,7 @@ export default async function FinancePage({ params }: { params: Promise<{ school
     dueDate: payment.dueDate,
     paidAt: payment.paidAt ?? null,
     paymentMethod: payment.paymentMethod ?? null,
+    feeStructure: payment.feeStructure ?? null,
     student: {
       id: payment.student.id,
       firstName: payment.student.user?.name?.split(' ')[0] || 'Prénom',
@@ -65,7 +74,7 @@ export default async function FinancePage({ params }: { params: Promise<{ school
         <h1 className="text-3xl font-bold text-foreground text-balance">Gestion Financière</h1>
         <p className="text-muted-foreground mt-2">Suivez les revenus et les paiements de votre école</p>
       </div>
-      <FinanceManager payments={payments} />
+      <FinanceManager payments={payments} schoolId={schoolId} />
     </div>
   )
 }

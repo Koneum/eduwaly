@@ -111,9 +111,6 @@ export default async function StudentDashboard({
     where: {
       schoolId: student.schoolId,
       isActive: true,
-      targetAudience: {
-        hasSome: ['ALL', 'STUDENT']
-      },
       OR: [
         { expiresAt: null },
         { expiresAt: { gte: now } }
@@ -123,7 +120,12 @@ export default async function StudentDashboard({
       publishedAt: 'desc'
     },
     take: 3
-  })
+  }).then(announcements => 
+    announcements.filter(a => {
+      const audience = a.targetAudience as string[]
+      return audience.includes('ALL') || audience.includes('STUDENT')
+    })
+  )
 
   // Stats
   const stats = [
@@ -164,25 +166,25 @@ export default async function StudentDashboard({
 
       {/* Annonces */}
       {announcements.length > 0 && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-blue-900">Annonces</CardTitle>
+              <Megaphone className="icon-responsive text-blue-600 dark:text-blue-400" />
+              <CardTitle className="text-responsive-lg text-blue-900 dark:text-blue-100">Annonces</CardTitle>
             </div>
-            <CardDescription>Dernières informations importantes</CardDescription>
+            <CardDescription className="text-responsive-sm">Dernières informations importantes</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {announcements.map((announcement) => (
-                <div key={announcement.id} className="p-4 bg-white border border-blue-200 rounded-lg">
+                <div key={announcement.id} className="p-3 sm:p-4 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-foreground">{announcement.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <h3 className="text-responsive-sm sm:text-responsive-base font-semibold text-foreground">{announcement.title}</h3>
+                      <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground mt-1 line-clamp-2">
                         {announcement.content}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <p className="text-responsive-xs text-muted-foreground mt-2">
                         {new Date(announcement.createdAt).toLocaleDateString('fr-FR', {
                           day: 'numeric',
                           month: 'long',
@@ -191,10 +193,10 @@ export default async function StudentDashboard({
                       </p>
                     </div>
                     {announcement.priority === 'HIGH' && (
-                      <Badge variant="destructive">Urgent</Badge>
+                      <Badge variant="destructive" className="text-responsive-xs">Urgent</Badge>
                     )}
                     {announcement.priority === 'NORMAL' && (
-                      <Badge className="bg-blue-600">Normal</Badge>
+                      <Badge className="bg-blue-600 dark:bg-blue-700 text-responsive-xs">Normal</Badge>
                     )}
                   </div>
                 </div>
@@ -211,27 +213,30 @@ export default async function StudentDashboard({
           {/* Scolarité */}
           <Card>
             <CardHeader>
-              <CardTitle>Scolarité</CardTitle>
-              <CardDescription>Vos paiements et frais scolaires</CardDescription>
+              <CardTitle className="text-responsive-lg">Scolarité</CardTitle>
+              <CardDescription className="text-responsive-sm">Vos paiements et frais scolaires</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Total</p>
-                    <p className="text-lg font-bold text-blue-600">{totalDue.toLocaleString()}</p>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 p-2 sm:p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-responsive-xs text-muted-foreground mb-1">Total</p>
+                    <p className="text-responsive-sm sm:text-responsive-base md:text-responsive-lg font-bold text-blue-600 dark:text-blue-400">{totalDue.toLocaleString()}</p>
+                    <p className="text-responsive-xs text-muted-foreground">FCFA</p>
                   </div>
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Payé</p>
-                    <p className="text-lg font-bold text-green-600">{totalPaid.toLocaleString()}</p>
+                  <div className="bg-green-50 dark:bg-green-950/30 p-2 sm:p-3 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="text-responsive-xs text-muted-foreground mb-1">Payé</p>
+                    <p className="text-responsive-sm sm:text-responsive-base md:text-responsive-lg font-bold text-green-600 dark:text-green-400">{totalPaid.toLocaleString()}</p>
+                    <p className="text-responsive-xs text-muted-foreground">FCFA</p>
                   </div>
-                  <div className="bg-orange-50 p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground mb-1">Reste</p>
-                    <p className="text-lg font-bold text-orange-600">{balance.toLocaleString()}</p>
+                  <div className="bg-orange-50 dark:bg-orange-950/30 p-2 sm:p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <p className="text-responsive-xs text-muted-foreground mb-1">Reste</p>
+                    <p className="text-responsive-sm sm:text-responsive-base md:text-responsive-lg font-bold text-orange-600 dark:text-orange-400">{balance.toLocaleString()}</p>
+                    <p className="text-responsive-xs text-muted-foreground">FCFA</p>
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-responsive-xs">
                     <span className="text-muted-foreground">Progression</span>
                     <span className="font-medium text-foreground">
                       {totalDue > 0 ? Math.round((totalPaid / totalDue) * 100) : 0}%
@@ -246,37 +251,52 @@ export default async function StudentDashboard({
           {/* Paiements récents */}
           <Card>
             <CardHeader>
-              <CardTitle>Paiements Récents</CardTitle>
-              <CardDescription>Vos dernières transactions</CardDescription>
+              <CardTitle className="text-responsive-lg">Paiements Récents</CardTitle>
+              <CardDescription className="text-responsive-sm">Vos dernières transactions</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {student.payments.map((payment) => (
-                  <div key={payment.id} className="p-4 border border-border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground">{payment.feeStructure.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Échéance: {new Date(payment.dueDate).toLocaleDateString('fr-FR')}
-                        </p>
+              {student.payments.length === 0 ? (
+                <div className="text-center py-8">
+                  <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-responsive-sm text-muted-foreground">Aucun paiement enregistré</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    {student.payments.map((payment) => (
+                      <div key={payment.id} className="p-3 sm:p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                          <div className="flex-1">
+                            <p className="text-responsive-sm sm:text-responsive-base font-medium text-foreground">{payment.feeStructure.name}</p>
+                            <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground mt-1">
+                              Échéance: {new Date(payment.dueDate).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2">
+                            <p className="text-responsive-base sm:text-responsive-lg font-bold text-primary">{Number(payment.amountPaid).toLocaleString()} FCFA</p>
+                            <Badge 
+                              variant={
+                                payment.status === 'PAID' ? 'default' :
+                                payment.status === 'OVERDUE' ? 'destructive' : 'secondary'
+                              }
+                              className="text-responsive-xs"
+                            >
+                              {payment.status === 'PAID' ? 'Payé' :
+                               payment.status === 'OVERDUE' ? 'En retard' : 
+                               payment.status === 'PARTIAL' ? 'Partiel' : 'En attente'}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-lg text-primary">{Number(payment.amountPaid).toLocaleString()} FCFA</p>
-                        <Badge variant={
-                          payment.status === 'PAID' ? 'default' :
-                          payment.status === 'OVERDUE' ? 'destructive' : 'secondary'
-                        }>
-                          {payment.status === 'PAID' ? 'Payé' :
-                           payment.status === 'OVERDUE' ? 'En retard' : 'En attente'}
-                        </Badge>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-4">
-                Voir tous les paiements
-              </Button>
+                  <Button variant="outline" className="w-full mt-4 text-responsive-sm" asChild>
+                    <Link href={`/student/${schoolId}/payments`}>
+                      Voir tous les paiements
+                    </Link>
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -287,14 +307,14 @@ export default async function StudentDashboard({
           {student.scholarships.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Mes Bourses</CardTitle>
+                <CardTitle className="text-responsive-lg">Mes Bourses</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {student.scholarships.map((scholarship) => (
-                  <div key={scholarship.id} className="p-3 border border-border rounded-lg bg-green-50">
-                    <div className="font-medium text-foreground text-sm">{scholarship.name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{scholarship.reason}</div>
-                    <Badge variant="default" className="mt-2">
+                  <div key={scholarship.id} className="p-3 border border-border rounded-lg bg-green-50 dark:bg-green-950/30">
+                    <div className="text-responsive-sm font-medium text-foreground">{scholarship.name}</div>
+                    <div className="text-responsive-xs text-muted-foreground mt-1">{scholarship.reason}</div>
+                    <Badge variant="default" className="mt-2 bg-green-600 dark:bg-green-700 text-responsive-xs">
                       {scholarship.percentage ? `${scholarship.percentage}%` : `${Number(scholarship.amount).toLocaleString()} FCFA`}
                     </Badge>
                   </div>
@@ -306,30 +326,30 @@ export default async function StudentDashboard({
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Actions Rapides</CardTitle>
+              <CardTitle className="text-responsive-lg">Actions Rapides</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full justify-start" variant="outline" asChild>
+              <Button className="w-full justify-start text-responsive-sm" variant="outline" asChild>
                 <Link href={`/student/${schoolId}/schedule`}>
-                  <Calendar className="h-4 w-4 mr-2" />
+                  <Calendar className="icon-responsive mr-2" />
                   Voir emploi du temps
                 </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline" asChild>
+              <Button className="w-full justify-start text-responsive-sm" variant="outline" asChild>
                 <Link href={`/student/${schoolId}/homework`}>
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="icon-responsive mr-2" />
                   Mes devoirs
                 </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline" asChild>
+              <Button className="w-full justify-start text-responsive-sm" variant="outline" asChild>
                 <Link href={`/student/${schoolId}/courses`}>
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <BookOpen className="icon-responsive mr-2" />
                   Ressources de cours
                 </Link>
               </Button>
-              <Button className="w-full justify-start" variant="outline" asChild>
+              <Button className="w-full justify-start text-responsive-sm" variant="outline" asChild>
                 <Link href={`/student/${schoolId}/payments`}>
-                  <DollarSign className="h-4 w-4 mr-2" />
+                  <DollarSign className="icon-responsive mr-2" />
                   Effectuer un paiement
                 </Link>
               </Button>

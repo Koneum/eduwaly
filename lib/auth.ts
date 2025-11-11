@@ -1,6 +1,10 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
+import { scrypt, randomBytes, timingSafeEqual } from 'crypto'
+import { promisify } from 'util'
+
+const scryptAsync = promisify(scrypt)
 
 // Configuration de l'URL de base pour l'authentification
 // Better Auth cherche automatiquement BETTER_AUTH_URL
@@ -37,11 +41,26 @@ export const auth = betterAuth({
   baseURL: getBaseURL(),
   basePath: '/api/auth',
   database: prismaAdapter(prisma, {
-    provider: 'postgresql',
+    provider: 'mysql',
   }),
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
+    password: {
+      // Hash personnalisé avec scrypt (format: salt:derivedKey)
+      hash: async (password: string) => {
+        const salt = randomBytes(16).toString('hex')
+        const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer
+        return `${salt}:${derivedKey.toString('hex')}`
+      },
+      // Vérification personnalisée
+      verify: async ({ password, hash }: { password: string; hash: string }) => {
+        const [salt, key] = hash.split(':')
+        const keyBuffer = Buffer.from(key, 'hex')
+        const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer
+        return timingSafeEqual(keyBuffer, derivedKey)
+      },
+    },
   },
   user: {
     additionalFields: {

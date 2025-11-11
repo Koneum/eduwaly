@@ -37,12 +37,16 @@ export default async function StudentCoursesPage({
 
   if (!student) redirect('/auth/login')
 
-  // Récupérer les modules de la filière de l'étudiant
+  // Récupérer les modules de la filière de l'étudiant (filtrés par courseSchedule)
   const modules: any = await prisma.module.findMany({
     where: {
       schoolId: student.schoolId,
       OR: [
-        { filiereId: student.filiereId },
+        { 
+          filiereId: student.filiereId,
+          // Filtrer selon le type de cours (jour/soir)
+          ...(student.courseSchedule === 'EVENING' ? { semestre: { contains: 'SOIR' } } : {})
+        },
         { isUeCommune: true }
       ]
     },
@@ -95,12 +99,17 @@ export default async function StudentCoursesPage({
     }
   })
 
-  // Récupérer les documents récents
+  // Récupérer les documents récents (filtrés par filière et courseSchedule)
   const recentDocuments: DocRow[] = ((await prisma.document.findMany({
     where: {
       module: {
+        schoolId: student.schoolId,
         OR: [
-          { filiereId: student.filiereId },
+          { 
+            filiereId: student.filiereId,
+            // Filtrer selon le type de cours (jour/soir)
+            ...(student.courseSchedule === 'EVENING' ? { semestre: { contains: 'SOIR' } } : {})
+          },
           { isUeCommune: true }
         ]
       }
@@ -117,7 +126,7 @@ export default async function StudentCoursesPage({
     createdAt: doc.createdAt,
     title: doc.title,
     fileUrl: doc.fileUrl,
-    module: doc.module ? { nom: doc.module.nom } : undefined
+    module: doc.module ? { nom: doc.module.nom } : undefined 
   }))
 
   // Calculer le temps écoulé pour chaque document
@@ -139,71 +148,80 @@ export default async function StudentCoursesPage({
         <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Consultez vos matières et ressources</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {courses.map((course: any) => (
-          <Card key={course.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className={`w-1 h-12 ${course.color} rounded-full mb-3`} />
-              <CardTitle className="text-lg">{course.name}</CardTitle>
-              <CardDescription>{course.teacher}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Moyenne</span>
-                  <span className="text-2xl font-bold text-foreground">{course.average}/20</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+        {courses.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-responsive-lg font-semibold text-foreground mb-2">Aucun cours disponible</h3>
+            <p className="text-responsive-sm text-muted-foreground">Les cours seront ajoutés par l&apos;administration</p>
+          </div>
+        ) : (
+          courses.map((course: any) => (
+            <Card key={course.id} className="hover:shadow-lg transition-shadow dark:hover:bg-accent/50">
+              <CardHeader>
+                <div className={`w-1 h-12 ${course.color} rounded-full mb-3`} />
+                <CardTitle className="text-responsive-base sm:text-responsive-lg">{course.name}</CardTitle>
+                <CardDescription className="text-responsive-xs sm:text-responsive-sm">{course.teacher}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Moyenne</span>
+                    <span className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground">{course.average}/20</span>
+                  </div>
+                  <div className="flex items-center justify-between text-responsive-xs">
+                    <span className="text-muted-foreground">Progression</span>
+                    <span className="font-medium text-foreground">{course.progress}%</span>
+                  </div>
+                  <Progress value={course.progress} className="h-2" />
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Progression</span>
-                  <span className="font-medium text-foreground">{course.progress}%</span>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <div className="flex items-center gap-2">
+                    <FileText className="icon-responsive text-muted-foreground" />
+                    <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">{course.resources} ressources</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-responsive-xs">
+                    Voir
+                  </Button>
                 </div>
-                <Progress value={course.progress} className="h-2" />
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{course.resources} ressources</span>
-                </div>
-                <Button variant="ghost" size="sm">
-                  Voir
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Ressources Récentes</CardTitle>
-          <CardDescription>Documents et supports de cours disponibles</CardDescription>
+          <CardTitle className="text-responsive-lg">Ressources Récentes</CardTitle>
+          <CardDescription className="text-responsive-sm">Documents et supports de cours disponibles</CardDescription>
         </CardHeader>
         <CardContent>
           {documentsWithTime.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Aucune ressource disponible</h3>
-              <p className="text-muted-foreground">Les documents de cours seront ajoutés par vos enseignants</p>
+              <h3 className="text-responsive-base sm:text-responsive-lg font-semibold text-foreground mb-2">Aucune ressource disponible</h3>
+              <p className="text-responsive-sm text-muted-foreground">Les documents de cours seront ajoutés par vos enseignants</p>
             </div>
           ) : (
             <div className="space-y-3">
               {documentsWithTime.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <FileText className="h-5 w-5 text-primary" />
+                <div key={doc.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+                      <FileText className="icon-responsive text-primary" />
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">{doc.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">{doc.module?.nom || 'Module'}</Badge>
-                        <span className="text-xs text-muted-foreground">{doc.dateText}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-responsive-sm sm:text-responsive-base font-medium text-foreground truncate">{doc.title}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <Badge variant="outline" className="text-responsive-xs">{doc.module?.nom || 'Module'}</Badge>
+                        <span className="text-responsive-xs text-muted-foreground">{doc.dateText}</span>
                       </div>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" className="text-responsive-xs self-end sm:self-auto" asChild>
                     <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
-                      <Download className="h-4 w-4" />
+                      <Download className="icon-responsive" />
+                      <span className="ml-2 hidden sm:inline">Télécharger</span>
                     </a>
                   </Button>
                 </div>

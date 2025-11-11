@@ -9,9 +9,10 @@ generator client {
   // Ne PAS mettre output dans app/ - Next.js le bundlerait côté client
   // Prisma utilise node_modules/.prisma/client par défaut
 }
+//provider = "postgresql"
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -147,6 +148,7 @@ model School {
   name              String
   subdomain         String               @unique
   logo              String?
+  stamp             String?              // Cachet/tampon officiel de l'école
   address           String?
   phone             String?
   email             String?
@@ -156,6 +158,10 @@ model School {
   maxTeachers       Int                  @default(20)
   isActive          Boolean              @default(true)
   schoolType        SchoolType           @default(UNIVERSITY) // UNIVERSITY ou HIGH_SCHOOL
+  
+  // Configuration système de notation
+  gradingSystem     GradingSystem        @default(SEMESTER) // TRIMESTER ou SEMESTER
+  gradingFormula    String?              // Formule personnalisée (ex: "(examens + devoirs * 2) / 3")
   
   // Relations
   subscriptionId    String?              @unique
@@ -176,6 +182,10 @@ model School {
   classes           Class[]
   documents         Document[]
   announcements     Announcement[]
+  gradingPeriods    GradingPeriod[]      // Périodes de notation (trimestres/semestres)
+  evaluationTypes   EvaluationType[]     // Types d'évaluations personnalisables
+  receiptTemplates  ReceiptTemplate[]    // Templates de reçu personnalisables
+  pdfTemplate       PDFTemplate?         // Template PDF personnalisable
   
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
@@ -228,6 +238,8 @@ model Student {
   filiereId         String?
   filiere           Filiere?          @relation(fields: [filiereId], references: [id])
   niveau            String            // L1, L2, L3, M1, M2, 10E, 11E, 12E
+  enrollmentYear    Int?              // Année d'inscription (ex: 2021) pour calculer promotion
+  courseSchedule    CourseSchedule    @default(DAY) // DAY ou EVENING (pour universités)
   dateOfBirth       DateTime?
   placeOfBirth      String?
   address           String?
@@ -465,23 +477,59 @@ model Scholarship {
 // Plan d'Abonnement
 model Plan {
   id                String          @id @default(cuid())
-  name              String
+  name              String          // Nom technique (STARTER, PROFESSIONAL, etc.)
+  displayName       String          @default("") // Nom affiché (Starter, Professional, etc.)
   description       String?
   price             Decimal         @db.Decimal(10, 2)
-  interval          String          // "monthly", "yearly"
+  interval          String          // "MONTHLY", "YEARLY"
   maxStudents       Int
   maxTeachers       Int
   features          String          @default("[]") // JSON array
   stripePriceId     String?
   isActive          Boolean         @default(true)
+  isPopular         Boolean         @default(false) // Badge "Recommandé"
   
   // Relations
   subscriptions     Subscription[]
+  comparisonValues  PlanComparisonValue[]
   
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@map("plans")
+}
+
+// Lignes de comparaison pour le tableau comparatif
+model ComparisonRow {
+  id          String                @id @default(cuid())
+  category    String                // Catégorie (ex: "Tarifs & Limites", "Fonctionnalités")
+  label       String                // Label de la ligne (ex: "Stockage", "API & Webhooks")
+  order       Int                   @default(0) // Ordre d'affichage
+  isActive    Boolean               @default(true)
+  
+  // Relations
+  values      PlanComparisonValue[]
+  
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@map("comparison_rows")
+}
+
+// Valeurs de comparaison pour chaque plan
+model PlanComparisonValue {
+  id              String          @id @default(cuid())
+  planId          String
+  plan            Plan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+  comparisonRowId String
+  comparisonRow   ComparisonRow   @relation(fields: [comparisonRowId], references: [id], onDelete: Cascade)
+  value           String          // Valeur (ex: "5 GB", "✅", "❌", "Illimité")
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([planId, comparisonRowId])
+  @@map("plan_comparison_values")
 }
 
 // Abonnement École
@@ -551,7 +599,7 @@ model Announcement {
   title             String
   content           String
   priority          AnnouncementPriority  @default(NORMAL)
-  targetAudience    String[]              // ["TEACHER", "STUDENT", "PARENT"] ou ["ALL"]
+  targetAudience    Json                  // ["TEACHER", "STUDENT", "PARENT"] ou ["ALL"] - JSON pour compatibilité MySQL
   
   isActive          Boolean               @default(true)
   publishedAt       DateTime              @default(now())
@@ -1060,7 +1108,7 @@ model UserUploadPermission {
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   grantedBy         String   // userId qui a accordé les permissions
   grantedAt         DateTime @default(now())
-  customCategories  String[] // Catégories supplémentaires autorisées (JSON array)
+  customCategories  Json     // Catégories supplémentaires autorisées - JSON pour compatibilité MySQL
   customMaxSizes    Json?    // Tailles max personnalisées par catégorie
   expiresAt         DateTime?
   reason            String?
@@ -1071,4 +1119,108 @@ model UserUploadPermission {
   @@index([userId])
   @@index([grantedBy])
   @@map("user_upload_permissions")
+}
+
+// ============================================
+// SYSTÈME DE NOTATION CONFIGURABLE
+// ============================================
+
+// Périodes de notation (Trimestres ou Semestres)
+model GradingPeriod {
+  id          String    @id @default(cuid())
+  schoolId    String
+  school      School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name        String    // "Trimestre 1", "Semestre 1", etc.
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([schoolId])
+  @@map("grading_periods")
+}
+
+// Types d'évaluations personnalisables par école
+model EvaluationType {
+  id          String       @id @default(cuid())
+  schoolId    String
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name        String       // "Devoir", "Examen", "Projet", "TP", etc.
+  category    String       // "HOMEWORK" ou "EXAM" pour le calcul
+  weight      Float        @default(1.0) // Poids dans le calcul (ex: 2.0 pour devoirs)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([schoolId])
+  @@map("evaluation_types")
+}
+
+// Templates de reçu personnalisables
+model ReceiptTemplate {
+  id          String   @id @default(cuid())
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name        String   // "Reçu Standard", "Reçu avec Logo", etc.
+  logoUrl     String?  // URL du logo de l'école
+  headerText  String?  // Texte d'en-tête personnalisé
+  footerText  String?  // Texte de pied de page personnalisé
+  showLogo    Boolean  @default(true)
+  showStamp   Boolean  @default(false)
+  stampUrl    String?  // URL du tampon/cachet
+  primaryColor String  @default("#4F46E5")
+  isActive    Boolean  @default(false) // Un seul template actif à la fois
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([schoolId, isActive])
+  @@map("receipt_templates")
+}
+
+// Templates PDF personnalisables (bulletins, certificats, etc.)
+model PDFTemplate {
+  id                String   @id @default(cuid())
+  schoolId          String   @unique
+  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  
+  // Configuration en-tête
+  showLogo          Boolean  @default(true)
+  logoPosition      String   @default("left") // "left", "center", "right"
+  headerColor       String   @default("#4F46E5")
+  schoolNameSize    Int      @default(24)
+  
+  // Informations à afficher
+  showAddress       Boolean  @default(true)
+  showPhone         Boolean  @default(true)
+  showEmail         Boolean  @default(true)
+  showStamp         Boolean  @default(true)
+  
+  // Configuration tableau
+  gradeTableStyle   String   @default("detailed") // "simple" ou "detailed"
+  
+  // Pied de page
+  footerText        String   @default("Ce document est officiel et certifié conforme.")
+  showSignatures    Boolean  @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([schoolId])
+  @@map("pdf_templates")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum CourseSchedule {
+  DAY      // Cours du jour
+  EVENING  // Cours du soir
+}
+
+enum GradingSystem {
+  TRIMESTER  // Système trimestriel (lycées)
+  SEMESTER   // Système semestriel (universités)
 }

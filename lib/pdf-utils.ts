@@ -310,3 +310,134 @@ export function generateCertificateNumber(): string {
   const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
   return `CERT-${year}-${random}`;
 }
+
+// ============================================
+// NOUVELLES FONCTIONS POUR TEMPLATES PDF
+// ============================================
+
+export interface PDFHeaderConfig {
+  showLogo: boolean
+  logoPosition: 'left' | 'center' | 'right'
+  headerColor: string
+  schoolNameSize: number
+  showAddress: boolean
+  showPhone: boolean
+  showEmail: boolean
+  showStamp: boolean
+  footerText: string
+  showSignatures: boolean
+  gradeTableStyle: string
+}
+
+export interface SchoolInfo {
+  name: string
+  logo: string | null
+  address: string | null
+  phone: string | null
+  email: string | null
+  stamp: string | null
+}
+
+/**
+ * Génère le header HTML pour les PDF avec logo, adresse, email, téléphone et tampon
+ */
+export function generatePDFHeader(school: SchoolInfo, config: PDFHeaderConfig): string {
+  const logoAlign = config.logoPosition === 'center' ? 'center' : config.logoPosition === 'right' ? 'flex-end' : 'flex-start'
+  
+  return `
+    <div class="pdf-header" style="position: relative; text-align: ${config.logoPosition}; border-bottom: 3px solid ${config.headerColor}; padding: 20px 20px 15px 20px; margin-bottom: 30px; background: linear-gradient(to bottom, ${config.headerColor}10, transparent);">
+      ${config.showLogo && school.logo ? `
+        <div style="display: flex; justify-content: ${logoAlign}; margin-bottom: 15px;">
+          <img src="${school.logo}" alt="Logo" style="max-width: 150px; max-height: 80px; object-fit: contain;" />
+        </div>
+      ` : ''}
+      
+      <h1 style="font-size: ${config.schoolNameSize}px; color: ${config.headerColor}; margin: 10px 0; font-weight: bold; text-transform: uppercase;">
+        ${school.name}
+      </h1>
+      
+      <div class="school-info" style="font-size: 12px; color: #666; margin-top: 10px; line-height: 1.6;">
+        ${config.showAddress && school.address ? `<p style="margin: 5px 0;">📍 ${school.address}</p>` : ''}
+        ${config.showPhone && school.phone ? `<p style="margin: 5px 0;">📞 ${school.phone}</p>` : ''}
+        ${config.showEmail && school.email ? `<p style="margin: 5px 0;">📧 ${school.email}</p>` : ''}
+      </div>
+      
+      ${config.showStamp && school.stamp ? `
+        <div style="position: absolute; top: 20px; right: 20px; opacity: 0.7;">
+          <img src="${school.stamp}" alt="Tampon" style="max-width: 100px; max-height: 100px; object-fit: contain;" />
+        </div>
+      ` : ''}
+    </div>
+  `
+}
+
+/**
+ * Génère le footer HTML pour les PDF avec texte personnalisé et signatures
+ */
+export function generatePDFFooter(footerText: string, showSignatures: boolean, stampUrl?: string): string {
+  return `
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd;">
+      <p style="text-align: center; font-size: 11px; color: #666; margin-bottom: 20px; font-style: italic;">
+        ${footerText}
+      </p>
+      
+      ${showSignatures ? `
+        <div style="display: flex; justify-content: space-between; margin-top: 40px; padding: 0 20px;">
+          <div style="text-align: center; width: 45%; position: relative;">
+            <p style="margin-bottom: 10px; font-size: 12px; font-weight: bold;">Le Directeur</p>
+            ${stampUrl ? `
+              <div style="margin: 10px auto; width: 100px; height: 100px;">
+                <img src="${stampUrl}" alt="Tampon" style="width: 100%; height: 100%; object-fit: contain; opacity: 0.8;" />
+              </div>
+            ` : '<div style="height: 60px;"></div>'}
+            <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px;">
+              <p style="font-size: 10px; color: #666;">Signature et cachet</p>
+            </div>
+          </div>
+          <div style="text-align: center; width: 45%;">
+            <p style="margin-bottom: 50px; font-size: 12px; font-weight: bold;">Le Parent/Tuteur</p>
+            <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px; margin-top: 60px;">
+              <p style="font-size: 10px; color: #666;">Signature</p>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+      
+      <p style="text-align: center; font-size: 10px; color: #999; margin-top: 20px;">
+        Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
+      </p>
+    </div>
+  `
+}
+
+/**
+ * Récupère les informations de l'école et le template PDF
+ */
+export async function getSchoolPDFConfig(schoolId: string): Promise<{ school: SchoolInfo; config: PDFHeaderConfig } | null> {
+  try {
+    // Récupérer les infos de l'école
+    const schoolRes = await fetch(`/api/schools/${schoolId}`)
+    if (!schoolRes.ok) return null
+    const school = await schoolRes.json()
+    
+    // Récupérer le template PDF
+    const templateRes = await fetch(`/api/admin/pdf-templates?schoolId=${schoolId}`)
+    if (!templateRes.ok) return null
+    const template = await templateRes.json()
+    
+    return {
+      school: {
+        name: school.name,
+        logo: school.logo,
+        address: school.address,
+        phone: school.phone,
+        email: school.email,
+        stamp: school.stamp
+      },
+      config: template.config
+    }
+  } catch (error) {
+    console.error('Erreur récupération config PDF:', error)
+    return null
+  }
+}

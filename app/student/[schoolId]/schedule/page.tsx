@@ -139,63 +139,63 @@ export default async function StudentSchedulePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Aujourd&apos;hui</CardTitle>
-          <CardDescription>Vos cours de la journée</CardDescription>
+          <CardTitle className="text-responsive-lg">Aujourd&apos;hui</CardTitle>
+          <CardDescription className="text-responsive-sm">Vos cours de la journée</CardDescription>
         </CardHeader>
         <CardContent>
           {schedule.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Aucun cours aujourd&apos;hui</h3>
-              <p className="text-muted-foreground">Profitez de votre journée libre !</p>
+              <h3 className="text-responsive-base sm:text-responsive-lg font-semibold text-foreground mb-2">Aucun cours aujourd&apos;hui</h3>
+              <p className="text-responsive-sm text-muted-foreground">Profitez de votre journée libre !</p>
             </div>
           ) : (
             <div className="space-y-3">
               {schedule.map((item: any, idx: number) => (
               <div
                 key={idx}
-                className={`flex items-center gap-4 p-4 border rounded-lg ${
+                className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg transition-colors ${
                   item.status === "current"
-                    ? "border-green-500 bg-green-50"
+                    ? "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-950/30"
                     : item.status === "completed"
                       ? "border-border bg-muted opacity-60"
-                      : "border-border"
+                      : "border-border hover:bg-accent/50"
                 }`}
               >
-                <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div
-                    className={`p-2 rounded-lg ${
+                    className={`p-2 rounded-lg shrink-0 ${
                       item.status === "current"
-                        ? "bg-green-100"
+                        ? "bg-green-100 dark:bg-green-900/30"
                         : item.status === "completed"
                           ? "bg-muted"
-                          : "bg-primary/10"
+                          : "bg-primary/10 dark:bg-primary/20"
                     }`}
                   >
                     <Clock
-                      className={`h-5 w-5 ${item.status === "current" ? "text-green-600" : "text-primary"}`}
+                      className={`icon-responsive ${item.status === "current" ? "text-green-600 dark:text-green-400" : "text-primary"}`}
                     />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">{item.subject}</h3>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-responsive-sm sm:text-responsive-base font-semibold text-foreground">{item.subject}</h3>
                       {item.status === "current" && (
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge variant="default" className="bg-green-600 dark:bg-green-700 text-responsive-xs">
                           En cours
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      <p className="text-sm text-muted-foreground">{item.teacher}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
+                      <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground truncate">{item.teacher}</p>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">{item.room}</p>
+                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">{item.room}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{item.time}</p>
+                <div className="text-left sm:text-right shrink-0">
+                  <p className="text-responsive-xs sm:text-responsive-sm font-medium text-foreground">{item.time}</p>
                 </div>
               </div>
             ))}
@@ -207,25 +207,25 @@ export default async function StudentSchedulePage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Prochain Cours</CardTitle>
+            <CardTitle className="text-responsive-lg">Prochain Cours</CardTitle>
           </CardHeader>
           <CardContent>
             {nextCourse ? (
               <div className="space-y-2">
-                <p className="text-2xl font-bold text-foreground">{nextCourse.subject}</p>
-                <p className="text-muted-foreground">{nextCourse.teacher}</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground">{nextCourse.subject}</p>
+                <p className="text-responsive-sm text-muted-foreground">{nextCourse.teacher}</p>
                 <div className="flex items-center gap-2 mt-3">
-                  <Clock className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-medium">{nextCourse.time}</p>
+                  <Clock className="icon-responsive text-primary" />
+                  <p className="text-responsive-xs sm:text-responsive-sm font-medium">{nextCourse.time}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <p className="text-sm font-medium">{nextCourse.room}</p>
+                  <MapPin className="icon-responsive text-primary" />
+                  <p className="text-responsive-xs sm:text-responsive-sm font-medium">{nextCourse.room}</p>
                 </div>
               </div>
             ) : (
               <div className="text-center py-6">
-                <p className="text-muted-foreground">Aucun cours à venir aujourd&apos;hui</p>
+                <p className="text-responsive-sm text-muted-foreground">Aucun cours à venir aujourd&apos;hui</p>
               </div>
             )}
           </CardContent>
@@ -233,20 +233,20 @@ export default async function StudentSchedulePage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Statistiques</CardTitle>
+            <CardTitle className="text-responsive-lg">Statistiques</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Heures cette semaine</span>
-              <span className="font-bold text-foreground">{Math.round(totalHoursWeek)}h</span>
+              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Heures cette semaine</span>
+              <span className="text-responsive-base sm:text-responsive-lg font-bold text-foreground">{Math.round(totalHoursWeek)}h</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Matières</span>
-              <span className="font-bold text-foreground">{uniqueModules}</span>
+              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Matières</span>
+              <span className="text-responsive-base sm:text-responsive-lg font-bold text-foreground">{uniqueModules}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Taux de présence</span>
-              <span className="font-bold text-green-600">{attendanceRate}%</span>
+              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Taux de présence</span>
+              <span className="text-responsive-base sm:text-responsive-lg font-bold text-green-600 dark:text-green-400">{attendanceRate}%</span>
             </div>
           </CardContent>
         </Card>

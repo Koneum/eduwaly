@@ -11,6 +11,7 @@ interface PermissionMenuItemProps {
   children: ReactNode
   onClick?: () => void
   className?: string
+  disabled?: boolean
 }
 
 export function PermissionMenuItem({ 
@@ -18,7 +19,8 @@ export function PermissionMenuItem({
   action, 
   children, 
   onClick,
-  className = ""
+  className = "",
+  disabled = false
 }: PermissionMenuItemProps) {
   const { user } = useAuth()
   const { hasPermission, isLoading } = usePermissions()
@@ -26,7 +28,7 @@ export function PermissionMenuItem({
   // SCHOOL_ADMIN a toutes les permissions
   if (user?.role === 'SCHOOL_ADMIN' || user?.role === 'SUPER_ADMIN') {
     return (
-      <DropdownMenuItem onClick={onClick} className={className}>
+      <DropdownMenuItem onClick={onClick} className={className} disabled={disabled}>
         {children}
       </DropdownMenuItem>
     )
@@ -42,7 +44,7 @@ export function PermissionMenuItem({
   }
 
   return (
-    <DropdownMenuItem onClick={onClick} className={className}>
+    <DropdownMenuItem onClick={onClick} className={className} disabled={disabled}>
       {children}
     </DropdownMenuItem>
   )

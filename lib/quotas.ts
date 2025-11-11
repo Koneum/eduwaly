@@ -110,7 +110,8 @@ export async function hasFeature(
     const planName = (school.subscription?.plan?.name?.toUpperCase() || 'STARTER') as PlanType
     const limits = PLAN_LIMITS[planName] || PLAN_LIMITS.STARTER
 
-    return limits.features[feature as keyof typeof limits.features] || false
+    const featureValue = limits.features[feature as keyof typeof limits.features]
+    return typeof featureValue === 'boolean' ? featureValue : Boolean(featureValue)
   } catch (error) {
     console.error('Erreur vérification feature:', error)
     return false

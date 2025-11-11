@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { subscriptionId, action, planId, months } = body
+    const { subscriptionId, action, planId, months, features } = body
 
     if (!subscriptionId || !action) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
@@ -65,6 +65,22 @@ export async function PUT(request: NextRequest) {
         }
         updateData = {
           planId
+        }
+        break
+
+      case 'customize':
+        // Customiser les fonctionnalités (pour plans Enterprise)
+        if (features === undefined) {
+          return NextResponse.json({ error: 'Features manquantes' }, { status: 400 })
+        }
+        // Valider que c'est du JSON valide
+        try {
+          if (features) JSON.parse(features)
+        } catch {
+          return NextResponse.json({ error: 'Format JSON invalide' }, { status: 400 })
+        }
+        updateData = {
+          features: features || null
         }
         break
 

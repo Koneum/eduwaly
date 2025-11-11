@@ -20,8 +20,10 @@ import {
   Wallet,
   FileText,
   MessageSquare,
-  AlertTriangle,
-  Megaphone
+  Megaphone,
+  Receipt,
+  ClipboardList,
+  FileBarChart
 } from "lucide-react"
 import { FaChartBar } from 'react-icons/fa';
 import { Button } from "@/components/ui/button"
@@ -107,6 +109,16 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
       icon: FileText,
     },
     {
+      title: "Configuration Notation",
+      href: `/admin/${schoolId}/settings/grading`, 
+      icon: ClipboardList,
+    },
+    {
+      title: "Bulletins de Notes",
+      href: `/admin/${schoolId}/bulletins`,
+      icon: FileBarChart,
+    },
+    {
       title: "Messages",
       href: `/admin/${schoolId}/messages`,
       icon: MessageSquare,
@@ -125,6 +137,11 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
       title: "Prix & Bourses",
       href: `/admin/${schoolId}/finance-settings`,
       icon: CreditCard,
+    },
+    {
+      title: "Templates de Reçu",
+      href: `/admin/${schoolId}/receipt-templates`,
+      icon: Receipt,
     },
     {
       title: "Abonnement",

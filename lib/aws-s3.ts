@@ -33,7 +33,7 @@ export async function uploadToS3(options: UploadOptions): Promise<string> {
   // Préparer le buffer
   let buffer: Buffer
   if (Buffer.isBuffer(file)) {
-    buffer = file as Buffer
+    buffer = file
   } else if (
     typeof file === 'object' &&
     file !== null &&
@@ -55,11 +55,17 @@ export async function uploadToS3(options: UploadOptions): Promise<string> {
     Bucket: BUCKET_NAME,
     Key: key,
     Body: buffer,
-  ContentType: contentType || ((file as { type?: string }).type ?? 'application/octet-stream'),
-    ACL: 'public-read', // Rendre le fichier accessible publiquement
+    ContentType: contentType || ((file as { type?: string }).type ?? 'application/octet-stream'),
+    // Note: ACL 'public-read' peut être bloqué par la config du bucket
+    // Utiliser plutôt une politique de bucket ou des URLs signées
   })
 
-  await s3Client.send(command)
+  try {
+    await s3Client.send(command)
+  } catch (error) {
+    console.error('Erreur upload S3:', error)
+    throw new Error('Échec de l\'upload vers S3')
+  }
 
   // Retourner l'URL publique
   const url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`

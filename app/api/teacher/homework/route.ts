@@ -31,26 +31,9 @@ export async function GET(req: NextRequest) {
     const moduleId = searchParams.get('moduleId')
     const filiereId = searchParams.get('filiereId')
 
-    // Récupérer les modules de l'enseignant
-    const emplois = await prisma.emploiDuTemps.findMany({
-      where: {
-        enseignantId: teacher.id,
-      },
-      include: {
-        module: {
-          include: {
-            filiere: true,
-          },
-        },
-      },
-      distinct: ['moduleId'],
-    })
-
-  const moduleIds = emplois.map((e: any) => e.moduleId)
-
-    // Construire le where
+    // Construire le where - Récupérer les devoirs créés par cet enseignant
     const where: Record<string, unknown> = {
-      moduleId: { in: moduleIds },
+      enseignantId: teacher.id,
     }
 
     if (moduleId) {
@@ -77,6 +60,19 @@ export async function GET(req: NextRequest) {
               include: {
                 user: true,
                 filiere: true,
+              },
+            },
+          },
+        },
+        workGroup: {
+          include: {
+            members: {
+              include: {
+                student: {
+                  include: {
+                    user: true,
+                  },
+                },
               },
             },
           },

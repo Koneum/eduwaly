@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
 import { vitepay } from '@/lib/vitepay/client'
 import prisma from '@/lib/prisma'
+import { checkFeatureAccess } from '@/lib/check-plan-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -15,6 +16,16 @@ export async function POST(request: NextRequest) {
     }
 
     const { planId, schoolId } = await request.json()
+
+    // Vérifier si les paiements en ligne sont disponibles dans le plan
+    const featureCheck = await checkFeatureAccess(schoolId, 'onlinePayments')
+    if (!featureCheck.allowed) {
+      return NextResponse.json({ 
+        error: 'Fonctionnalité non disponible',
+        message: featureCheck.error,
+        upgradeRequired: true
+      }, { status: 403 })
+    }
 
     // Récupérer le plan et l'école
     const [plan, school] = await Promise.all([

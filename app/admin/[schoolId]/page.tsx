@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import DashboardActions from "@/components/school-admin/dashboard-actions"
 import SubscriptionButton from "@/components/school-admin/subscription-button"
+import { PlanUsageCard } from "@/components/school-admin/plan-usage-card"
 import prisma from "@/lib/prisma"
 
 type PaymentRow = { status: string; amountPaid: unknown; student?: { id: string } }
@@ -83,12 +84,13 @@ export default async function AdminSchoolDashboard({
         />
       </div>
 
-      {/* Charts and Quick Actions */}
+      {/* Charts, Quick Actions and Plan Usage */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-7">
         <div className="lg:col-span-4">
           <PaymentStatusChart data={paymentStatusData} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-4 sm:space-y-6">
+          <PlanUsageCard />
           <DashboardActions schoolId={schoolId} />
         </div>
       </div>

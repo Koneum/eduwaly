@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
+import { checkCanAddResource } from '@/lib/check-plan-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,6 +78,15 @@ export async function POST(req: NextRequest) {
         { error: 'Titre, fichier et module requis' },
         { status: 400 }
       )
+    }
+
+    // Vérifier la limite de documents du plan
+    const limitCheck = await checkCanAddResource(user.schoolId, 'document')
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ 
+        error: limitCheck.error,
+        upgradeRequired: true
+      }, { status: 403 })
     }
 
     // Vérifier que le module appartient à l'école

@@ -124,77 +124,79 @@ export default function EnrollPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-primary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-primary/10 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-responsive">
       <div className="w-full max-w-2xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <GraduationCap className="h-8 w-8 text-primary" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="bg-primary/10 dark:bg-primary/20 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <GraduationCap className="icon-responsive-lg text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Enrôlement</h1>
-          <p className="text-muted-foreground">
+          <h1 className="heading-responsive-h1 text-foreground mb-2">Enrôlement</h1>
+          <p className="text-responsive-sm text-muted-foreground px-4">
             Créez votre compte avec votre ID d&apos;enrôlement
           </p>
         </div>
 
         {step === "id" ? (
           /* Étape 1: Vérification de l'ID */
-          <Card>
-            <CardHeader>
-              <CardTitle>Entrez votre ID d&apos;enrôlement</CardTitle>
-              <CardDescription>
+          <Card className="card-responsive shadow-lg">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-responsive-lg sm:text-responsive-xl">
+                Entrez votre ID d&apos;enrôlement
+              </CardTitle>
+              <CardDescription className="text-responsive-xs sm:text-responsive-sm">
                 L&apos;ID vous a été fourni par votre établissement lors de votre inscription
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 sm:space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="enrollmentId">ID d&apos;enrôlement</Label>
+                <Label htmlFor="enrollmentId" className="text-responsive-sm">
+                  ID d&apos;enrôlement
+                </Label>
                 <div className="relative">
-                  <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                   <Input
                     id="enrollmentId"
-                    placeholder="Entrez votre ID (ex: ENR-2024-A3B5C)"
+                    placeholder="Ex: ENR-2024-A3B5C"
                     value={enrollmentId}
                     onChange={(e) => {
                       setEnrollmentId(e.target.value.toUpperCase())
                       setError("")
                     }}
-                    className="pl-10"
+                    className="pl-10 text-responsive-sm h-10 sm:h-11"
                     disabled={loading}
                   />
                 </div>
                 {error && (
-                  <p className="text-sm text-red-600">{error}</p>
+                  <p className="text-responsive-xs text-red-600 dark:text-red-400">{error}</p>
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
-                  variant="outline"
-                  className="flex-1"
+                  variant={userType === "student" ? "default" : "outline"}
+                  className="flex-1 text-responsive-sm h-10 sm:h-11"
                   onClick={() => setUserType("student")}
-                  disabled={userType === "student"}
                 >
-                  <User className="h-4 w-4 mr-2" />
+                  <User className="icon-responsive mr-2" />
                   Je suis Étudiant
                 </Button>
                 <Button
-                  variant="outline"
-                  className="flex-1"
+                  variant={userType === "parent" ? "default" : "outline"}
+                  className="flex-1 text-responsive-sm h-10 sm:h-11"
                   onClick={() => setUserType("parent")}
-                  disabled={userType === "parent"}
                 >
-                  <UserPlus className="h-4 w-4 mr-2" />
+                  <UserPlus className="icon-responsive mr-2" />
                   Je suis Parent
                 </Button>
               </div>
 
-              <Badge className="w-full justify-center py-2">
+              <Badge className="w-full justify-center py-2 text-responsive-xs sm:text-responsive-sm">
                 Type sélectionné: {userType === "student" ? "Étudiant" : "Parent"}
               </Badge>
 
               <Button
-                className="w-full"
+                className="w-full text-responsive-sm h-10 sm:h-11"
                 onClick={handleVerifyId}
                 disabled={!enrollmentId || loading}
               >
@@ -202,7 +204,7 @@ export default function EnrollPage() {
               </Button>
 
               <div className="pt-4 border-t">
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground text-center">
                   Vous n&apos;avez pas d&apos;ID d&apos;enrôlement ? Contactez votre établissement
                 </p>
               </div>
@@ -210,66 +212,77 @@ export default function EnrollPage() {
           </Card>
         ) : (
           /* Étape 2: Formulaire d'inscription */
-          <Card>
+          <Card className="card-responsive shadow-lg">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Créez votre compte</CardTitle>
-                  <CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-1">
+                  <CardTitle className="text-responsive-lg sm:text-responsive-xl">
+                    Créez votre compte
+                  </CardTitle>
+                  <CardDescription className="text-responsive-xs sm:text-responsive-sm">
                     Complétez vos informations pour finaliser l&apos;enrôlement
                   </CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setStep("id")}>
-                  Retour
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setStep("id")}
+                  className="text-responsive-xs sm:text-responsive-sm self-start sm:self-auto"
+                >
+                  ← Retour
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {/* Info étudiant */}
               {studentInfo && (
-                <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-background mb-2">Informations de l&apos;inscription</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h3 className="text-responsive-sm sm:text-responsive-base font-semibold text-blue-900 dark:text-blue-100 mb-2 sm:mb-3">
+                    Informations de l&apos;inscription
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-responsive-xs sm:text-responsive-sm">
                     <div>
-                      <span className="text-background">Établissement:</span>
-                      <p className="font-medium text-background">{studentInfo.schoolName}</p>
+                      <span className="text-blue-700 dark:text-blue-300">Établissement:</span>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.schoolName}</p>
                     </div>
                     <div>
-                      <span className="text-background">N° Étudiant:</span>
-                      <p className="font-medium text-background">{studentInfo.studentNumber}</p>
+                      <span className="text-blue-700 dark:text-blue-300">N° Étudiant:</span>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.studentNumber}</p>
                     </div>
                     <div>
-                      <span className="text-background">Niveau:</span>
-                      <p className="font-medium text-background">{studentInfo.niveau}</p>
+                      <span className="text-blue-700 dark:text-blue-300">Niveau:</span>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.niveau}</p>
                     </div>
                     <div>
-                      <span className="text-background">Filière:</span>
-                      <p className="font-medium text-background">{studentInfo.filiere}</p>
+                      <span className="text-blue-700 dark:text-blue-300">Filière:</span>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.filiere}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Nom et Prénom */}
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nom">Nom *</Label>
+                    <Label htmlFor="nom" className="text-responsive-sm">Nom *</Label>
                     <Input 
                       id="nom" 
                       placeholder="Votre nom" 
                       value={formData.nom}
                       onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                      className="text-responsive-sm h-10 sm:h-11"
                       required 
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prenom">Prénom *</Label>
+                    <Label htmlFor="prenom" className="text-responsive-sm">Prénom *</Label>
                     <Input 
                       id="prenom" 
                       placeholder="Votre prénom" 
                       value={formData.prenom}
                       onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                      className="text-responsive-sm h-10 sm:h-11"
                       required 
                     />
                   </div>
@@ -278,14 +291,14 @@ export default function EnrollPage() {
                 {/* Email (obligatoire pour université) */}
                 {studentInfo?.schoolType === "UNIVERSITY" && (
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email" className="text-responsive-sm">Email *</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
                         placeholder="votre.email@example.com"
-                        className="pl-10"
+                        className="pl-10 text-responsive-sm h-10 sm:h-11"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         required
@@ -297,14 +310,14 @@ export default function EnrollPage() {
                 {/* Email (optionnel pour lycée) */}
                 {studentInfo?.schoolType === "HIGH_SCHOOL" && (
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email (optionnel)</Label>
+                    <Label htmlFor="email" className="text-responsive-sm">Email (optionnel)</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
                         placeholder="votre.email@example.com"
-                        className="pl-10"
+                        className="pl-10 text-responsive-sm h-10 sm:h-11"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                       />
@@ -315,14 +328,14 @@ export default function EnrollPage() {
                 {/* Numéro (obligatoire pour lycée) */}
                 {studentInfo?.schoolType === "HIGH_SCHOOL" && (
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Numéro de téléphone *</Label>
+                    <Label htmlFor="phone" className="text-responsive-sm">Numéro de téléphone *</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                       <Input
                         id="phone"
                         type="tel"
                         placeholder="+237 6XX XXX XXX"
-                        className="pl-10"
+                        className="pl-10 text-responsive-sm h-10 sm:h-11"
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         required
@@ -334,14 +347,14 @@ export default function EnrollPage() {
                 {/* Numéro (optionnel pour université) */}
                 {studentInfo?.schoolType === "UNIVERSITY" && (
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Numéro de téléphone (optionnel)</Label>
+                    <Label htmlFor="phone" className="text-responsive-sm">Numéro de téléphone (optionnel)</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                       <Input
                         id="phone"
                         type="tel"
                         placeholder="+237 6XX XXX XXX"
-                        className="pl-10"
+                        className="pl-10 text-responsive-sm h-10 sm:h-11"
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       />
@@ -351,14 +364,14 @@ export default function EnrollPage() {
 
                 {/* Mot de passe */}
                 <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe *</Label>
+                  <Label htmlFor="password" className="text-responsive-sm">Mot de passe *</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Créez un mot de passe sécurisé (min. 8 caractères)"
-                      className="pl-10"
+                      placeholder="Min. 8 caractères"
+                      className="pl-10 text-responsive-sm h-10 sm:h-11"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       required
@@ -368,14 +381,14 @@ export default function EnrollPage() {
 
                 {/* Confirmation mot de passe */}
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+                  <Label htmlFor="confirmPassword" className="text-responsive-sm">Confirmer le mot de passe *</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                     <Input
                       id="confirmPassword"
                       type="password"
                       placeholder="Confirmez votre mot de passe"
-                      className="pl-10"
+                      className="pl-10 text-responsive-sm h-10 sm:h-11"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                       required
@@ -384,16 +397,20 @@ export default function EnrollPage() {
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-600">{error}</p>
+                  <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-responsive-xs sm:text-responsive-sm text-red-600 dark:text-red-400">{error}</p>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button 
+                  type="submit" 
+                  className="w-full text-responsive-sm h-10 sm:h-11" 
+                  disabled={loading}
+                >
                   {loading ? "Création en cours..." : "Créer mon compte"}
                 </Button>
 
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-responsive-xs text-muted-foreground text-center px-4">
                   En créant un compte, vous acceptez les conditions d&apos;utilisation
                 </p>
               </form>

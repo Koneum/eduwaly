@@ -16,17 +16,18 @@ export default async function TeacherAnnouncementsPage({
   const announcements = await prisma.announcement.findMany({
     where: {
       schoolId: schoolId,
-      isActive: true,
-      OR: [
-        { targetAudience: { has: 'ALL' } },
-        { targetAudience: { has: 'TEACHER' } }
-      ]
+      isActive: true
     },
     orderBy: {
       publishedAt: 'desc'
     },
     take: 50
-  })
+  }).then(announcements => 
+    announcements.filter(a => {
+      const audience = a.targetAudience as string[]
+      return audience.includes('ALL') || audience.includes('TEACHER')
+    })
+  )
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

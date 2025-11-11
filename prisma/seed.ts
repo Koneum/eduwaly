@@ -1,19 +1,26 @@
 import { PrismaClient, UserRole } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
+import { scrypt, randomBytes } from 'crypto'
+import { promisify } from 'util'
 
 const prisma = new PrismaClient()
+const scryptAsync = promisify(scrypt)
 
-// Helper pour créer un utilisateur avec compte BetterAuth
-async function createUserWithAccount(data: {
+// Helper pour hasher un mot de passe avec scrypt (comme Better Auth)
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex')
+  const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer
+  return `${salt}:${derivedKey.toString('hex')}`
+}
+
+// Helper pour créer un utilisateur avec Better Auth scrypt hashing
+async function createUserWithBetterAuth(data: {
   email: string
   password: string
   name: string
   role: UserRole
   schoolId?: string
-  isActive?: boolean
 }) {
-  const hashedPassword = await bcrypt.hash(data.password, 10)
+  const hashedPassword = await hashPassword(data.password)
   
   // Créer l'utilisateur
   const user = await prisma.user.create({
@@ -21,19 +28,19 @@ async function createUserWithAccount(data: {
       email: data.email,
       password: hashedPassword,
       name: data.name,
-  role: data.role,
+      role: data.role,
       schoolId: data.schoolId,
-      isActive: data.isActive ?? true,
+      isActive: true,
       emailVerified: true,
     },
   })
 
-  // Créer le compte BetterAuth
+  // Créer le compte Better Auth
   await prisma.account.create({
     data: {
-      id: crypto.randomUUID(),
+      id: randomBytes(16).toString('hex'),
       userId: user.id,
-      accountId: crypto.randomUUID(),
+      accountId: randomBytes(16).toString('hex'),
       providerId: 'credential',
       password: hashedPassword,
     },
@@ -71,12 +78,9 @@ async function main() {
   await prisma.user.deleteMany()
   await prisma.school.deleteMany()
 
-  // Mot de passe par défaut pour les utilisateurs créés directement dans le seed
-  const commonHashedPassword = await bcrypt.hash('password123', 10)
-
   // 1. Créer Super Admin
   console.log('👤 Création Super Admin...')
-  await createUserWithAccount({
+  await createUserWithBetterAuth({
     email: 'superadmin@saas.com',
     password: 'password123',
     name: 'Super Administrateur',
@@ -152,15 +156,12 @@ async function main() {
   })
 
   // Admin École 1
-  const schoolAdmin1 = await prisma.user.create({
-    data: {
-      email: 'admin@excellence-dakar.sn',
-      password: commonHashedPassword,
-      name: 'Amadou Diallo',
-      role: 'SCHOOL_ADMIN',
-      schoolId: school1.id,
-      isActive: true,
-    },
+  const schoolAdmin1 = await createUserWithBetterAuth({
+    email: 'admin@excellence-dakar.sn',
+    password: 'password123',
+    name: 'Amadou Diallo',
+    role: 'SCHOOL_ADMIN',
+    schoolId: school1.id,
   })
 
   // Année universitaire
@@ -199,15 +200,12 @@ async function main() {
   })
 
   // Enseignant
-  const teacher1User = await prisma.user.create({
-    data: {
-      email: 'teacher@excellence-dakar.sn',
-      password: commonHashedPassword,
-      name: 'Fatou Sow',
-      role: 'TEACHER',
-      schoolId: school1.id,
-      isActive: true,
-    },
+  const teacher1User = await createUserWithBetterAuth({
+    email: 'teacher@excellence-dakar.sn',
+    password: 'password123',
+    name: 'Fatou Sow',
+    role: 'TEACHER',
+    schoolId: school1.id,
   })
   await prisma.enseignant.create({
     data: {
@@ -224,15 +222,12 @@ async function main() {
   })
 
   // Étudiants
-  const student1User = await prisma.user.create({
-    data: {
-      email: 'student1@excellence-dakar.sn',
-      password: commonHashedPassword,
-      name: 'Moussa Ndiaye',
-      role: 'STUDENT',
-      schoolId: school1.id,
-      isActive: true,
-    },
+  const student1User = await createUserWithBetterAuth({
+    email: 'student1@excellence-dakar.sn',
+    password: 'password123',
+    name: 'Moussa Ndiaye',
+    role: 'STUDENT',
+    schoolId: school1.id,
   })
 
   const student1 = await prisma.student.create({
@@ -248,15 +243,12 @@ async function main() {
     },
   })
 
-  const student2User = await prisma.user.create({
-    data: {
-      email: 'student2@excellence-dakar.sn',
-      password: commonHashedPassword,
-      name: 'Aïssatou Ba',
-      role: 'STUDENT',
-      schoolId: school1.id,
-      isActive: true,
-    },
+  const student2User = await createUserWithBetterAuth({
+    email: 'student2@excellence-dakar.sn',
+    password: 'password123',
+    name: 'Aïssatou Ba',
+    role: 'STUDENT',
+    schoolId: school1.id,
   })
 
   const student2 = await prisma.student.create({
@@ -273,15 +265,12 @@ async function main() {
   })
 
   // Parent
-  const parent1User = await prisma.user.create({
-    data: {
-      email: 'parent@excellence-dakar.sn',
-      password: commonHashedPassword,
-      name: 'Ibrahima Ndiaye',
-      role: 'PARENT',
-      schoolId: school1.id,
-      isActive: true,
-    },
+  const parent1User = await createUserWithBetterAuth({
+    email: 'parent@excellence-dakar.sn',
+    password: 'password123',
+    name: 'Ibrahima Ndiaye',
+    role: 'PARENT',
+    schoolId: school1.id,
   })
   await prisma.parent.create({
     data: {
@@ -434,15 +423,12 @@ async function main() {
     },
   })
 
-  const schoolAdmin2 = await prisma.user.create({
-    data: {
-      email: 'admin@moderne-abidjan.ci',
-      password: commonHashedPassword,
-      name: 'Kouassi Yao',
-      role: 'SCHOOL_ADMIN',
-      schoolId: school2.id,
-      isActive: true,
-    },
+  const schoolAdmin2 = await createUserWithBetterAuth({
+    email: 'admin@moderne-abidjan.ci',
+    password: 'password123',
+    name: 'Kouassi Yao',
+    role: 'SCHOOL_ADMIN',
+    schoolId: school2.id,
   })
 
   // Signalements

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { headers } from 'next/headers';
+import { checkFeatureAccess } from '@/lib/check-plan-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,16 @@ export async function POST(request: NextRequest) {
 
   const user = session.user as { schoolId?: string };
   const schoolId = user.schoolId as string;
+
+  // Vérifier si les rapports avancés sont disponibles dans le plan
+  const featureCheck = await checkFeatureAccess(schoolId, 'advancedReports');
+  if (!featureCheck.allowed) {
+    return NextResponse.json({ 
+      error: 'Fonctionnalité non disponible',
+      message: featureCheck.error,
+      upgradeRequired: true
+    }, { status: 403 });
+  }
   let data: Record<string, unknown> = {};
   let summary: Record<string, unknown> = {};
 

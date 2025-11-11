@@ -138,6 +138,7 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
       }
 
       toast.success('Membre du personnel créé avec succès')
+      toast.info(`Un email avec les identifiants a été envoyé à ${createForm.email}`)
       setIsCreateOpen(false)
       setCreateForm({
         name: '',

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import { getAuthUser } from '@/lib/auth-utils'
 import { redirect } from "next/navigation"
 import GradesManager from "@/components/teacher/grades-manager"
+import StudentsGradesList from "@/components/teacher/students-grades-list"
 
 export default async function TeacherGradesPage({ 
   params 
@@ -196,8 +197,35 @@ export default async function TeacherGradesPage({
     ? classes.map(c => ({ id: c.id, name: c.name }))
     : filieres.map(f => ({ id: f.id, name: f.nom }))
 
+  // Récupérer tous les étudiants avec leurs infos
+  const students = await prisma.student.findMany({
+    where: { schoolId: schoolId },
+    select: {
+      id: true,
+      studentNumber: true,
+      niveau: true,
+      enrollmentYear: true,
+      user: {
+        select: {
+          name: true,
+          email: true
+        }
+      },
+      filiere: {
+        select: {
+          nom: true
+        }
+      }
+    },
+    orderBy: {
+      user: {
+        name: 'asc'
+      }
+    }
+  })
+
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <GradesManager 
         evaluations={formattedEvaluations} 
         stats={stats}
@@ -205,32 +233,39 @@ export default async function TeacherGradesPage({
         isHighSchool={isHighSchool}
       />
 
+      {/* Liste des étudiants avec filtres et promotion */}
+      <StudentsGradesList 
+        students={students}
+        filieres={formattedClasses.map(c => ({ id: c.id, nom: c.name }))}
+        isHighSchool={isHighSchool}
+      />
+
       <Card>
-        <CardHeader>
-          <CardTitle>Présences de la Semaine</CardTitle>
-          <CardDescription>
-            Suivi des absences et retards (du {startOfWeek.toLocaleDateString('fr-FR')} à aujourd&apos;hui)
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-responsive-base sm:text-responsive-lg">Présences de la Semaine</CardTitle>
+          <CardDescription className="text-responsive-xs sm:text-responsive-sm">
+            Suivi des absences et retards (du {startOfWeek.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} à aujourd&apos;hui)
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           {weekAttendance.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {weekAttendance.map((day) => (
-                <div key={day.day} className="p-4 border border-border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-foreground">{day.day}</h3>
-                    <div className="flex items-center gap-4">
+                <div key={day.day} className="p-3 sm:p-4 border border-border rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 className="font-semibold text-responsive-sm sm:text-responsive-base text-foreground">{day.day}</h3>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
                       <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Présents</p>
-                        <p className="font-bold text-green-600">{day.present}</p>
+                        <p className="text-responsive-xs text-muted-foreground">Présents</p>
+                        <p className="font-bold text-responsive-sm sm:text-responsive-base text-green-600">{day.present}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Absents</p>
-                        <p className="font-bold text-red-600">{day.absent}</p>
+                        <p className="text-responsive-xs text-muted-foreground">Absents</p>
+                        <p className="font-bold text-responsive-sm sm:text-responsive-base text-red-600">{day.absent}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Justifiés</p>
-                        <p className="font-bold text-orange-600">{day.late}</p>
+                        <p className="text-responsive-xs text-muted-foreground">Justifiés</p>
+                        <p className="font-bold text-responsive-sm sm:text-responsive-base text-orange-600">{day.late}</p>
                       </div>
                     </div>
                   </div>
@@ -238,7 +273,7 @@ export default async function TeacherGradesPage({
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-responsive-sm text-muted-foreground py-6 sm:py-8">
               Aucune donnée de présence pour cette semaine
             </p>
           )}

@@ -28,14 +28,26 @@ export default async function RoomsManagementPage({
   const { schoolId } = await params
   await requireSchoolAccess(schoolId)
 
-  const school = (await prisma.school.findUnique({
+  const school = await prisma.school.findUnique({
     where: { id: schoolId },
-    include: {
+    select: {
+      schoolType: true,
       rooms: {
-        orderBy: { name: 'asc' }
+        orderBy: { name: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          capacity: true,
+          isAvailable: true,
+          type: true,
+          equipment: true,
+          building: true,
+          floor: true,
+        }
       }
     }
-  })) as unknown as ({ rooms: RoomModel[]; schoolType: 'HIGH_SCHOOL' | 'UNIVERSITY' } & Record<string, unknown>) | null
+  })
 
   if (!school) {
     redirect('/admin')

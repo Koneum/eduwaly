@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { generatePDFHeader, generatePDFFooter, type SchoolInfo, type PDFHeaderConfig } from '@/lib/pdf-utils'
+
+// Fonction pour convertir FeeType en nom lisible
+const getFeeTypeName = (type: string): string => {
+  const feeTypeNames: Record<string, string> = {
+    'REGISTRATION': "Frais d'inscription",
+    'TUITION': 'Frais de scolarité',
+    'EXAM': "Frais d'examen",
+    'LIBRARY': 'Frais de bibliothèque',
+    'SPORT': 'Frais sportifs',
+    'TRANSPORT': 'Frais de transport',
+    'OTHER': 'Autres frais'
+  }
+  return feeTypeNames[type] || type
+}
 
 interface Student {
   id: string
@@ -22,6 +37,10 @@ interface Student {
   classe: {
     name: string
   }
+}
+
+interface FeeStructure {
+  type: string
 }
 
 interface Payment {
@@ -33,16 +52,63 @@ interface Payment {
   paidAt: Date | null
   paymentMethod: string | null
   student: Student
+  feeStructure?: FeeStructure | null
 }
 
 interface FinanceManagerProps {
   payments: Payment[]
+  schoolId: string
 }
 
-export default function FinanceManager({ payments }: FinanceManagerProps) {
+interface ReceiptTemplate {
+  id: string
+  name: string
+  logoUrl: string | null
+  headerText: string | null
+  footerText: string | null
+  showLogo: boolean
+  showStamp: boolean
+  stampUrl: string | null
+  primaryColor: string
+}
+
+export default function FinanceManager({ payments, schoolId }: FinanceManagerProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('date')
+  const [receiptTemplate, setReceiptTemplate] = useState<ReceiptTemplate | null>(null)
+  const [school, setSchool] = useState<SchoolInfo | null>(null)
+  const [pdfConfig, setPdfConfig] = useState<PDFHeaderConfig | null>(null)
+
+  // Charger le template actif et les infos école
+  useEffect(() => {
+    // Template de reçu
+    fetch(`/api/school-admin/receipt-templates/active?schoolId=${schoolId}`)
+      .then(res => res.json())
+      .then(data => setReceiptTemplate(data))
+      .catch(err => console.error('Erreur chargement template:', err))
+
+    // Infos école et template PDF
+    Promise.all([
+      fetch(`/api/schools/${schoolId}`),
+      fetch(`/api/admin/pdf-templates?schoolId=${schoolId}`)
+    ]).then(async ([schoolRes, templateRes]) => {
+      if (schoolRes.ok && templateRes.ok) {
+        const schoolData = await schoolRes.json()
+        const templateData = await templateRes.json()
+        
+        setSchool({
+          name: schoolData.name,
+          logo: schoolData.logo,
+          address: schoolData.address,
+          phone: schoolData.phone,
+          email: schoolData.email,
+          stamp: schoolData.stamp
+        })
+        setPdfConfig(templateData.config)
+      }
+    }).catch(err => console.error('Erreur chargement config PDF:', err))
+  }, [schoolId])
 
   // Filtrer et trier les paiements
   const filteredPayments = payments
@@ -65,24 +131,44 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
       return 0
     })
 
-  // Calculer les statistiques
+  // Calculer les statistiques CORRECTEMENT
   const stats = {
+    // Total attendu (somme de tous les montants dus)
     total: payments.reduce((sum, p) => sum + Number(p.amount), 0),
-    paid: payments
-      .filter(p => p.status === 'PAID')
-      .reduce((sum, p) => sum + Number(p.amountPaid), 0),
+    
+    // Total payé (somme de TOUS les montants payés, peu importe le statut)
+    paid: payments.reduce((sum, p) => sum + Number(p.amountPaid), 0),
+    
+    // Total restant (total - payé)
+    remaining: payments.reduce((sum, p) => 
+      sum + (Number(p.amount) - Number(p.amountPaid)), 0
+    ),
+    
+    // Restant en attente (seulement les paiements PENDING)
     pending: payments
       .filter(p => p.status === 'PENDING')
-      .reduce((sum, p) => sum + Number(p.amount), 0),
+      .reduce((sum, p) => sum + (Number(p.amount) - Number(p.amountPaid)), 0),
+    
+    // Restant en retard (seulement les paiements OVERDUE)
     overdue: payments
       .filter(p => p.status === 'OVERDUE')
-      .reduce((sum, p) => sum + Number(p.amount), 0),
+      .reduce((sum, p) => sum + (Number(p.amount) - Number(p.amountPaid)), 0),
   }
 
   // Imprimer un reçu
   const printReceipt = (payment: Payment) => {
     const receiptWindow = window.open('', '_blank')
     if (!receiptWindow) return
+
+    const template = receiptTemplate || {
+      logoUrl: null,
+      headerText: 'REÇU DE PAIEMENT',
+      footerText: 'Merci pour votre paiement',
+      showLogo: false,
+      showStamp: false,
+      stampUrl: null,
+      primaryColor: '#4F46E5'
+    }
 
     const receiptHTML = `
       <!DOCTYPE html>
@@ -99,12 +185,16 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
             .header {
               text-align: center;
               margin-bottom: 30px;
-              border-bottom: 2px solid #333;
+              border-bottom: 3px solid ${template.primaryColor};
               padding-bottom: 20px;
+            }
+            .logo {
+              max-width: 200px;
+              margin-bottom: 20px;
             }
             .header h1 {
               margin: 0;
-              color: #333;
+              color: ${template.primaryColor};
             }
             .info-section {
               margin: 20px 0;
@@ -132,13 +222,19 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
               font-size: 24px;
               font-weight: bold;
               text-align: right;
-              color: #333;
+              color: ${template.primaryColor};
+            }
+            .stamp {
+              max-width: 150px;
+              margin-top: 20px;
             }
             .footer {
               margin-top: 40px;
               text-align: center;
               color: #666;
-              font-size: 12px;
+              font-size: 14px;
+              padding-top: 20px;
+              border-top: 2px solid #eee;
             }
             @media print {
               body { padding: 20px; }
@@ -147,8 +243,9 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
         </head>
         <body>
           <div class="header">
-            <h1>REÇU DE PAIEMENT</h1>
-            <p>Code d'inscription: ${payment.id}</p>
+            ${template.showLogo && template.logoUrl ? `<img src="${template.logoUrl}" alt="Logo" class="logo" />` : ''}
+            <h1>${template.headerText || 'REÇU DE PAIEMENT'}</h1>
+            <p style="color: #666; margin: 10px 0;">N° ${payment.id}</p>
           </div>
           
           <div class="info-section">
@@ -160,10 +257,12 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
               <span class="label">Classe:</span>
               <span class="value">${payment.student.classe.name}</span>
             </div>
+            ${payment.feeStructure ? `
             <div class="info-row">
-              <span class="label">Date d'échéance:</span>
-              <span class="value">${new Date(payment.dueDate).toLocaleDateString('fr-FR')}</span>
+              <span class="label">Type de frais:</span>
+              <span class="value">${getFeeTypeName(payment.feeStructure.type)}</span>
             </div>
+            ` : ''}
             ${payment.paidAt ? `
             <div class="info-row">
               <span class="label">Date de paiement:</span>
@@ -178,7 +277,7 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
             ` : ''}
             <div class="info-row">
               <span class="label">Statut:</span>
-              <span class="value">${payment.status}</span>
+              <span class="value">${payment.status === 'PAID' ? 'Payé' : payment.status === 'PENDING' ? 'En attente' : 'En retard'}</span>
             </div>
           </div>
 
@@ -197,8 +296,11 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
           </div>
 
           <div class="footer">
-            <p>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
-            <p>Merci pour votre paiement</p>
+            ${template.showStamp && template.stampUrl ? `<img src="${template.stampUrl}" alt="Cachet" class="stamp" />` : ''}
+            <p>${template.footerText || 'Merci pour votre paiement'}</p>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+              Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
+            </p>
           </div>
 
           <script>
@@ -216,16 +318,21 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
 
   // Exporter en Excel (CSV avec séparateur point-virgule pour Excel)
   const exportToExcel = () => {
-    const headers = ['Date', 'Étudiant', 'Classe', 'Montant', 'Payé', 'Statut', 'Méthode']
-    const rows = filteredPayments.map(p => [
-      new Date(p.dueDate).toLocaleDateString('fr-FR'),
-      `${p.student.firstName} ${p.student.lastName}`,
-      p.student.classe.name,
-      Number(p.amount).toLocaleString(),
-      Number(p.amountPaid).toLocaleString(),
-      p.status === 'PAID' ? 'Payé' : p.status === 'PENDING' ? 'En attente' : 'En retard',
-      p.paymentMethod || '-'
-    ])
+    const headers = ['Date', 'Étudiant', 'Classe', 'Type de frais', 'Montant Total', 'Montant Payé', 'Restant', 'Statut', 'Méthode']
+    const rows = filteredPayments.map(p => {
+      const remaining = Number(p.amount) - Number(p.amountPaid)
+      return [
+        p.paidAt ? new Date(p.paidAt).toLocaleDateString('fr-FR') : '-',
+        `${p.student.firstName} ${p.student.lastName}`,
+        p.student.classe.name,
+        p.feeStructure ? getFeeTypeName(p.feeStructure.type) : '-',
+        Number(p.amount).toLocaleString(),
+        Number(p.amountPaid).toLocaleString(),
+        remaining > 0 ? remaining.toLocaleString() : '0',
+        p.status === 'PAID' ? 'Payé' : p.status === 'PENDING' ? 'En attente' : 'En retard',
+        p.paymentMethod || '-'
+      ]
+    })
 
     const csvContent = [
       headers.join(';'),
@@ -242,6 +349,11 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
 
   // Exporter en PDF
   const exportToPDF = () => {
+    if (!school || !pdfConfig) {
+      alert('Configuration PDF non chargée. Veuillez rafraîchir la page.')
+      return
+    }
+
     const pdfWindow = window.open('', '_blank')
     if (!pdfWindow) return
 
@@ -257,26 +369,23 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
               padding: 40px;
               margin: 0;
             }
-            .header {
+            .report-title {
+              text-align: center;
+              margin: 20px 0;
+              font-size: 24px;
+              font-weight: bold;
+              color: ${pdfConfig.headerColor};
+            }
+            .report-meta {
               text-align: center;
               margin-bottom: 30px;
-              border-bottom: 3px solid #333;
-              padding-bottom: 20px;
-            }
-            .header h1 {
-              margin: 0 0 10px 0;
-              color: #333;
-              font-size: 28px;
-            }
-            .header p {
-              margin: 5px 0;
               color: #666;
               font-size: 14px;
             }
             .stats {
               display: grid;
-              grid-template-columns: repeat(4, 1fr);
-              gap: 20px;
+              grid-template-columns: repeat(5, 1fr);
+              gap: 15px;
               margin-bottom: 30px;
             }
             .stat-card {
@@ -343,8 +452,10 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>LISTE DES PAIEMENTS</h1>
+          ${generatePDFHeader(school, pdfConfig)}
+          
+          <div class="report-title">LISTE DES PAIEMENTS</div>
+          <div class="report-meta">
             <p>Rapport généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
             <p>Total de ${filteredPayments.length} paiement(s)</p>
           </div>
@@ -355,15 +466,19 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
               <div class="stat-value">${stats.total.toLocaleString()} FCFA</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Payé</div>
+              <div class="stat-label">Total Payé</div>
               <div class="stat-value green">${stats.paid.toLocaleString()} FCFA</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">En Attente</div>
+              <div class="stat-label">Total Restant</div>
+              <div class="stat-value orange">${stats.remaining.toLocaleString()} FCFA</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Restant (Attente)</div>
               <div class="stat-value orange">${stats.pending.toLocaleString()} FCFA</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">En Retard</div>
+              <div class="stat-label">Restant (Retard)</div>
               <div class="stat-value red">${stats.overdue.toLocaleString()} FCFA</div>
             </div>
           </div>
@@ -374,20 +489,28 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
                 <th>Date</th>
                 <th>Étudiant</th>
                 <th>Classe</th>
-                <th style="text-align: right;">Montant</th>
+                <th>Type de frais</th>
+                <th style="text-align: right;">Total</th>
                 <th style="text-align: right;">Payé</th>
+                <th style="text-align: right;">Restant</th>
                 <th>Statut</th>
                 <th>Méthode</th>
               </tr>
             </thead>
             <tbody>
-              ${filteredPayments.map(p => `
+              ${filteredPayments.map(p => {
+                const remaining = Number(p.amount) - Number(p.amountPaid)
+                return `
                 <tr>
-                  <td>${new Date(p.dueDate).toLocaleDateString('fr-FR')}</td>
+                  <td>${p.paidAt ? new Date(p.paidAt).toLocaleDateString('fr-FR') : '-'}</td>
                   <td>${p.student.firstName} ${p.student.lastName}</td>
                   <td>${p.student.classe.name}</td>
-                  <td style="text-align: right;">${Number(p.amount).toLocaleString()} FCFA</td>
-                  <td style="text-align: right;">${Number(p.amountPaid).toLocaleString()} FCFA</td>
+                  <td>${p.feeStructure ? getFeeTypeName(p.feeStructure.type) : '-'}</td>
+                  <td style="text-align: right; font-weight: 500;">${Number(p.amount).toLocaleString()} FCFA</td>
+                  <td style="text-align: right; color: #10b981; font-weight: 500;">${Number(p.amountPaid).toLocaleString()} FCFA</td>
+                  <td style="text-align: right; font-weight: bold; color: ${remaining > 0 ? '#ef4444' : '#10b981'};">
+                    ${remaining > 0 ? remaining.toLocaleString() + ' FCFA' : '✓ Soldé'}
+                  </td>
                   <td>
                     <span class="badge badge-${p.status === 'PAID' ? 'paid' : p.status === 'PENDING' ? 'pending' : 'overdue'}">
                       ${p.status === 'PAID' ? 'Payé' : p.status === 'PENDING' ? 'En attente' : 'En retard'}
@@ -395,13 +518,11 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
                   </td>
                   <td>${p.paymentMethod || '-'}</td>
                 </tr>
-              `).join('')}
+              `}).join('')}
             </tbody>
           </table>
 
-          <div class="footer">
-            <p>Document confidentiel - Usage interne uniquement</p>
-          </div>
+          ${generatePDFFooter(pdfConfig.footerText, pdfConfig.showSignatures, school.stamp || undefined)}
 
           <script>
             window.onload = function() {
@@ -419,7 +540,7 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Stats rapides */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2 sm:pb-3">
             <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Total Attendu</CardTitle>
@@ -430,15 +551,23 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2 sm:pb-3">
-            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Payé</CardTitle>
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Total Payé</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-responsive-xl font-bold text-success">{stats.paid.toLocaleString()} FCFA</div>
           </CardContent>
         </Card>
+        <Card className="border-orange-200 dark:border-orange-800">
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Total Restant</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-responsive-xl font-bold text-orange-600">{stats.remaining.toLocaleString()} FCFA</div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="pb-2 sm:pb-3">
-            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">En Attente</CardTitle>
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Restant (Attente)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-responsive-xl font-bold text-chart-5">{stats.pending.toLocaleString()} FCFA</div>
@@ -446,7 +575,7 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2 sm:pb-3">
-            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">En Retard</CardTitle>
+            <CardTitle className="text-responsive-xs font-medium text-muted-foreground">Restant (Retard)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-responsive-xl font-bold text-red-600">{stats.overdue.toLocaleString()} FCFA</div>
@@ -533,20 +662,42 @@ export default function FinanceManager({ payments }: FinanceManagerProps) {
                 priority: "medium"
               },
               {
-                header: "Date d'échéance",
-                accessor: (payment) => new Date(payment.dueDate).toLocaleDateString('fr-FR'),
+                header: "Type de frais",
+                accessor: (payment) => payment.feeStructure ? getFeeTypeName(payment.feeStructure.type) : '-',
                 priority: "medium"
               },
               {
-                header: "Montant",
+                header: "Date de paiement",
+                accessor: (payment) => payment.paidAt ? new Date(payment.paidAt).toLocaleDateString('fr-FR') : '-',
+                priority: "medium"
+              },
+              {
+                header: "Montant Total",
                 accessor: (payment) => `${Number(payment.amount).toLocaleString()} FCFA`,
+                priority: "high",
+                className: "text-right font-medium"
+              },
+              {
+                header: "Montant Payé",
+                accessor: (payment) => (
+                  <span className="text-green-600 font-medium">
+                    {Number(payment.amountPaid).toLocaleString()} FCFA
+                  </span>
+                ),
                 priority: "high",
                 className: "text-right"
               },
               {
-                header: "Payé",
-                accessor: (payment) => `${Number(payment.amountPaid).toLocaleString()} FCFA`,
-                priority: "medium",
+                header: "Restant",
+                accessor: (payment) => {
+                  const remaining = Number(payment.amount) - Number(payment.amountPaid)
+                  return (
+                    <span className={`font-semibold ${remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {remaining > 0 ? `${remaining.toLocaleString()} FCFA` : '✓ Soldé'}
+                    </span>
+                  )
+                },
+                priority: "high",
                 className: "text-right"
               },
               {

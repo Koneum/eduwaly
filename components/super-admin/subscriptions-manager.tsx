@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatDistance } from "date-fns"
 import { fr } from "date-fns/locale"
-import { RefreshCw, Pause, Play, Trash2 } from "lucide-react"
+import { RefreshCw, Pause, Play, Trash2, Info, Settings, Eye, ArrowRightLeft } from "lucide-react"
 import { toast } from 'sonner'
+import { Textarea } from "@/components/ui/textarea"
 
 interface Plan {
   id: string
@@ -31,8 +32,22 @@ interface Subscription {
   status: string
   currentPeriodStart: Date
   currentPeriodEnd: Date
+  features?: string // JSON pour customisation Enterprise
   school: School
   plan: Plan
+}
+
+interface SchoolDetails {
+  name: string
+  email: string
+  phone: string | null
+  address: string | null
+  isActive: boolean
+  createdAt: Date
+  _count: {
+    students: number
+    enseignants: number
+  }
 }
 
 interface SubscriptionsManagerProps {
@@ -43,12 +58,14 @@ interface SubscriptionsManagerProps {
 export default function SubscriptionsManager({ initialSubscriptions, plans }: SubscriptionsManagerProps) {
   const [subscriptions] = useState<Subscription[]>(initialSubscriptions)
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null)
-  const [action, setAction] = useState<'renew' | 'suspend' | 'activate' | 'change_plan' | 'delete' | null>(null)
+  const [action, setAction] = useState<'renew' | 'suspend' | 'activate' | 'change_plan' | 'delete' | 'customize' | 'view_school' | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [schoolDetails, setSchoolDetails] = useState<SchoolDetails | null>(null)
   
   // Form state
   const [renewMonths, setRenewMonths] = useState('1')
   const [newPlanId, setNewPlanId] = useState('')
+  const [customFeatures, setCustomFeatures] = useState('')
 
   const stats = {
     active: subscriptions.filter(s => s.status === 'ACTIVE').length,
@@ -85,6 +102,8 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
           body.months = parseInt(renewMonths)
         } else if (action === 'change_plan') {
           body.planId = newPlanId
+        } else if (action === 'customize') {
+          body.features = customFeatures
         }
 
         const response = await fetch('/api/super-admin/subscriptions', {
@@ -115,11 +134,24 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
     }
   }
 
-  const openDialog = (sub: Subscription, actionType: typeof action) => {
+  const openDialog = async (sub: Subscription, actionType: typeof action) => {
     setSelectedSub(sub)
     setAction(actionType)
     if (actionType === 'change_plan') {
       setNewPlanId(sub.plan.id)
+    } else if (actionType === 'customize') {
+      setCustomFeatures(sub.features || '')
+    } else if (actionType === 'view_school') {
+      // Charger les détails de l'école
+      try {
+        const response = await fetch(`/api/schools/${sub.school.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setSchoolDetails(data)
+        }
+      } catch (error) {
+        toast.error('Erreur lors du chargement des détails')
+      }
     }
   }
 
@@ -128,6 +160,8 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
     setAction(null)
     setRenewMonths('1')
     setNewPlanId('')
+    setCustomFeatures('')
+    setSchoolDetails(null)
   }
 
   return (
@@ -226,7 +260,31 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
             ]}
             keyExtractor={(sub) => sub.id}
             actions={(sub) => (
-              <div className="flex gap-2">
+              <div className="flex gap-1 flex-wrap">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openDialog(sub, 'view_school')}
+                  title="Voir infos école"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openDialog(sub, 'customize')}
+                  title="Customiser plan"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openDialog(sub, 'change_plan')}
+                  title="Changer de plan"
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"
@@ -279,6 +337,8 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
               {action === 'activate' && 'Activer l\'abonnement'}
               {action === 'change_plan' && 'Changer de plan'}
               {action === 'delete' && 'Supprimer l\'abonnement'}
+              {action === 'customize' && 'Customiser le plan'}
+              {action === 'view_school' && 'Informations de l\'école'}
             </DialogTitle>
             <DialogDescription className="text-responsive-sm">
               {selectedSub && `École: ${selectedSub.school.name}`}
@@ -336,20 +396,89 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 Attention : Cette action est irréversible. Êtes-vous sûr de vouloir supprimer cet abonnement ?
               </p>
             )}
+
+            {action === 'customize' && (
+              <div className="space-y-2">
+                <Label htmlFor="features" className="text-responsive-sm">
+                  Fonctionnalités personnalisées (JSON)
+                </Label>
+                <Textarea
+                  id="features"
+                  value={customFeatures}
+                  onChange={(e) => setCustomFeatures(e.target.value)}
+                  placeholder='{"maxStudents": 5000, "customFeature": true}'
+                  rows={6}
+                  className="text-responsive-sm font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Format JSON pour les fonctionnalités Enterprise personnalisées
+                </p>
+              </div>
+            )}
+
+            {action === 'view_school' && schoolDetails && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Nom</p>
+                    <p className="text-sm font-semibold">{schoolDetails.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Email</p>
+                    <p className="text-sm">{schoolDetails.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Téléphone</p>
+                    <p className="text-sm">{schoolDetails.phone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Adresse</p>
+                    <p className="text-sm">{schoolDetails.address || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Statut</p>
+                    <Badge variant={schoolDetails.isActive ? 'default' : 'destructive'}>
+                      {schoolDetails.isActive ? 'Actif' : 'Inactif'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Créé le</p>
+                    <p className="text-sm">
+                      {new Date(schoolDetails.createdAt).toLocaleDateString('fr-FR')}
+                    </p>
+                  </div>
+                </div>
+                <div className="border-t pt-4">
+                  <p className="text-sm font-medium mb-2">Statistiques</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{schoolDetails._count.students} étudiants</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{schoolDetails._count.enseignants} enseignants</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button variant="outline" onClick={closeDialog} className="w-full sm:w-auto">
-              Annuler
+              {action === 'view_school' ? 'Fermer' : 'Annuler'}
             </Button>
-            <Button 
-              onClick={handleAction} 
-              disabled={isLoading}
-              variant={action === 'delete' ? 'destructive' : 'default'}
-              className="w-full sm:w-auto"
-            >
-              {isLoading ? 'Traitement...' : 'Confirmer'}
-            </Button>
+            {action !== 'view_school' && (
+              <Button 
+                onClick={handleAction} 
+                disabled={isLoading}
+                variant={action === 'delete' ? 'destructive' : 'default'}
+                className="w-full sm:w-auto"
+              >
+                {isLoading ? 'Traitement...' : 'Confirmer'}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

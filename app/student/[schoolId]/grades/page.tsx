@@ -96,26 +96,26 @@ export default async function StudentGradesPage({
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Notes Totales</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{student.evaluations.length}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Notes Totales</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{student.evaluations.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Modules</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{moduleAverages.length}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Modules</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{moduleAverages.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Niveau</p>
-              <p className="text-3xl font-bold text-foreground mt-2">{student.niveau}</p>
+              <p className="text-responsive-xs font-medium text-muted-foreground">Niveau</p>
+              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{student.niveau}</p>
             </div>
           </CardContent>
         </Card>
@@ -124,8 +124,8 @@ export default async function StudentGradesPage({
       {/* Moyennes par module */}
       <Card>
         <CardHeader>
-          <CardTitle>Moyennes par Module</CardTitle>
-          <CardDescription>Vos résultats détaillés par matière</CardDescription>
+          <CardTitle className="text-responsive-lg">Moyennes par Module</CardTitle>
+          <CardDescription className="text-responsive-sm">Vos résultats détaillés par matière</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -136,22 +136,24 @@ export default async function StudentGradesPage({
               
               return (
                 <div key={module.moduleId} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <BookOpen className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium text-foreground">{module.moduleName}</p>
-                        <p className="text-sm text-muted-foreground">{module.noteCount} notes</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <BookOpen className="icon-responsive text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-responsive-sm sm:text-responsive-base font-medium text-foreground truncate">{module.moduleName}</p>
+                        <p className="text-responsive-xs text-muted-foreground">{module.noteCount} notes</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-2xl font-bold ${isGood ? 'text-green-600' : 'text-orange-600'}`}>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-responsive-lg sm:text-responsive-xl font-bold ${
+                        isGood ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'
+                      }`}>
                         {module.average}/20
                       </span>
                       {isGood ? (
-                        <TrendingUp className="h-5 w-5 text-green-600" />
+                        <TrendingUp className="icon-responsive text-green-600 dark:text-green-400" />
                       ) : (
-                        <TrendingDown className="h-5 w-5 text-orange-600" />
+                        <TrendingDown className="icon-responsive text-orange-600 dark:text-orange-400" />
                       )}
                     </div>
                   </div>
@@ -166,23 +168,23 @@ export default async function StudentGradesPage({
       {/* Dernières notes */}
       <Card>
         <CardHeader>
-          <CardTitle>Dernières Notes</CardTitle>
-          <CardDescription>Vos évaluations récentes</CardDescription>
+          <CardTitle className="text-responsive-lg">Dernières Notes</CardTitle>
+          <CardDescription className="text-responsive-sm">Vos évaluations récentes</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {student.evaluations.slice(0, 10).map((evaluation) => (
-              <div key={evaluation.id} className="p-4 border border-border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-foreground">{evaluation.module.nom}</h3>
-                      <Badge variant="outline">{typeLabels[evaluation.type] || evaluation.type}</Badge>
+              <div key={evaluation.id} className="p-3 sm:p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className="text-responsive-sm sm:text-responsive-base font-semibold text-foreground">{evaluation.module.nom}</h3>
+                      <Badge variant="outline" className="text-responsive-xs">{typeLabels[evaluation.type] || evaluation.type}</Badge>
                       {evaluation.coefficient > 1 && (
-                        <Badge variant="secondary">Coef. {evaluation.coefficient}</Badge>
+                        <Badge variant="secondary" className="text-responsive-xs">Coef. {evaluation.coefficient}</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">
                       {new Date(evaluation.date).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'long',
@@ -190,19 +192,19 @@ export default async function StudentGradesPage({
                       })}
                     </p>
                     {evaluation.comment && (
-                      <p className="text-sm text-muted-foreground mt-2 italic">&quot;{evaluation.comment}&quot;</p>
+                      <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground mt-2 italic">&quot;{evaluation.comment}&quot;</p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className={`text-3xl font-bold ${
-                      evaluation.note >= 12 ? 'text-green-600' : 
-                      evaluation.note >= 10 ? 'text-orange-600' : 
-                      'text-red-600'
+                  <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2">
+                    <p className={`text-responsive-xl sm:text-responsive-2xl font-bold ${
+                      evaluation.note >= 12 ? 'text-green-600 dark:text-green-400' : 
+                      evaluation.note >= 10 ? 'text-orange-600 dark:text-orange-400' : 
+                      'text-red-600 dark:text-red-400'
                     }`}>
                       {evaluation.note}/20
                     </p>
                     {evaluation.validated && (
-                      <Badge className="bg-green-100 text-green-700 mt-2">Validée</Badge>
+                      <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-responsive-xs">Validée</Badge>
                     )}
                   </div>
                 </div>

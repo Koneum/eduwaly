@@ -42,6 +42,7 @@ interface Student {
     amountDue: number
     amountPaid: number
     dueDate: Date
+    feeStructureId: string
   }>
   scholarships: Array<{
     id: string
@@ -86,6 +87,20 @@ interface StudentsManagerProps {
   rooms?: Room[]
 }
 
+// Fonction pour convertir FeeType en nom lisible
+const getFeeTypeName = (type: string): string => {
+  const feeTypeNames: Record<string, string> = {
+    'REGISTRATION': "Frais d'inscription",
+    'TUITION': 'Frais de scolarité',
+    'EXAM': "Frais d'examen",
+    'LIBRARY': 'Frais de bibliothèque',
+    'SPORT': 'Frais sportifs',
+    'TRANSPORT': 'Frais de transport',
+    'OTHER': 'Autres frais'
+  }
+  return feeTypeNames[type] || type
+}
+
 export default function StudentsManager({ students, schoolId, schoolType, filieres, feeStructures, rooms = [] }: StudentsManagerProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
@@ -94,6 +109,9 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  
+  // Debug: Afficher tous les frais reçus
+  console.log('StudentsManager - feeStructures:', feeStructures.map(f => ({ id: f.id, name: f.name, type: f.type, amount: f.amount })))
   
   // Dialogs state
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
@@ -154,6 +172,41 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
 
+  // Fonction pour vérifier si un frais est complètement payé
+  const isFeeFullyPaid = (student: Student, feeId: string): boolean => {
+    const totalPaidForFee = student.payments
+      .filter(p => p.feeStructureId === feeId)
+      .reduce((sum, p) => sum + p.amountPaid, 0)
+    
+    const fee = feeStructures.find(f => f.id === feeId)
+    if (!fee) return false
+    
+    let feeAmount = fee.amount
+    const scholarship = student.scholarships?.[0]
+    
+    if (scholarship) {
+      if (scholarship.percentage) {
+        feeAmount = feeAmount - (feeAmount * (scholarship.percentage / 100))
+      } else if (scholarship.amount) {
+        feeAmount = Math.max(0, feeAmount - scholarship.amount)
+      }
+    }
+    
+    return totalPaidForFee >= feeAmount
+  }
+
+  // Fonction pour vérifier si tous les frais sont payés
+  const areAllFeesPaid = (student: Student): boolean => {
+    const applicableFees = feeStructures.filter(fee =>
+      (!fee.niveau || fee.niveau === student.niveau) &&
+      (!fee.filiereId || fee.filiereId === student.filiere?.id)
+    )
+    
+    if (applicableFees.length === 0) return true
+    
+    return applicableFees.every(fee => isFeeFullyPaid(student, fee.id))
+  }
+
   // Debug: afficher le nombre d'étudiants
   console.log('StudentsManager - Total students:', students.length)
   console.log('StudentsManager - First student:', students[0])
@@ -191,41 +244,61 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
     )
   })
 
-  const getPaymentAmount = (student: Student) => {
-    const latestPayment = student.payments[0]
+  // Fonction détaillée pour obtenir toutes les informations de paiement
+  const getDetailedPaymentInfo = (student: Student) => {
     const scholarship = student.scholarships?.[0]
     
-    if (!latestPayment) {
-      const applicableFees = feeStructures.filter(fee => 
-        (!fee.niveau || fee.niveau === student.niveau) &&
-        (!fee.filiereId || fee.filiereId === student.filiere?.id)
-      )
-      
-      if (applicableFees.length === 0) return { amount: '-', hasBourse: false }
-      
-      let amount = applicableFees[0].amount
-      const originalAmount = amount
-      
-      if (scholarship) {
-        if (scholarship.percentage) {
-          amount = amount - (amount * (scholarship.percentage / 100))
-        } else if (scholarship.amount) {
-          amount = Math.max(0, amount - scholarship.amount)
-        }
-      }
-      
-      return {
-        amount: `${amount.toLocaleString()} FCFA`,
-        hasBourse: scholarship && amount !== originalAmount
+    // Récupérer TOUS les frais applicables (inscription + scolarité)
+    const applicableFees = feeStructures.filter(fee => 
+      (!fee.niveau || fee.niveau === student.niveau) &&
+      (!fee.filiereId || fee.filiereId === student.filiere?.id)
+    )
+    
+    if (applicableFees.length === 0) {
+      return { 
+        totalBeforeScholarship: 0,
+        scholarshipDiscount: 0,
+        totalAmount: 0,
+        totalPaid: 0,
+        remaining: 0,
+        hasBourse: false,
+        details: '-'
       }
     }
     
-    const remaining = latestPayment.amountDue - latestPayment.amountPaid
-    if (remaining <= 0) return { amount: '-', hasBourse: false }
+    // 1. Total des frais (avant bourse)
+    const totalBeforeScholarship = applicableFees.reduce((sum, fee) => sum + fee.amount, 0)
+    
+    // 2. Réduction de la bourse
+    let scholarshipDiscount = 0
+    if (scholarship) {
+      if (scholarship.percentage) {
+        scholarshipDiscount = totalBeforeScholarship * (scholarship.percentage / 100)
+      } else if (scholarship.amount) {
+        scholarshipDiscount = Math.min(scholarship.amount, totalBeforeScholarship)
+      }
+    }
+    
+    // 3. Total après bourse
+    const totalAmount = Math.max(0, totalBeforeScholarship - scholarshipDiscount)
+    
+    // 4. Total payé
+    const totalPaid = student.payments.reduce((sum, payment) => sum + payment.amountPaid, 0)
+    
+    // 5. Restant
+    const remaining = Math.max(0, totalAmount - totalPaid)
+    
+    // Générer les détails des frais
+    const feeNames = applicableFees.map(f => getFeeTypeName(f.type)).join(' + ')
     
     return {
-      amount: `${remaining.toLocaleString()} FCFA`,
-      hasBourse: !!scholarship
+      totalBeforeScholarship,
+      scholarshipDiscount,
+      totalAmount,
+      totalPaid,
+      remaining,
+      hasBourse: !!scholarship,
+      details: feeNames
     }
   }
 
@@ -665,21 +738,53 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
             priority: "low"
           },
           {
-            header: "Montant à payer",
+            header: "Total à Payer",
             accessor: (student) => {
-              const payment = getPaymentAmount(student)
+              const info = getDetailedPaymentInfo(student)
+              if (info.totalAmount === 0) return '-'
               return (
-                <div className="flex items-center gap-2">
-                  <span>{payment.amount}</span>
-                  {payment.hasBourse && (
-                    <Badge variant="outline" className="bg-green-50 text-success border-green-200 text-xs">
-                      🎓
-                    </Badge>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium">{info.totalAmount.toLocaleString()} FCFA</span>
+                  {info.hasBourse && (
+                    <div className="flex items-center gap-1 text-xs text-green-600">
+                      <Badge variant="outline" className="bg-green-50 dark:bg-green-900/30 text-success border-green-200 dark:border-green-800 text-xs">
+                        🎓 -{info.scholarshipDiscount.toLocaleString()} FCFA
+                      </Badge>
+                    </div>
                   )}
                 </div>
               )
             },
-            priority: "medium"
+            priority: "medium",
+            className: "text-right"
+          },
+          {
+            header: "Montant Payé",
+            accessor: (student) => {
+              const info = getDetailedPaymentInfo(student)
+              if (info.totalAmount === 0) return '-'
+              return (
+                <span className="font-medium text-green-600">
+                  {info.totalPaid.toLocaleString()} FCFA
+                </span>
+              )
+            },
+            priority: "high",
+            className: "text-right"
+          },
+          {
+            header: "Restant",
+            accessor: (student) => {
+              const info = getDetailedPaymentInfo(student)
+              if (info.totalAmount === 0) return '-'
+              return (
+                <span className={`font-semibold ${info.remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {info.remaining > 0 ? `${info.remaining.toLocaleString()} FCFA` : '✓ Soldé'}
+                </span>
+              )
+            },
+            priority: "high",
+            className: "text-right"
           },
           {
             header: "Statut",
@@ -704,8 +809,13 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
               <PermissionMenuItem category="students" action="view" onClick={() => handleAction(student, 'view')}>
                 Voir profil
               </PermissionMenuItem>
-              <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'payment')}>
-                Enregistrer paiement
+              <PermissionMenuItem 
+                category="finance" 
+                action="create" 
+                onClick={() => handleAction(student, 'payment')}
+                disabled={areAllFeesPaid(student)}
+              >
+                {areAllFeesPaid(student) ? '✓ Tous les frais payés' : 'Enregistrer paiement'}
               </PermissionMenuItem>
               <PermissionMenuItem category="finance" action="create" onClick={() => handleAction(student, 'scholarship')}>
                 Appliquer bourse
@@ -1042,9 +1152,14 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       // Si le frais a une filière spécifique, elle doit correspondre à celle de l'étudiant
                       if (fee.filiereId && fee.filiereId !== selectedStudent.filiere?.id) return false
                       
+                      // Exclure les frais déjà complètement payés
+                      if (isFeeFullyPaid(selectedStudent, fee.id)) return false
+                      
                       return true
                     })
                     .map(fee => {
+                      // Debug: Afficher les informations du frais
+                      console.log('Fee:', { id: fee.id, name: fee.name, type: fee.type, typeName: getFeeTypeName(fee.type), amount: fee.amount })
                       // Calculer le montant après bourse pour l'affichage
                       let displayAmount = fee.amount
                       const originalAmount = fee.amount
@@ -1060,7 +1175,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                       
                       return (
                         <SelectItem key={fee.id} value={fee.id} className="text-responsive-sm">
-                          {fee.name} - {displayAmount.toLocaleString()} FCFA
+                          {getFeeTypeName(fee.type)} - {displayAmount.toLocaleString()} FCFA
                           {scholarship && displayAmount !== originalAmount && (
                             <span className="text-xs text-muted-foreground line-through ml-2">
                               {originalAmount.toLocaleString()}

@@ -296,19 +296,19 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
 
   const renderHomeworkCard = (hw: Homework) => (
     <Card key={hw.id}>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              {hw.title}
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-3">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-responsive-base sm:text-responsive-lg">
+              <span className="truncate">{hw.title}</span>
               {hw.assignmentType === 'GROUP' && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-[10px] sm:text-responsive-xs shrink-0">
                   <Users className="h-3 w-3 mr-1" />
                   Groupe
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-responsive-xs sm:text-responsive-sm mt-1">
               {schoolType === 'UNIVERSITY' 
                 ? `${hw.module.nom}${hw.module.filiere ? ` - ${hw.module.filiere.nom}` : ''}`
                 : `${hw.module.filiere ? `${hw.module.filiere.nom} - ` : ''}${hw.module.nom}`
@@ -316,31 +316,33 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
               {hw.workGroup && ` - ${hw.workGroup.name}`}
             </CardDescription>
           </div>
-          {getStatusBadge(hw)}
+          <div className="shrink-0">
+            {getStatusBadge(hw)}
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">{hw.description}</p>
-          <div className="flex items-center gap-4 text-sm">
+          <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground line-clamp-2">{hw.description}</p>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-responsive-xs sm:text-responsive-sm">
             <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span className="whitespace-nowrap">
                 {format(new Date(hw.dueDate), 'dd MMM yyyy', { locale: fr })}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              <span>{hw.submissions.length} soumissions</span>
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span className="whitespace-nowrap">{hw.submissions.length} soumissions</span>
             </div>
             {hw.fileUrl && (
-              <div className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
+              <div className="flex items-center gap-1 min-w-0">
+                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <a
                   href={hw.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--link)] hover:underline hover:text-[var(--link-hover)]"
+                  className="text-primary hover:underline truncate"
                 >
                   {hw.fileName}
                 </a>
@@ -353,53 +355,57 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
   )
 
   if (loading) {
-    return <div>Chargement...</div>
+    return <div className="p-6 sm:p-8 text-center text-responsive-sm">Chargement...</div>
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Gestion des Devoirs</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowGroupDialog(true)}>
-            <Users className="h-4 w-4 mr-2" />
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-responsive-xl sm:text-responsive-2xl font-bold">Gestion des Devoirs</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => setShowGroupDialog(true)} className="w-full sm:w-auto text-responsive-xs sm:text-responsive-sm">
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             Nouveau Groupe
           </Button>
-          <Button onClick={() => setShowDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setShowDialog(true)} className="w-full sm:w-auto text-responsive-xs sm:text-responsive-sm">
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
             Nouveau Devoir
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="sent" className="w-full">
-        <TabsList>
-          <TabsTrigger value="sent">
-            <Send className="h-4 w-4 mr-2" />
-            Devoirs Créés ({homework.length})
+        <TabsList className="w-full grid grid-cols-2">
+          <TabsTrigger value="sent" className="text-responsive-xs sm:text-responsive-sm">
+            <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Devoirs Créés</span>
+            <span className="sm:hidden">Créés</span>
+            <span className="ml-1">({homework.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="received">
-            <Inbox className="h-4 w-4 mr-2" />
-            Devoirs Reçus ({receivedHomework.length})
+          <TabsTrigger value="received" className="text-responsive-xs sm:text-responsive-sm">
+            <Inbox className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Devoirs Reçus</span>
+            <span className="sm:hidden">Reçus</span>
+            <span className="ml-1">({receivedHomework.length})</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sent" className="space-y-4">
+        <TabsContent value="sent" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
           {homework.map(renderHomeworkCard)}
           {homework.length === 0 && (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
+              <CardContent className="p-6 sm:p-8 text-center text-responsive-sm text-muted-foreground">
                 Aucun devoir créé. Cliquez sur &quot;Nouveau Devoir&quot; pour commencer.
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="received" className="space-y-4">
+        <TabsContent value="received" className="space-y-3 sm:space-y-4 mt-3 sm:mt-4">
           {receivedHomework.map(renderHomeworkCard)}
           {receivedHomework.length === 0 && (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
+              <CardContent className="p-6 sm:p-8 text-center text-responsive-sm text-muted-foreground">
                 Aucun devoir reçu de groupes de travail.
               </CardContent>
             </Card>
@@ -409,15 +415,15 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
 
       {/* Dialog Nouveau Devoir */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
-          <DialogHeader>
-            <DialogTitle className="text-responsive-lg">Créer un Devoir</DialogTitle>
-            <DialogDescription className="text-responsive-sm">
+        <DialogContent className="max-w-[98vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto bg-card p-0 gap-0">
+          <DialogHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3 border-b sticky top-0 bg-card z-10">
+            <DialogTitle className="text-responsive-base sm:text-responsive-lg">Créer un Devoir</DialogTitle>
+            <DialogDescription className="text-responsive-xs sm:text-responsive-sm">
               Assignez un devoir {schoolType === 'UNIVERSITY' ? 'par module' : 'par matière'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
             <div>
               <Label className="text-responsive-sm">
                 {schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'} *
@@ -540,7 +546,15 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             <div>
               <Label className="text-responsive-sm">Fichier (optionnel)</Label>
               <FileUpload
-                onUpload={(files) => setUploadedFile(files[0])}
+                onUpload={(files) => {
+                  if (files && files.length > 0) {
+                    setUploadedFile(files[0])
+                    toast({
+                      title: 'Fichier ajouté',
+                      description: files[0].name,
+                    })
+                  }
+                }}
                 onError={(error) => {
                   toast({
                     title: 'Erreur',
@@ -552,22 +566,36 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
                 folder="homework"
                 multiple={false}
               />
+              {uploadedFile && (
+                <div className="mt-2 flex items-center gap-2 text-responsive-xs text-muted-foreground">
+                  <FileText className="h-4 w-4" />
+                  <span className="truncate">{uploadedFile.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadedFile(null)}
+                    className="h-6 w-6 p-0"
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+          <DialogFooter className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 border-t gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setShowDialog(false)}
               disabled={isSubmitting}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-responsive-sm"
             >
               Annuler
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !title || !selectedModule || !dueDate}
-              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto"
+              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto text-responsive-sm"
             >
               {isSubmitting ? 'Création...' : 'Créer le Devoir'}
             </Button>
@@ -577,15 +605,15 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
 
       {/* Dialog Nouveau Groupe */}
       <Dialog open={showGroupDialog} onOpenChange={setShowGroupDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto bg-card">
-          <DialogHeader>
-            <DialogTitle className="text-responsive-lg">Créer un Groupe de Travail</DialogTitle>
-            <DialogDescription className="text-responsive-sm">
+        <DialogContent className="max-w-[98vw] sm:max-w-md max-h-[95vh] overflow-y-auto bg-card p-0 gap-0">
+          <DialogHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3 border-b sticky top-0 bg-card z-10">
+            <DialogTitle className="text-responsive-base sm:text-responsive-lg">Créer un Groupe de Travail</DialogTitle>
+            <DialogDescription className="text-responsive-xs sm:text-responsive-sm">
               Les étudiants pourront également créer leurs propres groupes
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
             <div>
               <Label htmlFor="groupName" className="text-responsive-sm">Nom du groupe *</Label>
               <Input
@@ -636,18 +664,18 @@ export function HomeworkManagerV2({ modules, schoolType }: HomeworkManagerV2Prop
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
+          <DialogFooter className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 border-t gap-2 sm:gap-0 flex-col sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setShowGroupDialog(false)}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-responsive-sm"
             >
               Annuler
             </Button>
             <Button
               onClick={handleCreateGroup}
               disabled={!groupName}
-              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto"
+              className="bg-primary hover:bg-primary hover:bg-[#E6B000] w-full sm:w-auto text-responsive-sm"
             >
               Créer le Groupe
             </Button>

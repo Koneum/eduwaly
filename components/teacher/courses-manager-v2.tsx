@@ -42,6 +42,29 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [modulesDocCount, setModulesDocCount] = useState<Record<string, number>>({})
+
+  // Charger le nombre de documents pour chaque module
+  useEffect(() => {
+    const loadDocumentCounts = async () => {
+      const counts: Record<string, number> = {}
+      for (const mod of modules) {
+        try {
+          const response = await fetch(`/api/documents?moduleId=${mod.id}`)
+          if (response.ok) {
+            const data = await response.json()
+            counts[mod.id] = data.length
+          }
+        } catch (error) {
+          console.error('Erreur chargement compteur:', error)
+        }
+      }
+      setModulesDocCount(counts)
+    }
+    if (modules.length > 0) {
+      loadDocumentCounts()
+    }
+  }, [modules])
 
   const handleManageDocuments = async (mod: Module) => {
     setSelectedModule(mod)
@@ -91,6 +114,12 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
       
       toast.success(`${files.length} document(s) ajouté(s) avec succès`)
       await loadDocuments(selectedModule.id)
+      
+      // Mettre à jour le compteur
+      setModulesDocCount(prev => ({
+        ...prev,
+        [selectedModule.id]: (prev[selectedModule.id] || 0) + files.length
+      }))
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de l\'ajout des documents')
@@ -110,6 +139,14 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
       if (response.ok) {
         setDocuments(documents.filter(d => d.id !== docId))
         toast.success('Document supprimé')
+        
+        // Mettre à jour le compteur
+        if (selectedModule) {
+          setModulesDocCount(prev => ({
+            ...prev,
+            [selectedModule.id]: Math.max(0, (prev[selectedModule.id] || 0) - 1)
+          }))
+        }
       } else {
         throw new Error('Erreur lors de la suppression')
       }
@@ -127,51 +164,58 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Mes Cours</h1>
-          <p className="text-muted-foreground mt-2">Consultez vos cours et gérez les ressources pédagogiques</p>
+          <h1 className="text-responsive-xl sm:text-responsive-2xl font-bold text-foreground">Mes Cours</h1>
+          <p className="text-responsive-sm text-muted-foreground mt-1 sm:mt-2">Consultez vos cours et gérez les ressources pédagogiques</p>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {modules.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground">Aucun cours assigné pour le moment</p>
+          <div className="col-span-full text-center py-8 sm:py-12">
+            <p className="text-responsive-sm text-muted-foreground">Aucun cours assigné pour le moment</p>
           </div>
         ) : (
           modules.map((mod) => (
             <Card key={mod.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <BookOpen className="h-6 w-6 text-primary" />
+              <CardHeader className="p-3 sm:p-4 md:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="bg-primary/10 p-2 sm:p-3 rounded-lg shrink-0">
+                    <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{mod.nom}</CardTitle>
-                    <CardDescription>{mod.filiere?.nom || 'Sans filière'}</CardDescription>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-responsive-base sm:text-responsive-lg truncate">{mod.nom}</CardTitle>
+                    <CardDescription className="text-responsive-xs sm:text-responsive-sm truncate">{mod.filiere?.nom || 'Sans filière'}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
+              <CardContent className="p-3 sm:p-4 md:p-6 pt-0 space-y-2 sm:space-y-3">
+                <div className="flex items-center justify-between text-responsive-xs sm:text-responsive-sm">
                   <span className="text-muted-foreground">Type</span>
                   <span className="font-medium">{mod.type}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-responsive-xs sm:text-responsive-sm">
                   <span className="text-muted-foreground">Volume horaire</span>
                   <span className="font-medium">{mod.vh}h</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-responsive-xs sm:text-responsive-sm">
                   <span className="text-muted-foreground">Semestre</span>
                   <span className="font-medium">{mod.semestre}</span>
                 </div>
+                <div className="flex items-center justify-between text-responsive-xs sm:text-responsive-sm">
+                  <span className="text-muted-foreground">Documents</span>
+                  <span className="font-medium flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                    {modulesDocCount[mod.id] || 0}
+                  </span>
+                </div>
                 <Button 
                   variant="outline" 
-                  className="w-full mt-4"
+                  className="w-full mt-2 sm:mt-4 text-responsive-xs sm:text-responsive-sm"
                   onClick={() => handleManageDocuments(mod)}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                   Gérer les documents
                 </Button>
               </CardContent>
@@ -182,15 +226,15 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
 
       {/* Dialog Gérer Documents */}
       <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card text-black">
-          <DialogHeader>
-            <DialogTitle className="text-responsive-lg">Gérer les documents - {selectedModule?.nom}</DialogTitle>
-            <DialogDescription className="text-responsive-sm">
+        <DialogContent className="max-w-[98vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto bg-card text-black p-0 gap-0">
+          <DialogHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3 border-b sticky top-0 bg-card z-10">
+            <DialogTitle className="text-responsive-base sm:text-responsive-lg">Gérer les documents - {selectedModule?.nom}</DialogTitle>
+            <DialogDescription className="text-responsive-xs sm:text-responsive-sm">
               Ajoutez ou supprimez des documents pour ce cours
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-3 sm:space-y-4">
+          <div className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
             {/* Upload de fichiers */}
             <div>
               <Label className="text-responsive-sm">Ajouter des ressources pédagogiques</Label>
@@ -269,8 +313,8 @@ export default function CoursesManagerV2({ modules, schoolId }: CoursesManagerPr
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 flex-col sm:flex-row">
-            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)} className="w-full sm:w-auto">
+          <DialogFooter className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 border-t gap-2 sm:gap-0 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setIsManageDialogOpen(false)} className="w-full sm:w-auto text-responsive-sm">
               Fermer
             </Button>
           </DialogFooter>

@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { ReportCardGenerator } from '@/components/reports/ReportCardGenerator';
 import { CertificateGenerator } from '@/components/reports/CertificateGenerator';
 import { AdvancedReportsManager } from '@/components/reports/AdvancedReportsManager';
+import { checkFeatureAccess } from '@/lib/check-plan-limit';
+import { FeatureGate } from '@/components/feature-gate';
 
 interface PageProps {
   params: Promise<{ schoolId: string }>;
@@ -18,6 +20,9 @@ export default async function ReportsPage({ params }: PageProps) {
   if (!session?.user || user?.schoolId !== schoolId) {
     redirect('/unauthorized');
   }
+
+  // Vérifier si les rapports avancés sont disponibles
+  const hasAdvancedReports = await checkFeatureAccess(schoolId, 'advancedReports');
 
   // Récupérer les étudiants
   const students = await prisma.student.findMany({
@@ -62,7 +67,13 @@ export default async function ReportsPage({ params }: PageProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <AdvancedReportsManager filieres={filieresData} />
+        {hasAdvancedReports.allowed ? (
+          <AdvancedReportsManager filieres={filieresData} schoolId={schoolId} />
+        ) : (
+          <FeatureGate feature="advancedReports" requiredPlan="Basic">
+            <AdvancedReportsManager filieres={filieresData} schoolId={schoolId} />
+          </FeatureGate>
+        )}
       </div>
     </div>
   );

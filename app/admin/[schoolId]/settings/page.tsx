@@ -1,6 +1,8 @@
 import SchoolSettingsManager from "@/components/school-admin/school-settings-manager"
 import UsersManager from "@/components/school-admin/users-manager"
 import ProfileManager from "@/components/school-admin/profile-manager"
+import SchoolLogoUploader from "@/components/admin/school-logo-uploader"
+import SchoolStampUploader from "@/components/admin/school-stamp-uploader"
 import { ReportIssueButton } from "@/components/admin/ReportIssueButton"
 import prisma from "@/lib/prisma"
 import { requireAdminDashboardAccess } from "@/lib/auth-utils"
@@ -13,7 +15,15 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
   // Récupérer le type d'école
   const school = await prisma.school.findUnique({
     where: { id: schoolId },
-    select: { schoolType: true, name: true, email: true, phone: true, address: true }
+    select: { 
+      schoolType: true, 
+      name: true, 
+      email: true, 
+      phone: true, 
+      address: true,
+      logo: true,
+      stamp: true
+    }
   })
 
   if (!school) {
@@ -154,6 +164,20 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
         </TabsList>
 
         <TabsContent value="school" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <SchoolLogoUploader 
+              schoolId={schoolId}
+              currentLogo={school.logo}
+              schoolName={school.name}
+            />
+            
+            <SchoolStampUploader 
+              schoolId={schoolId}
+              currentStamp={school.stamp}
+              schoolName={school.name}
+            />
+          </div>
+          
           <SchoolSettingsManager 
             schoolId={schoolId} 
             schoolType={school.schoolType}

@@ -69,7 +69,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100 px-4">
+    <div className="min-h-screen py-5 flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100 px-4">
       <div className="max-w-md w-full">
         {/* Logo et titre */}
         <div className="text-center mb-8">

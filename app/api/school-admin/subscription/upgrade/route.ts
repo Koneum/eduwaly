@@ -25,9 +25,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    const { planName } = await req.json()
+    const body = await req.json()
+    const { planName, planId, schoolId } = body
 
-    if (!planName || !['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'].includes(planName)) {
+    // Accepter soit planName soit planId
+    if (!planName && !planId) {
+      return NextResponse.json({ error: 'planName ou planId requis' }, { status: 400 })
+    }
+
+    if (planName && !['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'].includes(planName)) {
       return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
@@ -53,33 +59,25 @@ export async function POST(req: NextRequest) {
         contactRequired: true,
       }, { status: 400 })
     }
-
-    // Pour STARTER, PROFESSIONAL et BUSINESS, créer un paiement VitePay
-    const price = PLAN_PRICES[planName as keyof typeof PLAN_PRICES]
     
-    // Créer ou récupérer le plan
-    let subscriptionPlan = await prisma.plan.findFirst({
-      where: { name: planName }
-    })
-    
-    if (!subscriptionPlan) {
-      subscriptionPlan = await prisma.plan.create({
-        data: {
-          name: planName,
-          description: planName === 'STARTER' ? 'Pour les petites écoles' : planName === 'PROFESSIONAL' ? 'Pour les écoles en croissance' : 'Pour les grandes institutions',
-          price,
-          interval: 'monthly',
-          maxStudents: planName === 'STARTER' ? 100 : planName === 'PROFESSIONAL' ? 500 : 2000,
-          maxTeachers: planName === 'STARTER' ? 10 : planName === 'PROFESSIONAL' ? 50 : 200,
-          features: JSON.stringify([
-            planName === 'STARTER' ? 'Gestion basique' : planName === 'PROFESSIONAL' ? 'Messagerie + Devoirs' : 'Paiements en ligne + API',
-            `${planName === 'STARTER' ? '100' : planName === 'PROFESSIONAL' ? '500' : '2000'} étudiants max`,
-            `${planName === 'STARTER' ? '10' : planName === 'PROFESSIONAL' ? '50' : '200'} enseignants max`
-          ]),
-          isActive: true,
-        }
+    // Récupérer le plan (par ID ou par nom)
+    let subscriptionPlan
+    if (planId) {
+      subscriptionPlan = await prisma.plan.findUnique({
+        where: { id: planId }
+      })
+    } else {
+      subscriptionPlan = await prisma.plan.findFirst({
+        where: { name: planName }
       })
     }
+    
+    if (!subscriptionPlan) {
+      return NextResponse.json({ error: 'Plan non trouvé' }, { status: 404 })
+    }
+
+    // Utiliser le prix du plan de la base de données
+    const price = Number(subscriptionPlan.price)
 
     // Créer le paiement VitePay
     const orderId = `SUB-${school.id}-${planName}-${Date.now()}`

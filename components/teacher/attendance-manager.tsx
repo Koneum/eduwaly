@@ -195,7 +195,8 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                   <SelectValue placeholder="Sélectionnez une filière" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
-                  {filieres.map((filiere: { id: string; nom: string }) => (
+                  <SelectItem value="all" className="text-responsive-sm">Toutes les filières</SelectItem>
+                  {filieres.filter((f: { id: string }) => f.id).map((filiere: { id: string; nom: string }) => (
                     <SelectItem key={filiere.id} value={filiere.id} className="text-responsive-sm">
                       {filiere.nom}
                     </SelectItem>
@@ -211,8 +212,9 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                   <SelectValue placeholder="Sélectionnez un module" />
                 </SelectTrigger>
                 <SelectContent className="bg-card">
+                  <SelectItem value="all" className="text-responsive-sm">Tous les modules</SelectItem>
                   {modules
-                    .filter((m) => !selectedFiliere || m.filiere.id === selectedFiliere)
+                    .filter((m) => m.id && (!selectedFiliere || selectedFiliere === 'all' || m.filiere.id === selectedFiliere))
                     .map((module) => (
                       <SelectItem key={module.id} value={module.id} className="text-responsive-sm">
                         {module.nom}
@@ -306,8 +308,8 @@ export function AttendanceManager({ modules }: AttendanceManagerProps) {
                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg gap-3 sm:gap-0"
                   >
                     <div>
-                      <p className="font-medium text-responsive-sm">{student.user.name}</p>
-                      <p className="text-responsive-xs text-muted-foreground">{student.user.email}</p>
+                      <p className="font-medium text-responsive-sm">{student.user?.name || 'Étudiant'}</p>
+                      <p className="text-responsive-xs text-muted-foreground">{student.user?.email || 'N/A'}</p>
                     </div>
 
                     <div className="flex items-center gap-2">

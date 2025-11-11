@@ -143,3 +143,91 @@ export async function sendEnrollmentCredentials(
     htmlContent
   })
 }
+
+/**
+ * Envoie les credentials à un membre du personnel
+ */
+export async function sendStaffCredentials(
+  staffName: string,
+  email: string,
+  password: string,
+  role: string,
+  schoolName: string
+): Promise<{ success: boolean; error?: string }> {
+  
+  const roleNames: Record<string, string> = {
+    'MANAGER': 'Gestionnaire',
+    'PERSONNEL': 'Personnel',
+    'ASSISTANT': 'Assistant',
+    'SECRETARY': 'Secrétaire'
+  }
+  
+  const roleName = roleNames[role] || role
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #4F46E5; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #f9f9f9; padding: 30px; margin: 0; border-radius: 0 0 8px 8px; }
+    .credentials { background: white; padding: 20px; border-left: 4px solid #4F46E5; margin: 20px 0; border-radius: 4px; }
+    .button { display: inline-block; background: #4F46E5; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; }
+    .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+    .password { font-family: 'Courier New', monospace; font-size: 16px; font-weight: bold; color: #4F46E5; background: #f0f0f0; padding: 8px 12px; border-radius: 4px; display: inline-block; }
+    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0; font-size: 28px;">👋 Bienvenue dans l'équipe</h1>
+      <p style="margin: 10px 0 0 0; font-size: 16px;">${schoolName}</p>
+    </div>
+    
+    <div class="content">
+      <h2 style="color: #2C3E50;">Bonjour ${staffName},</h2>
+      
+      <p>Votre compte <strong>${roleName}</strong> a été créé avec succès. Voici vos identifiants de connexion :</p>
+      
+      <div class="credentials">
+        <p style="margin: 10px 0;"><strong>📧 Email :</strong> ${email}</p>
+        <p style="margin: 10px 0;"><strong>🔑 Mot de passe :</strong> <span class="password">${password}</span></p>
+        <p style="margin: 10px 0;"><strong>👤 Rôle :</strong> ${roleName}</p>
+      </div>
+      
+      <p>Vous pouvez maintenant vous connecter à la plateforme :</p>
+      
+      <div style="text-align: center;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sign-in" class="button">🚀 Se connecter</a>
+      </div>
+      
+      <div class="warning">
+        <p style="margin: 0; font-weight: bold; color: #856404;">⚠️ Important - Sécurité :</p>
+        <p style="margin: 5px 0 0 0; color: #856404;">
+          Pour votre sécurité, veuillez changer votre mot de passe dès votre première connexion.
+          Allez dans <strong>Paramètres → Sécurité → Changer le mot de passe</strong>.
+        </p>
+      </div>
+      
+      <p style="margin-top: 20px;">Si vous avez des questions, n'hésitez pas à contacter l'administrateur.</p>
+    </div>
+    
+    <div class="footer">
+      <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+      <p>&copy; ${new Date().getFullYear()} ${schoolName}. Tous droits réservés.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim()
+
+  return sendEmail({
+    to: email,
+    subject: `👋 Vos identifiants de connexion - ${schoolName}`,
+    htmlContent
+  })
+}

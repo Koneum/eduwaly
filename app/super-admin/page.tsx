@@ -2,11 +2,14 @@
 import { StatCard } from "@/components/stat-card"
 import { RecentActivity } from "@/components/recent-activity"
 import { RevenueChart } from "@/components/revenue-chart"
-import { School, Users, DollarSign, TrendingUp } from "lucide-react"
+import { School, Users, DollarSign, TrendingUp, Package, CreditCard, ArrowRight } from "lucide-react"
 import prisma from "@/lib/prisma"
 import { formatDistance } from "date-fns"
 import { fr } from "date-fns/locale"
 import { requireSuperAdmin } from "@/lib/auth-utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
 
@@ -153,6 +156,10 @@ export default async function SuperAdminDashboard() {
     }))
   ].slice(0, 4)
 
+  // Statistiques des plans
+  const totalPlans = await prisma.plan.count()
+  const activePlans = await prisma.plan.count({ where: { isActive: true } })
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
@@ -201,6 +208,84 @@ export default async function SuperAdminDashboard() {
         <div className="lg:col-span-3">
           <RecentActivity activities={activities} />
         </div>
+      </div>
+
+      {/* Liens Rapides */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Plans & Tarifs
+            </CardTitle>
+            <CardDescription>
+              Gérez les plans d&apos;abonnement et les tarifs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 mb-4">
+              <p className="text-sm text-muted-foreground">
+                {totalPlans} plan(s) total • {activePlans} actif(s)
+              </p>
+            </div>
+            <Link href="/super-admin/plans">
+              <Button className="w-full">
+                Gérer les Plans
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Abonnements
+            </CardTitle>
+            <CardDescription>
+              Gérez tous les abonnements des écoles
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 mb-4">
+              <p className="text-sm text-muted-foreground">
+                {activeSubscriptions.length} abonnement(s) actif(s)
+              </p>
+            </div>
+            <Link href="/super-admin/subscriptions">
+              <Button className="w-full" variant="outline">
+                Voir les Abonnements
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <School className="h-5 w-5" />
+              Écoles
+            </CardTitle>
+            <CardDescription>
+              Gérez toutes les écoles inscrites
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 mb-4">
+              <p className="text-sm text-muted-foreground">
+                {totalSchools} école(s) • {activeSchools} active(s)
+              </p>
+            </div>
+            <Link href="/super-admin/schools">
+              <Button className="w-full" variant="outline">
+                Voir les Écoles
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
