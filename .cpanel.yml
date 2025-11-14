@@ -1,7 +1,10 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/umdynastie/site/educwaly/
+    # 1. Installer les dépendances
     - /bin/bash -c "npm install"
+    # 2. Construire l'application (le résultat va dans .next/)
     - /bin/bash -c "npm run build"
-    # cPanel va exécuter ces commandes après chaque pull
+    # 3. Copier tous les fichiers nécessaires pour l'exécution dans le sous-dossier 'app'
+    # Copie les fichiers de build, les dépendances, le package.json, etc.
+    - /bin/bash -c "rsync -av --exclude 'app' . /home/umdynastie/educwaly/app"
