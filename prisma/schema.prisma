@@ -10,9 +10,10 @@ generator client {
   // Prisma utilise node_modules/.prisma/client par défaut
 }
 //provider = "postgresql"
+//directUrl  = env("DIRECT_URL")
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
