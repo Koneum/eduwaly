@@ -74,12 +74,14 @@ export function PlanSelector({ currentPlan: initialPlan }: PlanSelectorProps) {
 
       // Si paiement nécessaire, rediriger vers VitePay
       if (data.paymentUrl) {
+        console.log('URL retournée par l\'API:', data.paymentUrl)
         toast.success("Redirection vers la page de paiement...", {
           description: `Montant: ${data.amount.toLocaleString('fr-FR')} FCFA`,
         })
         
         // Rediriger vers VitePay
         setTimeout(() => {
+          console.log('Redirection vers:', data.paymentUrl)
           window.location.href = data.paymentUrl
         }, 1500)
       } else {

@@ -19,7 +19,7 @@ interface Plan {
   price: number
   interval: string
   description: string | null
-  features: string // JSON string
+  features: string | string[] | null // Peut être un JSON string, un tableau direct, ou null
   maxStudents: number
   maxTeachers: number
   isActive: boolean
@@ -27,11 +27,23 @@ interface Plan {
 }
 
 // Helper pour parser les features
-function parseFeatures(features: string): string[] {
+function parseFeatures(features: string | string[] | undefined | null): string[] {
+  // Si c'est undefined, null ou vide, retourner un tableau vide
+  if (!features) {
+    return []
+  }
+  
+  // Si c'est déjà un tableau, le retourner directement
+  if (Array.isArray(features)) {
+    return features
+  }
+  
+  // Si c'est une chaîne, essayer de parser du JSON
   try {
     const parsed = JSON.parse(features)
     return Array.isArray(parsed) ? parsed : []
   } catch {
+    // Si le parsing JSON échoue, traiter comme une chaîne séparée par des sauts de ligne
     return features.split('\n').filter(f => f.trim())
   }
 }
@@ -98,7 +110,7 @@ export default function PlansManager({ initialPlans }: PlansManagerProps) {
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
-    price: '',
+    price: 0,
     interval: 'MONTHLY',
     description: '',
     features: '',
@@ -112,7 +124,7 @@ export default function PlansManager({ initialPlans }: PlansManagerProps) {
     setFormData({
       name: '',
       displayName: '',
-      price: '',
+      price: 0,
       interval: 'MONTHLY',
       description: '',
       features: '',
@@ -134,7 +146,7 @@ export default function PlansManager({ initialPlans }: PlansManagerProps) {
     setFormData({
       name: plan.name,
       displayName: plan.displayName,
-      price: plan.price.toString(),
+      price: plan.price,
       interval: plan.interval,
       description: plan.description || '',
       features: parseFeatures(plan.features).join('\n'),
@@ -160,7 +172,7 @@ export default function PlansManager({ initialPlans }: PlansManagerProps) {
       const body = {
         name: formData.name,
         displayName: formData.displayName,
-        price: parseFloat(formData.price),
+        price: formData.price,
         interval: formData.interval,
         description: formData.description,
         features: featuresArray,
@@ -381,7 +393,7 @@ export default function PlansManager({ initialPlans }: PlansManagerProps) {
                   type="number"
                   placeholder="5000"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                 />
               </div>
 

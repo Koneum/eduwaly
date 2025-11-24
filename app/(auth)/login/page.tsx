@@ -167,10 +167,10 @@ export default function LoginPage() {
         <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
           <h3 className="font-semibold text-foreground mb-3">Comptes de test :</h3>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
+            {/* <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
               <span className="font-medium text-purple-900">Super Admin:</span>
               <code className="text-purple-700 text-xs">superadmin@saas.com</code>
-            </div>
+            </div> */}
             <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
               <span className="font-medium text-blue-900">Admin École:</span>
               <code className="text-[var(--link)] text-xs">admin@excellence-dakar.sn</code>

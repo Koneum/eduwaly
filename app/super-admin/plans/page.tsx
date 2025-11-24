@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma"
-import PlansManager from "@/components/super-admin/plans-manager"
-import ComparisonTableManager from "@/components/super-admin/comparison-table-manager"
+import PlansClientWrapper from "@/components/super-admin/plans-client-wrapper"
 import { requireSuperAdmin } from "@/lib/auth-utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -47,11 +46,11 @@ export default async function PlansPage() {
         </TabsList>
         
         <TabsContent value="plans" className="mt-6">
-          <PlansManager initialPlans={plans} />
+          <PlansClientWrapper initialPlans={plans} simplePlans={simplePlans} activeTab="plans" />
         </TabsContent>
         
         <TabsContent value="comparison" className="mt-6">
-          <ComparisonTableManager plans={simplePlans} />
+          <PlansClientWrapper initialPlans={plans} simplePlans={simplePlans} activeTab="comparison" />
         </TabsContent>
       </Tabs>
     </div>

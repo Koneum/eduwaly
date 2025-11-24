@@ -264,6 +264,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 <Button
                   size="sm"
                   variant="outline"
+                  className="btn-outline-adaptive"
                   onClick={() => openDialog(sub, 'view_school')}
                   title="Voir infos école"
                 >
@@ -272,6 +273,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 <Button
                   size="sm"
                   variant="outline"
+                  className="btn-outline-adaptive"
                   onClick={() => openDialog(sub, 'customize')}
                   title="Customiser plan"
                 >
@@ -280,6 +282,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 <Button
                   size="sm"
                   variant="outline"
+                  className="btn-outline-adaptive"
                   onClick={() => openDialog(sub, 'change_plan')}
                   title="Changer de plan"
                 >
@@ -288,6 +291,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 <Button
                   size="sm"
                   variant="outline"
+                  className="btn-outline-adaptive"
                   onClick={() => openDialog(sub, 'renew')}
                   title="Renouveler"
                 >
@@ -297,6 +301,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                   <Button
                     size="sm"
                     variant="outline"
+                    className="btn-outline-adaptive"
                     onClick={() => openDialog(sub, 'suspend')}
                     title="Suspendre"
                   >
@@ -306,6 +311,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                   <Button
                     size="sm"
                     variant="outline"
+                    className="btn-outline-adaptive"
                     onClick={() => openDialog(sub, 'activate')}
                     title="Activer"
                   >
@@ -315,6 +321,7 @@ export default function SubscriptionsManager({ initialSubscriptions, plans }: Su
                 <Button
                   size="sm"
                   variant="destructive"
+                  className="btn-destructive-adaptive"
                   onClick={() => openDialog(sub, 'delete')}
                   title="Supprimer"
                 >

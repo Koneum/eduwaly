@@ -5,7 +5,7 @@ import { getAuthUser } from '@/lib/auth-utils'
 export const dynamic = 'force-dynamic'
 
 // GET - Récupérer tous les plans
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const user = await getAuthUser()
     if (!user || user.role !== 'SUPER_ADMIN') {
@@ -16,7 +16,13 @@ export async function GET(_request: NextRequest) {
       orderBy: { price: 'asc' }
     })
 
-    return NextResponse.json({ plans })
+    // Parser le champ features pour chaque plan
+    const plansWithParsedFeatures = plans.map(plan => ({
+      ...plan,
+      features: plan.features ? JSON.parse(plan.features) : []
+    }))
+
+    return NextResponse.json({ plans: plansWithParsedFeatures })
   } catch (error) {
     console.error('Error fetching plans:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
@@ -52,7 +58,7 @@ export async function POST(request: NextRequest) {
         price,
         interval,
         description,
-        features,
+        features: Array.isArray(features) ? JSON.stringify(features) : features,
         maxStudents,
         maxTeachers,
         isActive,

@@ -141,7 +141,9 @@ export function ResponsiveTable<T = any>({
 
             {actions && (
               <div className="mt-4 pt-4 border-t" onClick={(e) => e.stopPropagation()}>
-                {actions(row)}
+                <div className="actions-container">
+                  {actions(row)}
+                </div>
               </div>
             )}
           </CardContent>
@@ -208,7 +210,9 @@ export function ResponsiveList<T extends Record<string, unknown>>({
 
           {actions && (
             <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-              {actions(row)}
+              <div className="actions-container">
+                {actions(row)}
+              </div>
             </div>
           )}
         </div>

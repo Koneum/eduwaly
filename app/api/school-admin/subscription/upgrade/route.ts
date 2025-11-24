@@ -73,10 +73,22 @@ export async function POST(req: NextRequest) {
 
     // Utiliser le prix du plan de la base de données
     const price = Number(subscriptionPlan.price)
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    // Utiliser NEXT_PUBLIC_BASE_URL en priorité pour la cohérence
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
+    // Debug: voir les valeurs
+    console.log('NODE_ENV:', process.env.NODE_ENV)
+    console.log('NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
+    console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL)
+    console.log('baseUrl final:', baseUrl)
+    
+    // Utiliser l'URL de base configurée
+    const finalBaseUrl = baseUrl
 
     // Rediriger vers la page checkout au lieu de créer directement le paiement
-    const checkoutUrl = `${baseUrl}/checkout?planId=${subscriptionPlan.id}&schoolId=${school.id}`
+    const checkoutUrl = `${finalBaseUrl}/checkout?planId=${subscriptionPlan.id}&schoolId=${school.id}`
+    
+    console.log('checkoutUrl:', checkoutUrl)
 
     // Retourner l'URL de checkout
     return NextResponse.json({

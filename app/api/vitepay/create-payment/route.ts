@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔥 Début création paiement VitePay')
+    
     const user = await getAuthUser()
     
     if (!user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
@@ -16,6 +18,15 @@ export async function POST(request: NextRequest) {
     }
 
     const { planId, schoolId } = await request.json()
+    console.log('📦 Données reçues:', { planId, schoolId })
+
+    // Vérifier la configuration VitePay
+    console.log('🔧 Config VitePay:', {
+      hasApiKey: !!process.env.VITEPAY_API_KEY,
+      hasApiSecret: !!process.env.VITEPAY_API_SECRET,
+      mode: process.env.VITEPAY_MODE,
+      baseUrl: process.env.VITEPAY_BASE_URL
+    })
 
     // Vérifier si les paiements en ligne sont disponibles dans le plan
     const featureCheck = await checkFeatureAccess(schoolId, 'onlinePayments')
@@ -45,7 +56,16 @@ export async function POST(request: NextRequest) {
 
     // Générer un ID de commande unique
     const orderId = `SUB-${school.id}-${Date.now()}`
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    // Utiliser NEXT_PUBLIC_BASE_URL en priorité pour la cohérence
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
+    
+    console.log('🌐 URLs de callback:', {
+      baseUrl,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+      returnUrl: `${baseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`,
+      callbackUrl: `${baseUrl}/api/vitepay/webhook`
+    })
 
     // Créer le paiement avec VitePay selon leur documentation
     const paymentResponse = await vitepay.createPayment({
@@ -59,6 +79,8 @@ export async function POST(request: NextRequest) {
       callbackUrl: `${baseUrl}/api/vitepay/webhook`,
       buyerIpAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
     })
+
+    console.log('✅ Réponse VitePay:', paymentResponse)
 
     // Note: Pour les paiements d'abonnement école, on pourrait créer un modèle séparé
     // Pour l'instant, on stocke l'orderId dans les métadonnées de la souscription

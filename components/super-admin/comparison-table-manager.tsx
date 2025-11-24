@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -35,14 +35,16 @@ interface ComparisonRow {
 
 interface ComparisonTableManagerProps {
   plans: Plan[]
+  onPlansUpdate?: () => void
 }
 
-export default function ComparisonTableManager({ plans }: ComparisonTableManagerProps) {
+export default function ComparisonTableManager({ plans: initialPlans, onPlansUpdate }: ComparisonTableManagerProps) {
   const [rows, setRows] = useState<ComparisonRow[]>([])
   const [selectedRow, setSelectedRow] = useState<ComparisonRow | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [mode, setMode] = useState<'create' | 'edit'>('create')
+  const [plans, setPlans] = useState<Plan[]>(initialPlans)
 
   // Fonction pour formater le prix
   const formatPrice = (price: number, interval: string) => {
@@ -72,9 +74,29 @@ export default function ComparisonTableManager({ plans }: ComparisonTableManager
     }
   }
 
+  // Charger les plans dynamiquement
+  const fetchPlans = useCallback(async () => {
+    try {
+      const response = await fetch('/api/super-admin/plans')
+      if (response.ok) {
+        const data = await response.json()
+        setPlans(data.plans)
+        onPlansUpdate?.()
+      }
+    } catch (error) {
+      console.error('Erreur chargement plans:', error)
+    }
+  }, [onPlansUpdate])
+
   useEffect(() => {
     fetchRows()
-  }, [])
+    fetchPlans()
+  }, [fetchPlans])
+
+  // Synchroniser les plans quand les props changent
+  useEffect(() => {
+    setPlans(initialPlans)
+  }, [initialPlans])
 
   const resetForm = () => {
     setFormData({
@@ -153,6 +175,7 @@ export default function ComparisonTableManager({ plans }: ComparisonTableManager
       setIsDialogOpen(false)
       resetForm()
       await fetchRows()
+      await fetchPlans()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde')
     } finally {
@@ -178,6 +201,7 @@ export default function ComparisonTableManager({ plans }: ComparisonTableManager
 
       toast.success('Ligne supprimée avec succès')
       await fetchRows()
+      await fetchPlans()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression')
     } finally {
@@ -299,7 +323,7 @@ export default function ComparisonTableManager({ plans }: ComparisonTableManager
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="Ex: Tarifs & Limites"
-                  className="h-10 sm:h-11"
+                  className="h-10 sm:h-11 bg-background"
                 />
               </div>
               <div className="space-y-2">

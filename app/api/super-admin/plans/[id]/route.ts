@@ -4,6 +4,40 @@ import { getAuthUser } from '@/lib/auth-utils'
 
 export const dynamic = 'force-dynamic'
 
+// GET - Récupérer un plan spécifique
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getAuthUser()
+    if (!user || user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    const plan = await prisma.plan.findUnique({
+      where: { id }
+    })
+
+    if (!plan) {
+      return NextResponse.json({ error: 'Plan non trouvé' }, { status: 404 })
+    }
+
+    // Parser le champ features
+    const planWithParsedFeatures = {
+      ...plan,
+      features: plan.features ? JSON.parse(plan.features) : []
+    }
+
+    return NextResponse.json({ plan: planWithParsedFeatures })
+  } catch (error) {
+    console.error('Error fetching plan:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
 // PUT - Mettre à jour un plan
 export async function PUT(
   request: NextRequest,
@@ -38,7 +72,7 @@ export async function PUT(
         price,
         interval,
         description,
-        features,
+        features: Array.isArray(features) ? JSON.stringify(features) : features,
         maxStudents,
         maxTeachers,
         isActive,
