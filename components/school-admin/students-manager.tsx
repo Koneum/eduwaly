@@ -85,6 +85,8 @@ interface StudentsManagerProps {
   filieres: Filiere[]
   feeStructures: FeeStructure[]
   rooms?: Room[]
+  schoolShortName?: string | null
+  schoolSubdomain?: string | null
 }
 
 // Fonction pour convertir FeeType en nom lisible
@@ -101,7 +103,7 @@ const getFeeTypeName = (type: string): string => {
   return feeTypeNames[type] || type
 }
 
-export default function StudentsManager({ students, schoolId, schoolType, filieres, feeStructures, rooms = [] }: StudentsManagerProps) {
+export default function StudentsManager({ students, schoolId, schoolType, filieres, feeStructures, rooms = [], schoolShortName, schoolSubdomain }: StudentsManagerProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -171,6 +173,14 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
   // Import state
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+
+  const schoolsBaseDomain = process.env.NEXT_PUBLIC_SCHOOLS_BASE_DOMAIN || 'educwaly.com'
+  const rawSigle = (schoolShortName || schoolSubdomain || '').trim()
+  const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const isLocal = defaultAppUrl.includes('localhost') || schoolsBaseDomain.includes('localhost')
+  const enrollmentUrl = !isLocal && rawSigle
+    ? `https://${rawSigle.toLowerCase()}.${schoolsBaseDomain}/enroll`
+    : `${defaultAppUrl}/enroll`
 
   // Fonction pour vérifier si un frais est complètement payé
   const isFeeFullyPaid = (student: Student, feeId: string): boolean => {
@@ -1012,7 +1022,7 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-responsive-sm text-muted-foreground">Code d&apos;inscription</Label>
+                  <Label className="text-responsive-sm text-muted-foreground">Numero Etudiant</Label>
                   <p className="font-mono text-responsive-xs">{selectedStudent.enrollmentId}</p>
                 </div>
               </div>
@@ -1507,6 +1517,12 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                 {selectedStudent?.filiere && (
                   <p>Filière: <span className="font-bold"><strong>{selectedStudent.filiere.nom}</strong></span></p>
                 )}
+                <p>
+                  Lien vers la page d&apos;enrôlement:&nbsp;
+                  <span className="font-mono text-responsive-xs break-all">
+                    {enrollmentUrl}
+                  </span>
+                </p>
               </div>
             </div>
 

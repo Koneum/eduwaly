@@ -15,9 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 interface ParentNavProps {
   schoolId: string
   schoolName: string
+  isEnrolled: boolean
 }
 
-export function ParentNav({ schoolId, schoolName }: ParentNavProps) {
+export function ParentNav({ schoolId, schoolName, isEnrolled }: ParentNavProps) {
   const pathname = usePathname()
   const { signOut, user } = useAuth()
   const router = useRouter()
@@ -70,8 +71,8 @@ export function ParentNav({ schoolId, schoolName }: ParentNavProps) {
   return (
     <>
       {/* Desktop Navigation */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
-        <div className="flex items-center gap-3 h-16 px-6 border-b border-border">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border pt-4">
+        <div className="flex items-center gap-3 px-6 pb-3 border-b border-border">
           <Avatar className="h-10 w-10">
             <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'Parent'} />
             <AvatarFallback className="text-responsive-sm">{userInitials}</AvatarFallback>
@@ -85,16 +86,21 @@ export function ParentNav({ schoolId, schoolName }: ParentNavProps) {
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const isPaymentsItem = item.href.endsWith('/payments')
+            const isDisabled = !isEnrolled && !isPaymentsItem
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed pointer-events-none text-muted-foreground"
+                    : isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
+                aria-disabled={isDisabled}
               >
                 <Icon className="h-5 w-5" />
                 {item.title}
@@ -139,16 +145,21 @@ export function ParentNav({ schoolId, schoolName }: ParentNavProps) {
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
+                  const isPaymentsItem = item.href.endsWith('/payments')
+                  const isDisabled = !isEnrolled && !isPaymentsItem
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        isDisabled
+                          ? "opacity-50 cursor-not-allowed pointer-events-none text-muted-foreground"
+                          : isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
+                      aria-disabled={isDisabled}
                     >
                       <Icon className="h-5 w-5" />
                       {item.title}

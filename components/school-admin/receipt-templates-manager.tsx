@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -197,12 +197,21 @@ export default function ReceiptTemplatesManager({
     setIsPreviewOpen(true)
   }
 
-  const generatePreviewHTML = (template: ReceiptTemplate) => {
+  const generatePreviewHTML = (data: {
+    name: string
+    logoUrl: string | null
+    headerText: string | null
+    footerText: string | null
+    showLogo: boolean
+    showStamp: boolean
+    stampUrl: string | null
+    primaryColor: string
+  }) => {
     return `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Aperçu - ${template.name}</title>
+          <title>Aperçu - ${data.name || 'Reçu'}</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -220,7 +229,7 @@ export default function ReceiptTemplatesManager({
             .header {
               text-align: center;
               margin-bottom: 30px;
-              border-bottom: 3px solid ${template.primaryColor};
+              border-bottom: 3px solid ${data.primaryColor};
               padding-bottom: 20px;
             }
             .logo {
@@ -229,7 +238,7 @@ export default function ReceiptTemplatesManager({
             }
             .header h1 {
               margin: 0;
-              color: ${template.primaryColor};
+              color: ${data.primaryColor};
               font-size: 28px;
             }
             .info-section {
@@ -253,13 +262,13 @@ export default function ReceiptTemplatesManager({
               padding: 20px;
               background: #f5f5f5;
               border-radius: 8px;
-              border-left: 4px solid ${template.primaryColor};
+              border-left: 4px solid ${data.primaryColor};
             }
             .total {
               font-size: 24px;
               font-weight: bold;
               text-align: right;
-              color: ${template.primaryColor};
+              color: ${data.primaryColor};
               margin-top: 10px;
             }
             .footer {
@@ -279,8 +288,8 @@ export default function ReceiptTemplatesManager({
         <body>
           <div class="receipt">
             <div class="header">
-              ${template.showLogo && template.logoUrl ? `<img src="${template.logoUrl}" alt="Logo" class="logo" />` : ''}
-              <h1>${template.headerText || 'REÇU DE PAIEMENT'}</h1>
+              ${data.showLogo && data.logoUrl ? `<img src="${data.logoUrl}" alt="Logo" class="logo" />` : ''}
+              <h1>${data.headerText || 'REÇU DE PAIEMENT'}</h1>
               <p style="color: #666; margin: 10px 0;">N° ${new Date().getTime()}</p>
             </div>
             
@@ -322,8 +331,8 @@ export default function ReceiptTemplatesManager({
             </div>
 
             <div class="footer">
-              ${template.showStamp && template.stampUrl ? `<img src="${template.stampUrl}" alt="Cachet" class="stamp" />` : ''}
-              <p>${template.footerText || 'Merci pour votre paiement'}</p>
+              ${data.showStamp && data.stampUrl ? `<img src="${data.stampUrl}" alt="Cachet" class="stamp" />` : ''}
+              <p>${data.footerText || 'Merci pour votre paiement'}</p>
               <p style="font-size: 12px; color: #999; margin-top: 10px;">
                 Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}
               </p>
@@ -336,13 +345,41 @@ export default function ReceiptTemplatesManager({
 
   const openPreview = () => {
     if (!selectedTemplate) return
-    
+
     const previewWindow = window.open('', '_blank')
     if (!previewWindow) return
 
-    previewWindow.document.write(generatePreviewHTML(selectedTemplate))
+    previewWindow.document.write(
+      generatePreviewHTML({
+        name: selectedTemplate.name,
+        logoUrl: selectedTemplate.logoUrl,
+        headerText: selectedTemplate.headerText,
+        footerText: selectedTemplate.footerText,
+        showLogo: selectedTemplate.showLogo,
+        showStamp: selectedTemplate.showStamp,
+        stampUrl: selectedTemplate.stampUrl,
+        primaryColor: selectedTemplate.primaryColor
+      })
+    )
     previewWindow.document.close()
   }
+
+  const [livePreviewHtml, setLivePreviewHtml] = useState('')
+
+  useEffect(() => {
+    setLivePreviewHtml(
+      generatePreviewHTML({
+        name: formData.name || 'Reçu Standard',
+        logoUrl: formData.logoUrl || schoolLogo,
+        headerText: formData.headerText,
+        footerText: formData.footerText,
+        showLogo: formData.showLogo,
+        showStamp: formData.showStamp,
+        stampUrl: formData.stampUrl || schoolStamp,
+        primaryColor: formData.primaryColor || schoolColor
+      })
+    )
+  }, [formData, schoolLogo, schoolStamp, schoolColor])
 
   return (
     <div className="space-y-6">
@@ -461,7 +498,7 @@ export default function ReceiptTemplatesManager({
 
       {/* Dialog Créer/Modifier */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[98vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>
               {selectedTemplate ? 'Modifier le template' : 'Créer un nouveau template'}
@@ -471,114 +508,138 @@ export default function ReceiptTemplatesManager({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom du template *</Label>
-              <Input
-                id="name"
-                placeholder="Ex: Reçu avec logo"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="headerText">Texte d&apos;en-tête</Label>
-              <Input
-                id="headerText"
-                placeholder="REÇU DE PAIEMENT"
-                value={formData.headerText}
-                onChange={(e) => setFormData({...formData, headerText: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="footerText">Texte de pied de page</Label>
-              <Textarea
-                id="footerText"
-                placeholder="Merci pour votre paiement"
-                value={formData.footerText}
-                onChange={(e) => setFormData({...formData, footerText: e.target.value})}
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="primaryColor">Couleur principale</Label>
-              <div className="flex gap-2">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] h-[70vh]">
+            {/* Panneau gauche : formulaire */}
+            <div className="space-y-4 overflow-y-auto pr-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom du template *</Label>
                 <Input
-                  id="primaryColor"
-                  type="color"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({...formData, primaryColor: e.target.value})}
-                  className="w-20 h-10"
-                />
-                <Input
-                  type="text"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({...formData, primaryColor: e.target.value})}
-                  placeholder="#4F46E5"
+                  id="name"
+                  placeholder="Ex: Reçu avec logo"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="logoUrl">URL du logo</Label>
-              <Input
-                id="logoUrl"
-                placeholder="https://..."
-                value={formData.logoUrl}
-                onChange={(e) => setFormData({...formData, logoUrl: e.target.value})}
-              />
-              <p className="text-xs text-muted-foreground">
-                Laissez vide pour utiliser le logo de l&apos;école
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="headerText">Texte d&apos;en-tête</Label>
+                <Input
+                  id="headerText"
+                  placeholder="REÇU DE PAIEMENT"
+                  value={formData.headerText}
+                  onChange={(e) => setFormData({...formData, headerText: e.target.value})}
+                />
+              </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="showLogo">Afficher le logo</Label>
-              <Switch
-                id="showLogo"
-                checked={formData.showLogo}
-                onCheckedChange={(checked) => setFormData({...formData, showLogo: checked})}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="footerText">Texte de pied de page</Label>
+                <Textarea
+                  id="footerText"
+                  placeholder="Merci pour votre paiement"
+                  value={formData.footerText}
+                  onChange={(e) => setFormData({...formData, footerText: e.target.value})}
+                  rows={3}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="stampUrl">URL du cachet/tampon</Label>
-              <Input
-                id="stampUrl"
-                placeholder="https://..."
-                value={formData.stampUrl}
-                onChange={(e) => setFormData({...formData, stampUrl: e.target.value})}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="primaryColor">Couleur principale</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="primaryColor"
+                    type="color"
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({...formData, primaryColor: e.target.value})}
+                    className="w-20 h-10"
+                  />
+                  <Input
+                    type="text"
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({...formData, primaryColor: e.target.value})}
+                    placeholder="#4F46E5"
+                  />
+                </div>
+              </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="showStamp">Afficher le cachet</Label>
-              <Switch
-                id="showStamp"
-                checked={formData.showStamp}
-                onCheckedChange={(checked) => setFormData({...formData, showStamp: checked})}
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div>
-                <Label htmlFor="isActive">Template actif</Label>
+              <div className="space-y-2">
+                <Label htmlFor="logoUrl">URL du logo</Label>
+                <Input
+                  id="logoUrl"
+                  placeholder="https://..."
+                  value={formData.logoUrl}
+                  onChange={(e) => setFormData({...formData, logoUrl: e.target.value})}
+                />
                 <p className="text-xs text-muted-foreground">
-                  Ce template sera utilisé pour tous les reçus
+                  Laissez vide pour utiliser le logo de l&apos;école
                 </p>
               </div>
-              <Switch
-                id="isActive"
-                checked={formData.isActive}
-                onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
-              />
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="showLogo">Afficher le logo</Label>
+                <Switch
+                  id="showLogo"
+                  checked={formData.showLogo}
+                  onCheckedChange={(checked) => setFormData({...formData, showLogo: checked})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="stampUrl">URL du cachet/tampon</Label>
+                <Input
+                  id="stampUrl"
+                  placeholder="https://..."
+                  value={formData.stampUrl}
+                  onChange={(e) => setFormData({...formData, stampUrl: e.target.value})}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="showStamp">Afficher le cachet</Label>
+                <Switch
+                  id="showStamp"
+                  checked={formData.showStamp}
+                  onCheckedChange={(checked) => setFormData({...formData, showStamp: checked})}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div>
+                  <Label htmlFor="isActive">Template actif</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Ce template sera utilisé pour tous les reçus
+                  </p>
+                </div>
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => setFormData({...formData, isActive: checked})}
+                />
+              </div>
             </div>
+
+            {/* Panneau droit : aperçu live */}
+            <Card className="hidden lg:flex flex-col overflow-hidden">
+              <CardContent className="p-0 h-full flex flex-col">
+                <div className="px-4 pt-4 pb-2 border-b flex items-center justify-between">
+                  <h3 className="font-semibold text-sm">Aperçu en direct</h3>
+                  <p className="text-[11px] text-muted-foreground">Les modifications sont prévisualisées automatiquement</p>
+                </div>
+                <div className="flex-1 bg-slate-900/80 flex items-center justify-center p-3">
+                  <div className="w-full h-full max-w-[840px] max-h-[1120px] bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shadow-inner">
+                    {livePreviewHtml && (
+                      <iframe
+                        title="Prévisualisation reçu"
+                        srcDoc={livePreviewHtml}
+                        className="w-full h-full bg-white"
+                      />
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Annuler
             </Button>

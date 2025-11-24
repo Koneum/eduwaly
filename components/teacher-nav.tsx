@@ -116,7 +116,7 @@ export function TeacherNav({ schoolId, schoolName }: TeacherNavProps) {
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="icon-responsive" />
                 {item.title}
               </Link>
             )
@@ -140,7 +140,7 @@ export function TeacherNav({ schoolId, schoolName }: TeacherNavProps) {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+                <Menu className="icon-responsive-lg" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
@@ -170,7 +170,7 @@ export function TeacherNav({ schoolId, schoolName }: TeacherNavProps) {
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="icon-responsive" />
                       {item.title}
                     </Link>
                   )
@@ -191,7 +191,7 @@ export function TeacherNav({ schoolId, schoolName }: TeacherNavProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <h1 className="text-responsive-base font-bold text-foreground">Espace Enseignant</h1>
-              <p className="text-responsive-xs text-muted-foreground truncate max-w-[150px]">{schoolName}</p>
+              <p className="text-responsive-xs text-muted-foreground truncate max-w-[140px] sm:max-w-[220px]">{schoolName}</p>
             </div>
           </div>
         </div>

@@ -27,12 +27,27 @@ export async function GET(req: NextRequest) {
       where.filiereId = filiereId
     }
 
-    // Récupérer les structures de frais
+    // ✅ OPTIMISÉ: Select précis
     const feeStructures = await prisma.feeStructure.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        amount: true,
+        type: true,
+        niveau: true,
+        academicYear: true,
+        dueDate: true,
+        isActive: true,
+        filiereId: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
         filiere: {
-          select: { nom: true },
+          select: { 
+            id: true,
+            nom: true 
+          },
         },
       },
       orderBy: { createdAt: 'desc' },

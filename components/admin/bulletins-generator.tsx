@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -8,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { FileText, Download, Eye, Settings, Loader2 } from 'lucide-react'
+import { FileText, Settings, Loader2 } from 'lucide-react'
 import PDFTemplateEditor from './pdf-template-editor'
+import BulletinTemplatesManager from './bulletin-templates-manager'
 
 interface School {
   id: string
@@ -44,6 +46,8 @@ interface BulletinsGeneratorProps {
   filieres: Array<{ id: string; nom: string }>
   students: Student[]
   isHighSchool: boolean
+  bulletinTemplates: any[]
+  maxBulletinTemplates: number
 }
 
 export default function BulletinsGenerator({ 
@@ -51,21 +55,23 @@ export default function BulletinsGenerator({
   gradingPeriods, 
   filieres, 
   students,
-  isHighSchool 
+  isHighSchool,
+  bulletinTemplates,
+  maxBulletinTemplates,
 }: BulletinsGeneratorProps) {
+  const router = useRouter()
   const [selectedPeriod, setSelectedPeriod] = useState<string>('')
   const [selectedFiliere, setSelectedFiliere] = useState<string>('all')
   const [selectedStudent, setSelectedStudent] = useState<string>('all')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   // Filtrer les étudiants par filière
   const filteredStudents = selectedFiliere === 'all' 
     ? students 
     : students.filter(s => s.filiere?.nom === filieres.find(f => f.id === selectedFiliere)?.nom)
 
-  const handleGenerate = async (action: 'preview' | 'download') => {
+  const handleGenerate = async () => {
     if (!selectedPeriod) {
       toast.error('Veuillez sélectionner une période')
       return
@@ -82,7 +88,6 @@ export default function BulletinsGenerator({
           periodId: selectedPeriod,
           filiereId: selectedFiliere === 'all' ? null : selectedFiliere,
           studentId: selectedStudent === 'all' ? null : selectedStudent,
-          action
         })
       })
 
@@ -92,26 +97,12 @@ export default function BulletinsGenerator({
         return
       }
 
-      // Si c'est un seul étudiant, l'API retourne du HTML directement
-      const contentType = response.headers.get('content-type')
-      
-      if (contentType?.includes('text/html')) {
-        // Ouvrir le HTML dans une nouvelle fenêtre
-        const html = await response.text()
-        const newWindow = window.open('', '_blank')
-        if (newWindow) {
-          newWindow.document.write(html)
-          newWindow.document.close()
-          toast.success('Bulletin généré avec succès')
-        } else {
-          toast.error('Veuillez autoriser les pop-ups')
-        }
-      } else {
-        // Plusieurs étudiants - JSON
-        const data = await response.json()
-        toast.success(`${data.count} bulletin(s) généré(s)`)
-        // TODO: Gérer le téléchargement multiple
-      }
+      // L’API persiste désormais tous les bulletins et renvoie un JSON
+      const data = await response.json()
+      toast.success(`${data.count ?? 1} bulletin(s) généré(s)`)
+
+      // Rafraîchir la page pour mettre à jour l'historique des bulletins
+      router.refresh()
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la génération')
@@ -154,7 +145,7 @@ export default function BulletinsGenerator({
                     <SelectValue placeholder="Sélectionner une période">
                       {selectedPeriod && gradingPeriods.find(p => p.id === selectedPeriod)?.name}
                     </SelectValue>
-                  </SelectTrigger>
+                  </SelectTrigger> 
                   <SelectContent className="bg-card">
                     {gradingPeriods.length === 0 ? (
                       <div className="p-2 text-center text-responsive-sm text-muted-foreground">
@@ -225,72 +216,41 @@ export default function BulletinsGenerator({
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
-                  onClick={() => handleGenerate('preview')}
-                  disabled={isGenerating || !selectedPeriod}
-                  variant="outline"
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
                   className="flex-1 text-responsive-sm"
                 >
                   {isGenerating ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <Eye className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                   )}
-                  Aperçu
-                </Button>
-                <Button
-                  onClick={() => handleGenerate('download')}
-                  disabled={isGenerating || !selectedPeriod}
-                  className="flex-1 text-responsive-sm"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4 mr-2" />
-                  )}
-                  Télécharger PDF
+                  Générer les bulletins
                 </Button>
               </div>
             </CardContent>
           </Card>
-
-          {/* Aperçu */}
-          {previewUrl && (
-            <Card>
-              <CardHeader className="p-3 sm:p-4 md:p-6">
-                <CardTitle className="text-responsive-base sm:text-responsive-lg">
-                  Aperçu du Bulletin
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                <iframe
-                  src={previewUrl}
-                  className="w-full h-[600px] border rounded-lg"
-                  title="Aperçu bulletin"
-                />
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         {/* Onglet Templates */}
-        <TabsContent value="templates">
+        <TabsContent value="templates" className="space-y-4">
           <Card>
-            <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardHeader className="p-3 sm:p-4 md:p-6 pb-2">
               <CardTitle className="text-responsive-base sm:text-responsive-lg">
                 Templates de Bulletins
               </CardTitle>
               <CardDescription className="text-responsive-xs sm:text-responsive-sm">
-                Personnalisez les templates PDF selon votre abonnement
+                Gérez plusieurs templates PDF de bulletins selon votre abonnement
               </CardDescription>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-              <Button
-                onClick={() => setIsTemplateEditorOpen(true)}
-                className="w-full sm:w-auto text-responsive-sm"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Modifier le Template
-              </Button>
+              <BulletinTemplatesManager
+                templates={bulletinTemplates}
+                schoolId={school.id}
+                schoolName={school.name}
+                schoolLogo={school.logo}
+                maxTemplates={maxBulletinTemplates}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -298,7 +258,7 @@ export default function BulletinsGenerator({
 
       {/* Dialog Éditeur de Template */}
       <Dialog open={isTemplateEditorOpen} onOpenChange={setIsTemplateEditorOpen}>
-        <DialogContent className="max-w-[98vw] sm:max-w-4xl h-[90vh] bg-card">
+        <DialogContent className="max-w-[98vw] sm:max-w-5xl lg:max-w-6xl xl:max-w-7xl h-[90vh] bg-card">
           <DialogHeader>
             <DialogTitle className="text-responsive-base sm:text-responsive-lg">
               Éditeur de Template PDF

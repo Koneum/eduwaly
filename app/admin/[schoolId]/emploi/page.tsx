@@ -351,10 +351,10 @@ export default function EmploisPage() {
         <div>
           <h1 className="text-responsive-xl font-bold text-foreground">Gestion des Emplois du Temps</h1>
           <p className="mt-1 sm:mt-2 text-responsive-sm text-muted-foreground">
-            Gérez les emplois du temps des enseignants et des {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'}
+            Gérez les emplois du temps des  enseignants et des {schoolType === 'UNIVERSITY' ? 'filières' : 'classes'}
           </p>
         </div>
-        <Link href={`/admin/${schoolId}/schedule`}>
+        <Link href={`/admin/${schoolId}/schedule`}> 
           <PermissionButton
             category="emploi"
             action="create"

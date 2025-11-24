@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth-utils'
-import { vitepay } from '@/lib/vitepay/client'
 import prisma from '@/lib/prisma'
 
 export const runtime = 'nodejs'
@@ -26,15 +25,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { planName, planId, schoolId } = body
+    const { planName, planId } = body
 
     // Accepter soit planName soit planId
     if (!planName && !planId) {
       return NextResponse.json({ error: 'planName ou planId requis' }, { status: 400 })
-    }
-
-    if (planName && !['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'].includes(planName)) {
-      return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
     }
 
     // Vérifier que l'école existe
@@ -78,51 +73,16 @@ export async function POST(req: NextRequest) {
 
     // Utiliser le prix du plan de la base de données
     const price = Number(subscriptionPlan.price)
-
-    // Créer le paiement VitePay
-    const orderId = `SUB-${school.id}-${planName}-${Date.now()}`
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    
-    const paymentResult = await vitepay.createPayment({
-      amount: price,
-      orderId,
-      description: `Abonnement ${planName} - ${school.name}`,
-      email: user.email || 'admin@schooly.app',
-      returnUrl: `${baseUrl}/admin/${school.id}/subscription?payment=success`,
-      declineUrl: `${baseUrl}/admin/${school.id}/subscription?payment=declined`,
-      cancelUrl: `${baseUrl}/admin/${school.id}/subscription?payment=cancelled`,
-      callbackUrl: `${baseUrl}/api/vitepay/webhook`,
-    })
 
-    if (!paymentResult.redirect_url) {
-      console.error('Erreur création paiement VitePay: Pas d\'URL de redirection')
-      return NextResponse.json(
-        { error: 'Erreur lors de la création du paiement' },
-        { status: 500 }
-      )
-    }
+    // Rediriger vers la page checkout au lieu de créer directement le paiement
+    const checkoutUrl = `${baseUrl}/checkout?planId=${subscriptionPlan.id}&schoolId=${school.id}`
 
-    // Enregistrer la demande d'upgrade en attente
-    await prisma.subscription.upsert({
-      where: { schoolId: school.id },
-      create: {
-        schoolId: school.id,
-        planId: subscriptionPlan.id,
-        status: 'TRIAL',
-        currentPeriodStart: new Date(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours
-      },
-      update: {
-        planId: subscriptionPlan.id,
-        status: 'TRIAL',
-      },
-    })
-
-    // Retourner l'URL de paiement VitePay
+    // Retourner l'URL de checkout
     return NextResponse.json({
       success: true,
-      paymentUrl: paymentResult.redirect_url,
-      orderId,
+      paymentUrl: checkoutUrl,
+      orderId: `SUB-${school.id}-${planName}-${Date.now()}`,
       amount: price,
     })
   } catch (error) {

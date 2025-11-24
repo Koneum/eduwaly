@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
     }
 
+    // ✅ OPTIMISÉ: Select précis
     const parents = await prisma.parent.findMany({
       where: {
         students: {
@@ -129,21 +130,40 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      include: {
+      select: {
+        id: true,
+        enrollmentId: true,
+        phone: true,
+        address: true,
+        occupation: true,
+        isEnrolled: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
+            id: true,
             name: true,
             email: true
           }
         },
         students: {
-          include: {
+          select: {
+            id: true,
+            studentNumber: true,
+            niveau: true,
             user: {
               select: {
+                id: true,
                 name: true
               }
             },
-            filiere: true
+            filiere: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
           }
         }
       },

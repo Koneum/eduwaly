@@ -1,0 +1,6 @@
+lastName;firstName;,dateOfBirth;,address,;studentNumber;,niveau,;filiereId;,phone
+Dupont,Jean,2000-01-01,123 Rue Exemple,2023001,L1,1,+221771234567;;;;;;;
+Martin,Marie,2001-05-15,456 Avenue Test,2023002,L2,2,+221761234567;;;;;;;
+Durand,Pierre,2002-10-20,789 Boulevard Demo,2023003,10E,3,+221751234567;;;;;;;
+Diop,Aminata,2003-03-25,321 Allée Modèle,2023004,M1,4,+221771112233;;;;;;;
+Ndiaye,Moussa,1999-12-10,159 Rue Test,2023005,M2,5,+221761112233;;;;;;;

@@ -272,10 +272,12 @@ export async function POST(req: NextRequest) {
 
       return {
         student: {
-          name: student.user?.name || 'Étudiant',
+          id: student.id,
           studentNumber: student.studentNumber,
           filiere: student.filiere?.nom || 'N/A',
-          niveau: student.niveau
+          filiereId: student.filiereId,
+          niveau: student.niveau,
+          name: student.user?.name || 'Étudiant',
         },
         period: period.name,
         modules: moduleResults,
@@ -283,40 +285,70 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // Récupérer le template PDF
-    let template = await prisma.pDFTemplate.findUnique({
-      where: { schoolId }
+    // Récupérer le template PDF actif
+    let template = await prisma.pDFTemplate.findFirst({
+      where: { schoolId, isActive: true },
+      orderBy: { createdAt: 'desc' }
     })
 
     if (!template) {
-      // Créer un template par défaut
+      // Créer un template par défaut actif si aucun n'existe
       template = await prisma.pDFTemplate.create({
         data: {
           schoolId,
-          headerColor: school.primaryColor || '#4F46E5'
+          name: 'Bulletin standard',
+          headerColor: school.primaryColor || '#4F46E5',
+          isActive: true
         }
       })
     }
 
-    // Générer le HTML pour chaque bulletin
-    const htmlBulletins = bulletinsData.map(data => 
-      generateBulletinHTML(data, school, template)
-    )
+    // Générer et persister chaque bulletin
+    const bulletinIds: string[] = []
 
-    // Pour un seul étudiant, retourner directement le HTML
+    for (const data of bulletinsData) {
+      const html = generateBulletinHTML(data, school, template)
+
+      const created = await prisma.bulletin.create({
+        data: {
+          schoolId,
+          studentId: data.student?.id ?? null,
+          filiereId: data.student?.filiereId ?? null,
+          gradingPeriodId: periodId,
+          templateId: template.id,
+          html,
+          generalAverage: data.generalAverage,
+        },
+      })
+
+      bulletinIds.push(created.id)
+    }
+
+    // Pour un seul étudiant, retourner directement le HTML du bulletin sauvegardé
     if (bulletinsData.length === 1) {
-      return new NextResponse(htmlBulletins[0], {
+      const singleBulletin = await prisma.bulletin.findUnique({
+        where: { id: bulletinIds[0] },
+      })
+
+      if (!singleBulletin) {
+        return NextResponse.json(
+          { error: 'Bulletin introuvable après génération' },
+          { status: 500 },
+        )
+      }
+
+      return new NextResponse(singleBulletin.html, {
         headers: {
-          'Content-Type': 'text/html; charset=utf-8'
-        }
+          'Content-Type': 'text/html; charset=utf-8',
+        },
       })
     }
 
-    // Pour plusieurs étudiants, retourner les données JSON
+    // Pour plusieurs étudiants, retourner les métadonnées JSON
     return NextResponse.json({
       message: `${bulletinsData.length} bulletin(s) généré(s)`,
-      bulletins: bulletinsData,
-      count: bulletinsData.length
+      count: bulletinsData.length,
+      bulletinIds,
     })
   } catch (error) {
     console.error('Erreur:', error)

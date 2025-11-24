@@ -15,9 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 interface StudentNavProps {
   schoolId: string
   schoolName: string
+  isEnrolled: boolean
 }
 
-export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
+export function StudentNav({ schoolId, schoolName, isEnrolled }: StudentNavProps) {
   const pathname = usePathname()
   const { signOut, user } = useAuth()
   const router = useRouter()
@@ -80,8 +81,8 @@ export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
   return (
     <>
       {/* Desktop Navigation */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
-        <div className="flex items-center gap-3 h-16 px-6 border-b border-border">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border pt-4">
+        <div className="flex items-center gap-3 px-6 pb-3 border-b border-border">
           <Avatar className="h-10 w-10">
             <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'Étudiant'} />
             <AvatarFallback className="text-responsive-sm">{userInitials}</AvatarFallback>
@@ -91,22 +92,27 @@ export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
             <p className="text-responsive-xs text-muted-foreground truncate">{schoolName}</p>
           </div>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const isPaymentsItem = item.href.endsWith('/payments')
+            const isDisabled = !isEnrolled && !isPaymentsItem
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed pointer-events-none text-muted-foreground"
+                    : isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
+                aria-disabled={isDisabled}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="icon-responsive" />
                 {item.title}
               </Link>
             )
@@ -130,7 +136,7 @@ export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+                <Menu className="icon-responsive-lg" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
@@ -149,18 +155,23 @@ export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
+                  const isPaymentsItem = item.href.endsWith('/payments')
+                  const isDisabled = !isEnrolled && !isPaymentsItem
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        isDisabled
+                          ? "opacity-50 cursor-not-allowed pointer-events-none text-muted-foreground"
+                          : isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
+                      aria-disabled={isDisabled}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="icon-responsive" />
                       {item.title}
                     </Link>
                   )
@@ -181,7 +192,7 @@ export function StudentNav({ schoolId, schoolName }: StudentNavProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <h1 className="text-responsive-base font-bold text-foreground">Espace Étudiant</h1>
-              <p className="text-responsive-xs text-muted-foreground truncate max-w-[150px]">{schoolName}</p>
+              <p className="text-responsive-xs text-muted-foreground truncate max-w-[140px] sm:max-w-[220px]">{schoolName}</p>
             </div>
           </div>
         </div>

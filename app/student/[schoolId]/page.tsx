@@ -127,6 +127,24 @@ export default async function StudentDashboard({
     })
   )
 
+  // Si le compte étudiant n'est pas encore activé par le paiement de la scolarité
+  if (!student.isEnrolled) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardHeader>
+            <CardTitle className="text-responsive-lg">Compte en attente d&apos;activation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-responsive-sm text-muted-foreground">
+              Veuillez payer vos frais de scolarite pour activer votre compte et accéder à votre espace étudiant.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   // Stats
   const stats = [
     { label: "Moyenne Générale", value: `${generalAverage}/20`, icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },

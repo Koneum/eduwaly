@@ -27,6 +27,7 @@ model Filiere {
   students      Student[]
   feeStructures FeeStructure[]
   workGroups    WorkGroup[]
+  bulletins     Bulletin[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -148,6 +149,7 @@ model School {
   id                String               @id @default(cuid())
   name              String
   subdomain         String               @unique
+  shortName         String?              // Sigle officiel de l'école (ex: EC, IUFP)
   logo              String?
   stamp             String?              // Cachet/tampon officiel de l'école
   address           String?
@@ -186,7 +188,8 @@ model School {
   gradingPeriods    GradingPeriod[]      // Périodes de notation (trimestres/semestres)
   evaluationTypes   EvaluationType[]     // Types d'évaluations personnalisables
   receiptTemplates  ReceiptTemplate[]    // Templates de reçu personnalisables
-  pdfTemplate       PDFTemplate?         // Template PDF personnalisable
+  pdfTemplates      PDFTemplate[]        // Templates PDF personnalisables (bulletins, certificats, etc.)
+  bulletins         Bulletin[]           // Bulletins générés et archivés
   
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
@@ -241,6 +244,7 @@ model Student {
   niveau            String            // L1, L2, L3, M1, M2, 10E, 11E, 12E
   enrollmentYear    Int?              // Année d'inscription (ex: 2021) pour calculer promotion
   courseSchedule    CourseSchedule    @default(DAY) // DAY ou EVENING (pour universités)
+  status            StudentStatus?
   dateOfBirth       DateTime?
   placeOfBirth      String?
   address           String?
@@ -256,12 +260,20 @@ model Student {
   scholarships      Scholarship[]
   attendances       Attendance[]
   workGroupMembers  WorkGroupMember[]
+  bulletins         Bulletin[]
   
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
   @@unique([studentNumber, schoolId])
   @@map("students")
+}
+
+enum StudentStatus {
+  REGULIER
+  PROFESSIONNEL
+  CL
+  PROFESSIONNEL_ETAT
 }
 
 // Modèle Parent
@@ -1137,6 +1149,7 @@ model GradingPeriod {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  bulletins   Bulletin[]
 
   @@index([schoolId])
   @@map("grading_periods")
@@ -1183,33 +1196,66 @@ model ReceiptTemplate {
 // Templates PDF personnalisables (bulletins, certificats, etc.)
 model PDFTemplate {
   id                String   @id @default(cuid())
-  schoolId          String   @unique
+  schoolId          String
   school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  
+
+  name              String   @default("Bulletin standard")
+
   // Configuration en-tête
   showLogo          Boolean  @default(true)
   logoPosition      String   @default("left") // "left", "center", "right"
   headerColor       String   @default("#4F46E5")
   schoolNameSize    Int      @default(24)
-  
+
   // Informations à afficher
   showAddress       Boolean  @default(true)
   showPhone         Boolean  @default(true)
   showEmail         Boolean  @default(true)
   showStamp         Boolean  @default(true)
-  
+
   // Configuration tableau
   gradeTableStyle   String   @default("detailed") // "simple" ou "detailed"
-  
+
   // Pied de page
   footerText        String   @default("Ce document est officiel et certifié conforme.")
   showSignatures    Boolean  @default(true)
-  
+
+  isActive          Boolean  @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  bulletins         Bulletin[]
+
   @@index([schoolId])
+  @@index([schoolId, isActive])
+  @@unique([schoolId])
   @@map("pdf_templates")
+}
+
+// Bulletins générés (snapshots)
+model Bulletin {
+  id              String        @id @default(cuid())
+  schoolId        String
+  school          School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentId       String?
+  student         Student?      @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  filiereId       String?
+  filiere         Filiere?      @relation(fields: [filiereId], references: [id], onDelete: SetNull)
+  gradingPeriodId String
+  gradingPeriod   GradingPeriod @relation(fields: [gradingPeriodId], references: [id], onDelete: Cascade)
+  templateId      String?
+  template        PDFTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  html            String        // Snapshot HTML complet
+  generalAverage  String        // Moyenne générale au moment de la génération
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([schoolId])
+  @@index([gradingPeriodId])
+  @@index([studentId])
+  @@index([filiereId])
+  @@map("bulletins")
 }
 
 // ============================================

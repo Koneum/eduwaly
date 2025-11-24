@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth-utils';
 
 // Définir l'enum TypeModule pour correspondre au schéma Prisma
 export enum TypeModule {
@@ -13,13 +14,42 @@ export enum TypeModule {
 
 export async function GET() {
   try {
+    // Récupérer l'utilisateur authentifié
+    const user = await getAuthUser();
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      );
+    }
+
+    // ✅ OPTIMISÉ: Retirer emplois include, utiliser _count et select précis
     const modules = await prisma.module.findMany({
-      include: {
-        filiere: true,
-        emplois: {
-          include: {
-            enseignant: true,
-            anneeUniv: true
+      where: {
+        schoolId: user.schoolId || undefined
+      },
+      select: {
+        id: true,
+        nom: true,
+        type: true,
+        vh: true,
+        semestre: true,
+        isUeCommune: true,
+        schoolId: true,
+        filiereId: true,
+        createdAt: true,
+        updatedAt: true,
+        filiere: {
+          select: {
+            id: true,
+            nom: true
+          }
+        },
+        _count: {
+          select: {
+            emplois: true,
+            evaluations: true
           }
         }
       },

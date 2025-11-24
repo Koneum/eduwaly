@@ -65,8 +65,14 @@ export function generateStudentNumber(year?: number): string {
  * Valide un ID d'enrôlement
  */
 export function validateEnrollmentId(id: string): boolean {
-  const pattern = /^ENR-\d{4}-[A-Z0-9]{5}$/
-  return pattern.test(id)
+  // Ancien format: ENR-YYYY-ABCDE (ex: ENR-2024-A3B5C)
+  const oldPattern = /^ENR-\d{4}-[A-Z0-9]{5}$/
+
+  // Nouveau format: SIGLE-YYYY-XXXX (ex: LED-2025-0002)
+  // SIGLE = 2 à 10 lettres majuscules
+  const newPattern = /^[A-Z]{2,10}-\d{4}-\d{4}$/
+
+  return oldPattern.test(id) || newPattern.test(id)
 }
 
 /**

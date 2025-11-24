@@ -151,7 +151,6 @@ export function PlanSelector({ currentPlan: initialPlan }: PlanSelectorProps) {
       {/* Section pricing */}
       <PricingSection 
         onSelectPlan={handleSelectPlan} 
-        showTrialInfo={true}
         currentPlan={currentPlan}
       />
     </div>

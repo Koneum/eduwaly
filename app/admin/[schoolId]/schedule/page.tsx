@@ -6,15 +6,31 @@ import { SchedulePageClient } from "@/components/admin/schedule-page-client"
 
 type EmploiModel = {
   id: string
-  module: { nom: string }
-  enseignant: { nom: string; prenom: string }
-  filiere?: { id: string; nom?: string } | null
+  module: { 
+    id: string
+    nom: string 
+  }
+  enseignant: { 
+    id: string
+    nom: string
+    prenom: string 
+  }
+  filiere?: { 
+    id: string
+    nom?: string 
+  } | null
   vh: number
-  joursCours?: string | null
+  semestre?: string
+  schoolId: string
+  moduleId: string
+  enseignantId: string
+  niveau: string
+  salle: string
   heureDebut: string
   heureFin: string
-  salle: string
-  niveau: string
+  joursCours: string
+  dateDebut?: string
+  dateFin?: string
 }
 
 export default async function ScheduleManagementPage({ 

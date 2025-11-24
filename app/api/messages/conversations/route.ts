@@ -23,7 +23,7 @@ export async function GET() {
       }
     }
 
-    // Récupérer les conversations où l'utilisateur est participant
+    // ✅ OPTIMISÉ: Charger conversations avec select précis + _count
     const conversations = await prisma.conversation.findMany({
       where: {
         participants: {
@@ -32,22 +32,42 @@ export async function GET() {
           }
         }
       },
-      include: {
+      select: {
+        id: true,
+        subject: true,
+        type: true,
+        schoolId: true,
+        updatedAt: true,
+        createdAt: true,
         participants: {
-          include: {
-            conversation: {
-              include: {
-                messages: {
-                  orderBy: { createdAt: 'desc' },
-                  take: 1
-                }
-              }
-            }
+          where: {
+            userId: { not: user.id }
+          },
+          select: {
+            userId: true
           }
         },
         messages: {
           orderBy: { createdAt: 'desc' },
-          take: 1
+          take: 1,
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            senderId: true,
+            senderName: true,
+            isDeleted: true
+          }
+        },
+        _count: {
+          select: {
+            messages: {
+              where: {
+                senderId: { not: user.id },
+                readBy: { not: { contains: user.id } }
+              }
+            }
+          }
         }
       },
       orderBy: {
@@ -55,82 +75,56 @@ export async function GET() {
       }
     })
 
-    // Enrichir avec les informations des participants
-    type ConversationRow = {
-      id: string
-      participants: Array<{ userId: string }>
-      messages: Array<{
-        id: string
-        content?: string
-        createdAt?: Date
-        conversationId?: string
-        isDeleted?: boolean
-        senderId?: string
-        senderName?: string
-      }>
-    }
-
-    type OtherUserSelect = {
-      id: string
-      name: string
-      email?: string | null
-      role?: string
-      avatar?: string | null
-      school?: { name?: string | null } | null
-    }
-
-    const enrichedConversations = await Promise.all(
-      (conversations as ConversationRow[]).map(async (conv: ConversationRow) => {
-        const participantIds = conv.participants
-          .map(p => p.userId)
-          .filter(id => id !== user.id)
-
-        const otherUsers = await prisma.user.findMany({
-          where: { id: { in: participantIds } },
-          select: { 
-            id: true, 
-            name: true, 
-            email: true, 
-            role: true, 
-            avatar: true,
-            schoolId: true,
-            school: {
-              select: {
-                name: true,
-              },
-            },
-          }
-        })
-        
-        // Enrichir avec le nom de l'école pour les admins d'école
-        const enrichedUsers = (otherUsers as OtherUserSelect[]).map((u: OtherUserSelect) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email ?? null,
-          role: u.role,
-          avatar: u.avatar ?? null,
-          schoolName: u.role === 'SCHOOL_ADMIN' && u.school?.name 
-            ? u.school.name 
-            : null,
-        }))
-
-        const lastMessage = conv.messages[0]
-        const unreadCount = await prisma.message.count({
-          where: {
-            conversationId: conv.id,
-            senderId: { not: user.id },
-            readBy: { not: { contains: user.id } }
-          }
-        })
-
-        return {
-          ...conv,
-          otherUsers: enrichedUsers,
-          lastMessage,
-          unreadCount
-        }
-      })
+    // ✅ Charger TOUS les users en 1 seule requête (au lieu de N requêtes)
+    const allUserIds = conversations.flatMap(c => 
+      c.participants.map(p => p.userId)
     )
+    
+    const allUsers = await prisma.user.findMany({
+      where: { id: { in: allUserIds } },
+      select: { 
+        id: true, 
+        name: true, 
+        email: true, 
+        role: true, 
+        avatar: true,
+        schoolId: true,
+        school: {
+          select: {
+            name: true,
+          },
+        },
+      }
+    })
+
+    // ✅ Mapper en mémoire (pas de requêtes supplémentaires)
+    const enrichedConversations = conversations.map(conv => {
+      const otherUsers = conv.participants.map(p => {
+        const user = allUsers.find(u => u.id === p.userId)
+        return user ? {
+          id: user.id,
+          name: user.name,
+          email: user.email ?? null,
+          role: user.role,
+          avatar: user.avatar ?? null,
+          schoolName: user.role === 'SCHOOL_ADMIN' && user.school?.name 
+            ? user.school.name 
+            : null,
+        } : null
+      }).filter(Boolean)
+
+      return {
+        id: conv.id,
+        subject: conv.subject,
+        type: conv.type,
+        schoolId: conv.schoolId,
+        updatedAt: conv.updatedAt,
+        createdAt: conv.createdAt,
+        otherUsers,
+        lastMessage: conv.messages[0] || null,
+        unreadCount: conv._count.messages
+      }
+    })
 
     return NextResponse.json(enrichedConversations)
   } catch (error) {

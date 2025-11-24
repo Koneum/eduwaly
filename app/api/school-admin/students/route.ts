@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth-utils'
 import { generateStudentEmail } from '@/lib/email-utils'
 import { generateEnrollmentId } from '@/lib/enrollment-utils'
 import { checkQuota } from '@/lib/subscription/quota-middleware'
+import { generateStudentNumberForSchool } from '@/lib/student-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,13 +24,15 @@ export async function POST(request: NextRequest) {
       niveau, 
       phone,
       filiereId,
-      schoolId
+      schoolId,
+      status,
+      enrollmentYear,
     } = body
 
     // Validation des champs obligatoires
-    if (!firstName || !lastName || !studentNumber || !niveau) {
+    if (!firstName || !lastName || !studentNumber || !niveau || !schoolId) {
       return NextResponse.json({ 
-        error: 'Champs obligatoires manquants: Prénom, Nom, Matricule, Niveau' 
+        error: 'Champs obligatoires manquants: Prénom, Nom, Matricule, Niveau, École' 
       }, { status: 400 })
     }
 
@@ -52,30 +55,36 @@ export async function POST(request: NextRequest) {
     // Récupérer les infos de l'école pour générer l'email
     const school = await prisma.school.findUnique({
       where: { id: schoolId },
-      select: { name: true, subdomain: true }
+      select: { name: true, subdomain: true, shortName: true }
     })
 
     if (!school) {
       return NextResponse.json({ error: 'École non trouvée' }, { status: 404 })
     }
 
-    // Vérifier si le matricule existe déjà
-    const existingStudent = await prisma.student.findFirst({
+    // Déterminer l'année de promotion (enrollmentYear)
+    const promotionYear = enrollmentYear || new Date().getFullYear()
+
+    // Vérifier l'unicité du matricule (studentNumber) pour cette école
+    const existingStudentWithMatricule = await prisma.student.findFirst({
       where: {
         studentNumber,
-        schoolId
-      }
+        schoolId,
+      },
     })
 
-    if (existingStudent) {
-      return NextResponse.json({ error: 'Ce matricule existe déjà' }, { status: 400 })
+    if (existingStudentWithMatricule) {
+      return NextResponse.json({ error: 'Ce matricule existe déjà pour cette école' }, { status: 400 })
     }
+
+    // Générer automatiquement le code d'inscription / numéro étudiant système au format SIGLE-YYYY-0001
+    const generatedEnrollmentCode = await generateStudentNumberForSchool(schoolId, promotionYear)
 
     // Générer l'email automatiquement: N.Prenom@ecole.com (pour information)
     const generatedEmail = generateStudentEmail(firstName, lastName, school.name)
 
-    // Générer un enrollmentId unique au format ENR-YYYY-XXXXX
-    const enrollmentId = generateEnrollmentId()
+    // Code d'inscription utilisé pour l'enrôlement (numéro étudiant système)
+    const enrollmentId = generatedEnrollmentCode
 
     // Créer l'étudiant SANS compte (le compte sera créé lors de l'enrôlement)
     const student = await prisma.student.create({
@@ -84,10 +93,12 @@ export async function POST(request: NextRequest) {
         studentNumber,
         enrollmentId,
         niveau,
+        enrollmentYear: promotionYear,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         address: address || null,
         phone: phone || null,
         filiereId: filiereId || null,
+        status: status || null,
         isEnrolled: false, // Pas encore enrôlé
         userId: null // Pas de compte utilisateur
       },

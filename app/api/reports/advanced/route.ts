@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Rapport académique
     if (reportType === 'academic') {
+      // ✅ OPTIMISÉ: Select précis au lieu de include profond
       type EvaluationRow = { note: number }
       const evaluations = await prisma.evaluation.findMany({
         where: {
@@ -41,7 +42,32 @@ export async function POST(request: NextRequest) {
           ...(filters.filiere && { student: { filiereId: filters.filiere } }),
           ...(filters.niveau && { student: { niveau: filters.niveau } }),
         },
-        include: { student: { include: { user: true } }, module: true },
+        select: {
+          id: true,
+          note: true,
+          coefficient: true,
+          type: true,
+          date: true,
+          student: {
+            select: {
+              id: true,
+              studentNumber: true,
+              niveau: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            }
+          },
+          module: {
+            select: {
+              id: true,
+              nom: true
+            }
+          }
+        },
       });
       const evals = evaluations as EvaluationRow[]
       const avgNote = evals.length > 0 ? evals.reduce<number>((sum, evaluation) => sum + (Number(evaluation.note) || 0), 0) / evals.length : 0;

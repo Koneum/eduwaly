@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { GraduationCap, UserPlus, Key, Mail, Phone, Lock, User } from "lucide-react"
+import { GraduationCap, UserPlus, Key, Mail, Phone, Lock, User, Eye, EyeOff } from "lucide-react"
 
 export default function EnrollPage() {
   const router = useRouter()
@@ -17,6 +17,8 @@ export default function EnrollPage() {
   const [userType, setUserType] = useState<"student" | "parent">("student")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -25,6 +27,8 @@ export default function EnrollPage() {
     password: "",
     confirmPassword: ""
   })
+
+  const passwordsMatch = !formData.confirmPassword || formData.password === formData.confirmPassword
 
   const handleVerifyId = async () => {
     if (!enrollmentId.trim()) {
@@ -175,7 +179,7 @@ export default function EnrollPage() {
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   variant={userType === "student" ? "default" : "outline"}
-                  className="flex-1 text-responsive-sm h-10 sm:h-11"
+                  className={`flex-1 text-responsive-sm h-10 sm:h-11 ${userType === "student" ? "text-background" : ""}`}
                   onClick={() => setUserType("student")}
                 >
                   <User className="icon-responsive mr-2" />
@@ -183,7 +187,7 @@ export default function EnrollPage() {
                 </Button>
                 <Button
                   variant={userType === "parent" ? "default" : "outline"}
-                  className="flex-1 text-responsive-sm h-10 sm:h-11"
+                  className={`flex-1 text-responsive-sm h-10 sm:h-11 ${userType === "parent" ? "text-background" : ""}`}
                   onClick={() => setUserType("parent")}
                 >
                   <UserPlus className="icon-responsive mr-2" />
@@ -191,12 +195,12 @@ export default function EnrollPage() {
                 </Button>
               </div>
 
-              <Badge className="w-full justify-center py-2 text-responsive-xs sm:text-responsive-sm">
+              <Badge className="w-full justify-center py-2 text-responsive-xs sm:text-responsive-sm text-background">
                 Type sélectionné: {userType === "student" ? "Étudiant" : "Parent"}
               </Badge>
 
               <Button
-                className="w-full text-responsive-sm h-10 sm:h-11"
+                className="w-full text-responsive-sm h-10 sm:h-11 text-background"
                 onClick={handleVerifyId}
                 disabled={!enrollmentId || loading}
               >
@@ -246,7 +250,7 @@ export default function EnrollPage() {
                       <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.schoolName}</p>
                     </div>
                     <div>
-                      <span className="text-blue-700 dark:text-blue-300">N° Étudiant:</span>
+                      <span className="text-blue-700 dark:text-blue-300">Matricule:</span>
                       <p className="font-medium text-blue-900 dark:text-blue-100">{studentInfo.studentNumber}</p>
                     </div>
                     <div>
@@ -369,13 +373,21 @@ export default function EnrollPage() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Min. 8 caractères"
-                      className="pl-10 text-responsive-sm h-10 sm:h-11"
+                      className="pl-10 pr-10 text-responsive-sm h-10 sm:h-11"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    >
+                      {showPassword ? <EyeOff className="icon-responsive" /> : <Eye className="icon-responsive" />}
+                    </button>
                   </div>
                 </div>
 
@@ -386,14 +398,27 @@ export default function EnrollPage() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 icon-responsive text-muted-foreground" />
                     <Input
                       id="confirmPassword"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirmez votre mot de passe"
-                      className="pl-10 text-responsive-sm h-10 sm:h-11"
+                      className="pl-10 pr-10 text-responsive-sm h-10 sm:h-11"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showConfirmPassword ? "Masquer la confirmation" : "Afficher la confirmation"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="icon-responsive" /> : <Eye className="icon-responsive" />}
+                    </button>
                   </div>
+                  {!passwordsMatch && (
+                    <p className="text-responsive-xs text-red-600 dark:text-red-400">
+                      Les mots de passe ne correspondent pas.
+                    </p>
+                  )}
                 </div>
 
                 {error && (

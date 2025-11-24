@@ -14,18 +14,42 @@ export async function GET(request: NextRequest) {
     const studentId = searchParams.get('studentId')
     const date = searchParams.get('date')
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     
     if (studentId) where.studentId = studentId
     if (date) where.date = new Date(date)
 
+    // ✅ OPTIMISÉ: Select précis au lieu de include profond
     const absences = await prisma.absence.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        date: true,
+        justified: true,
+        justification: true,
+        moduleId: true,
+        notifiedParent: true,
+        studentId: true,
+        createdAt: true,
+        updatedAt: true,
         student: {
-          include: {
-            user: true,
-            filiere: true
+          select: {
+            id: true,
+            studentNumber: true,
+            niveau: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            },
+            filiere: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
           }
         }
       },

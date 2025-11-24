@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Récupérer le template existant ou créer avec valeurs par défaut
-    let template = await prisma.pDFTemplate.findUnique({
+    let template = await prisma.pDFTemplate.findFirst({
       where: { schoolId }
     })
 
@@ -76,37 +76,49 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    // Upsert (créer ou mettre à jour) le template
-    const template = await prisma.pDFTemplate.upsert({
-      where: { schoolId },
-      create: {
-        schoolId,
-        showLogo: config.showLogo,
-        logoPosition: config.logoPosition,
-        headerColor: config.headerColor,
-        schoolNameSize: config.schoolNameSize,
-        showAddress: config.showAddress,
-        showPhone: config.showPhone,
-        showEmail: config.showEmail,
-        showStamp: config.showStamp,
-        footerText: config.footerText,
-        gradeTableStyle: config.gradeTableStyle,
-        showSignatures: config.showSignatures
-      },
-      update: {
-        showLogo: config.showLogo,
-        logoPosition: config.logoPosition,
-        headerColor: config.headerColor,
-        schoolNameSize: config.schoolNameSize,
-        showAddress: config.showAddress,
-        showPhone: config.showPhone,
-        showEmail: config.showEmail,
-        showStamp: config.showStamp,
-        footerText: config.footerText,
-        gradeTableStyle: config.gradeTableStyle,
-        showSignatures: config.showSignatures
-      }
+    // Vérifier si le template existe
+    const existingTemplate = await prisma.pDFTemplate.findFirst({
+      where: { schoolId }
     })
+
+    let template;
+    if (existingTemplate) {
+      // Mettre à jour le template existant
+      template = await prisma.pDFTemplate.update({
+        where: { id: existingTemplate.id },
+        data: {
+          showLogo: config.showLogo,
+          logoPosition: config.logoPosition,
+          headerColor: config.headerColor,
+          schoolNameSize: config.schoolNameSize,
+          showAddress: config.showAddress,
+          showPhone: config.showPhone,
+          showEmail: config.showEmail,
+          showStamp: config.showStamp,
+          footerText: config.footerText,
+          gradeTableStyle: config.gradeTableStyle,
+          showSignatures: config.showSignatures
+        }
+      })
+    } else {
+      // Créer un nouveau template
+      template = await prisma.pDFTemplate.create({
+        data: {
+          schoolId,
+          showLogo: config.showLogo,
+          logoPosition: config.logoPosition,
+          headerColor: config.headerColor,
+          schoolNameSize: config.schoolNameSize,
+          showAddress: config.showAddress,
+          showPhone: config.showPhone,
+          showEmail: config.showEmail,
+          showStamp: config.showStamp,
+          footerText: config.footerText,
+          gradeTableStyle: config.gradeTableStyle,
+          showSignatures: config.showSignatures
+        }
+      })
+    }
     
     return NextResponse.json({
       message: 'Template sauvegardé avec succès',

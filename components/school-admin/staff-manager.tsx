@@ -263,29 +263,47 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
   }
 
   const toggleAllPermissions = (category: string, perms: { view: Permission | null, create: Permission | null, edit: Permission | null, delete: Permission | null }) => {
-    // Vérifier si toutes les permissions de cette catégorie sont cochées
-    const allChecked = 
-      (perms.view && selectedPermissions[perms.view.id]?.canView) &&
-      (perms.create && selectedPermissions[perms.create.id]?.canCreate) &&
-      (perms.edit && selectedPermissions[perms.edit.id]?.canEdit) &&
-      (perms.delete && selectedPermissions[perms.delete.id]?.canDelete)
-    
+    // Vérifier si toutes les permissions EXISTANTES de cette catégorie sont cochées
+    const allChecked =
+      (!perms.view || !!selectedPermissions[perms.view.id]?.canView) &&
+      (!perms.create || !!selectedPermissions[perms.create.id]?.canCreate) &&
+      (!perms.edit || !!selectedPermissions[perms.edit.id]?.canEdit) &&
+      (!perms.delete || !!selectedPermissions[perms.delete.id]?.canDelete)
+
+    const newValue = !allChecked
+
     setSelectedPermissions(prev => {
-      const newState = { ...prev }
-      
+      const newState: PermissionState = { ...prev }
+
       if (perms.view) {
-        newState[perms.view.id] = { ...newState[perms.view.id], canView: !allChecked, canCreate: false, canEdit: false, canDelete: false }
+        const current = newState[perms.view.id] || { canView: false, canCreate: false, canEdit: false, canDelete: false }
+        newState[perms.view.id] = {
+          ...current,
+          canView: newValue,
+        }
       }
       if (perms.create) {
-        newState[perms.create.id] = { ...newState[perms.create.id], canView: false, canCreate: !allChecked, canEdit: false, canDelete: false }
+        const current = newState[perms.create.id] || { canView: false, canCreate: false, canEdit: false, canDelete: false }
+        newState[perms.create.id] = {
+          ...current,
+          canCreate: newValue,
+        }
       }
       if (perms.edit) {
-        newState[perms.edit.id] = { ...newState[perms.edit.id], canView: false, canCreate: false, canEdit: !allChecked, canDelete: false }
+        const current = newState[perms.edit.id] || { canView: false, canCreate: false, canEdit: false, canDelete: false }
+        newState[perms.edit.id] = {
+          ...current,
+          canEdit: newValue,
+        }
       }
       if (perms.delete) {
-        newState[perms.delete.id] = { ...newState[perms.delete.id], canView: false, canCreate: false, canEdit: false, canDelete: !allChecked }
+        const current = newState[perms.delete.id] || { canView: false, canCreate: false, canEdit: false, canDelete: false }
+        newState[perms.delete.id] = {
+          ...current,
+          canDelete: newValue,
+        }
       }
-      
+
       return newState
     })
   }
@@ -307,6 +325,23 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
       case 'ASSISTANT': return 'Assistant'
       case 'SECRETARY': return 'Secrétaire'
       default: return role
+    }
+  }
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'students': return 'Étudiants'
+      case 'staff': return 'Personnel & Staff'
+      case 'parents': return 'Parents'
+      case 'finance': return 'Finance & Scolarité'
+      case 'timetable': return 'Emploi du temps'
+      case 'courses': return 'Cours & Modules'
+      case 'attendance': return 'Présences & Absences'
+      case 'homework': return 'Devoirs & Soumissions'
+      case 'reporting': return 'Reporting & Bulletins'
+      case 'communication': return 'Communication & Messages'
+      case 'settings': return 'Paramètres de l’école'
+      default: return category
     }
   }
 
@@ -503,7 +538,7 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                     <table className="w-full">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2 px-2 text-responsive-sm font-medium">Permission</th>
+                          <th className="text-left py-2 px-2 text-responsive-sm font-medium">Fonction</th>
                           <th className="text-center py-2 px-2 text-responsive-xs font-medium">Tout</th>
                           <th className="text-center py-2 px-2 text-responsive-xs font-medium">Voir</th>
                           <th className="text-center py-2 px-2 text-responsive-xs font-medium">Créer</th>
@@ -513,16 +548,17 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
                       </thead>
                       <tbody>
                         {Object.entries(permissionsByCategory).map(([category, perms]) => {
-                          const allChecked = 
-                            (perms.view && selectedPermissions[perms.view.id]?.canView) &&
-                            (perms.create && selectedPermissions[perms.create.id]?.canCreate) &&
-                            (perms.edit && selectedPermissions[perms.edit.id]?.canEdit) &&
-                            (perms.delete && selectedPermissions[perms.delete.id]?.canDelete)
-                          
+                          const allChecked =
+                            (!perms.view || !!selectedPermissions[perms.view.id]?.canView) &&
+                            (!perms.create || !!selectedPermissions[perms.create.id]?.canCreate) &&
+                            (!perms.edit || !!selectedPermissions[perms.edit.id]?.canEdit) &&
+                            (!perms.delete || !!selectedPermissions[perms.delete.id]?.canDelete)
+
                           return (
                             <tr key={category} className="border-b last:border-0 hover:bg-muted/50">
                               <td className="py-3 px-2">
-                                <p className="text-responsive-sm font-medium capitalize">{category}</p>
+                                <p className="text-responsive-sm font-medium">{getCategoryLabel(category)}</p>
+                                <p className="text-responsive-xs text-muted-foreground lowercase first-letter:uppercase">{category}</p>
                               </td>
                               <td className="text-center py-3 px-2">
                                 <Checkbox

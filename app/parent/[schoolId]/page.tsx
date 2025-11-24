@@ -27,6 +27,23 @@ export default async function ParentDashboard() {
 
   if (!parent) redirect('/auth/login')
 
+  if (!parent.isEnrolled) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardHeader>
+            <CardTitle className="text-responsive-lg">Compte parent en attente d&apos;activation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-responsive-sm text-muted-foreground">
+              Veuillez payer vos frais de scolarite pour activer votre compte parent et accéder aux informations de vos enfants.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const allPayments = parent.students.flatMap(s => s.payments)
   const totalDue = allPayments.reduce((sum, p) => sum + Number(p.amountDue), 0)
   // totalPaid not used currently; leave calculation out to satisfy lint

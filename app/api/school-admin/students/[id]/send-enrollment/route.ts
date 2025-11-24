@@ -51,6 +51,18 @@ export async function POST(
       student.school.name
     )
 
+    const schoolsBaseDomain = process.env.NEXT_PUBLIC_SCHOOLS_BASE_DOMAIN || 'educwaly.com'
+    const rawSigle = (student.school.shortName || student.school.subdomain || '').trim()
+    const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const host = request.headers.get('host') || ''
+    const isLocal = host.includes('localhost')
+      || defaultAppUrl.includes('localhost')
+      || schoolsBaseDomain.includes('localhost')
+
+    const enrollmentUrl = !isLocal && rawSigle
+      ? `https://${rawSigle.toLowerCase()}.${schoolsBaseDomain}/enroll`
+      : `${defaultAppUrl}/enroll`
+
     // Préparer le contenu de l'email
     const emailContent = {
       to: recipientEmail,
@@ -79,7 +91,7 @@ export async function POST(
           <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #92400e;">📝 Étapes pour créer votre compte</h3>
             <ol style="padding-left: 20px;">
-              <li>Rendez-vous sur la page d'enrôlement de votre établissement</li>
+              <li>Rendez-vous sur la page d'enrôlement de votre établissement : <a href="${enrollmentUrl}" style="color: #2563eb; text-decoration: underline;">${enrollmentUrl}</a></li>
               <li>Entrez votre <strong>ID d'enrôlement</strong> : ${student.enrollmentId}</li>
               <li>Sélectionnez "Je suis Étudiant"</li>
               <li>Remplissez le formulaire avec vos informations</li>

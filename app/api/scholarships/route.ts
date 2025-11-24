@@ -30,17 +30,34 @@ export async function GET(req: NextRequest) {
       where.studentId = studentId
     }
 
-    // Récupérer les bourses
+    // ✅ OPTIMISÉ: Select précis
     const scholarships = await prisma.scholarship.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        amount: true,
+        percentage: true,
+        reason: true,
+        academicYear: true,
+        isActive: true,
+        studentId: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
         student: {
           select: {
-            user: {
-              select: { name: true, email: true },
-            },
+            id: true,
             studentNumber: true,
             niveau: true,
+            user: {
+              select: { 
+                id: true,
+                name: true, 
+                email: true 
+              },
+            },
           },
         },
       },

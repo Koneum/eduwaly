@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     const moduleId = searchParams.get('moduleId')
     const category = searchParams.get('category')
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       module: {
         schoolId: user.schoolId,
       },
@@ -34,14 +34,36 @@ export async function GET(req: NextRequest) {
       where.category = category
     }
 
+    // ✅ OPTIMISÉ: Select précis au lieu de include profond
     const documents = await prisma.document.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        fileName: true,
+        fileUrl: true,
+        fileSize: true,
+        mimeType: true,
+        category: true,
+        uploadedBy: true,
+        isPublic: true,
+        moduleId: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
         module: {
-          include: {
-            filiere: true,
-          },
-        },
+          select: {
+            id: true,
+            nom: true,
+            filiere: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc',

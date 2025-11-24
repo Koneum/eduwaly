@@ -78,8 +78,7 @@ export async function POST(request: NextRequest) {
         where: { id: studentId },
         data: {
           userId: user.id,
-          phone: phone || student.phone,
-          isEnrolled: true
+          phone: phone || student.phone
         }
       })
 
@@ -141,8 +140,7 @@ export async function POST(request: NextRequest) {
         where: { id: parentId },
         data: {
           userId: user.id,
-          phone: phone || parent.phone,
-          isEnrolled: true
+          phone: phone || parent.phone
         }
       })
 

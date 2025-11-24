@@ -39,7 +39,7 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
   // Récupérer les informations de l'école
   const school = await prisma.school.findUnique({
     where: { id: schoolId },
-    select: { schoolType: true, name: true }
+    select: { schoolType: true, name: true, subdomain: true, shortName: true }
   })
 
   console.log('StudentsPage - school found:', school)
@@ -213,6 +213,8 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
         filieres={filieres}
         feeStructures={finalFeeStructures}
         rooms={rooms}
+        schoolShortName={school.shortName ?? null}
+        schoolSubdomain={school.subdomain ?? null}
       />
     </div>
   )

@@ -176,154 +176,135 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // STUDENT: Récupère étudiants de la même classe/filière, parents et teachers
+    // STUDENT: Récupérer tous les utilisateurs disponibles en 1 requête
     else if (userRole === 'STUDENT') {
-      const student = await prisma.student.findFirst({
+      const student = await prisma.student.findUnique({
         where: { userId: session.user.id },
         select: { 
           id: true,
-          filiereId: true,
-          niveau: true,
-          schoolId: true,
-        },
-      });
+          schoolId: true, 
+          filiereId: true, 
+          niveau: true 
+        }
+      })
 
       if (!student) {
-        return NextResponse.json({ error: 'Étudiant non trouvé' }, { status: 404 });
+        return NextResponse.json({ error: 'Étudiant non trouvé' }, { status: 404 })
       }
 
-      // Étudiants de la même filière et niveau
-      const classmates = await prisma.student.findMany({
+      // ✅ 1 seule requête optimisée avec OR
+      const users = await prisma.user.findMany({
         where: {
-          schoolId: student.schoolId,
-          filiereId: student.filiereId,
-          niveau: student.niveau,
-          userId: { not: session.user.id },
-          user: { isNot: null },
-        },
-        select: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-              image: true,
+          id: { not: session.user.id },
+          OR: [
+            // Camarades de classe
+            {
+              student: {
+                schoolId: student.schoolId,
+                filiereId: student.filiereId,
+                niveau: student.niveau
+              }
             },
-          },
-        },
-      });
-
-      // Teachers de l'école
-      const teachers = await prisma.user.findMany({
-        where: {
-          role: 'TEACHER',
-          enseignant: {
-            schoolId: student.schoolId
-          },
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          image: true,
-        },
-      });
-
-      // Parents (TODO: à implémenter quand la relation sera clarifiée)
-      
-      // Admins de l'école
-      const admins = await prisma.user.findMany({
-        where: {
-          role: 'SCHOOL_ADMIN',
-          schoolId: student.schoolId,
+            // Enseignants de l'école
+            {
+              role: 'TEACHER',
+              schoolId: student.schoolId
+            },
+            // Admins de l'école
+            {
+              role: 'SCHOOL_ADMIN',
+              schoolId: student.schoolId
+            },
+            // Parent de l'étudiant
+            {
+              role: 'PARENT',
+              parent: {
+                students: {
+                  some: { id: student.id }
+                }
+              }
+            }
+          ]
         },
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
-          image: true,
+          image: true
         },
-      });
+        orderBy: [
+          { role: 'asc' },
+          { name: 'asc' }
+        ]
+      })
 
-  const classmateUsers = classmates.map((c: { user?: UserSelect | null }) => c.user).filter(Boolean) as UserSelect[]
-      availableUsers = [
-        ...classmateUsers.map((u: UserSelect) => ({ id: u.id, name: u.name, email: u.email ?? null, role: u.role, image: u.image ?? null })),
-        ...teachers.map((t: UserSelect) => ({ id: t.id, name: t.name, email: t.email ?? null, role: t.role, image: t.image ?? null })),
-        ...admins.map((a: UserSelect) => ({ id: a.id, name: a.name, email: a.email ?? null, role: a.role, image: a.image ?? null })),
-      ];
+      availableUsers = users.map((user: UserSelect) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email ?? null,
+        role: user.role,
+        image: user.image ?? null,
+      }));
     }
 
-    // PARENT: Récupère étudiants liés, teachers des étudiants et admin
+    // PARENT: Récupérer tous les utilisateurs disponibles en 1 requête
     else if (userRole === 'PARENT') {
-      const parent = await prisma.parent.findFirst({
+      const parent = await prisma.parent.findUnique({
         where: { userId: session.user.id },
-        select: { 
+        select: {
           id: true,
           students: {
             select: {
               id: true,
               schoolId: true,
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  role: true,
-                  image: true,
-                },
-              },
+              userId: true
             },
-          },
-        },
-      });
+            take: 1
+          }
+        }
+      })
 
-      if (!parent || parent.students.length === 0) {
-        return NextResponse.json({ error: 'Parent sans enfants' }, { status: 404 });
+      if (!parent || !parent.students[0]) {
+        return NextResponse.json({ error: 'Parent non trouvé' }, { status: 404 })
       }
 
-  const schoolIds = parent.students.map((s: { schoolId?: string }) => s.schoolId).filter(Boolean) as string[];
-  const studentUsers = parent.students.map((s: { user?: UserSelect | null }) => s.user).filter(Boolean) as UserSelect[];
+      const schoolId = parent.students[0].schoolId
+      const studentUserIds = parent.students.map(s => s.userId).filter((id): id is string => id !== null)
 
-      // Teachers des écoles des enfants
-      const teachers = await prisma.user.findMany({
+      // ✅ 1 seule requête optimisée
+      const users = await prisma.user.findMany({
         where: {
-          role: 'TEACHER',
-          enseignant: {
-            schoolId: { in: schoolIds }
-          },
+          OR: [
+            // Ses enfants
+            { id: { in: studentUserIds } },
+            // Enseignants de l'école
+            { role: 'TEACHER', schoolId },
+            // Admins de l'école
+            { role: 'SCHOOL_ADMIN', schoolId }
+          ],
+          id: { not: session.user.id }
         },
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
-          image: true,
-        }, 
-      });
-
-      // Admins des écoles des enfants
-      const admins = await prisma.user.findMany({
-        where: {
-          role: 'SCHOOL_ADMIN',
-          schoolId: { in: schoolIds },
+          image: true
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          image: true,
-        },
-      });
+        orderBy: [
+          { role: 'asc' },
+          { name: 'asc' }
+        ]
+      })
 
-      availableUsers = [
-        ...studentUsers.map(u => ({ id: u.id, name: u.name, email: u.email ?? null, role: u.role, image: u.image ?? null })),
-        ...teachers.map((t: UserSelect) => ({ id: t.id, name: t.name, email: t.email ?? null, role: t.role, image: t.image ?? null })),
-        ...admins.map((a: UserSelect) => ({ id: a.id, name: a.name, email: a.email ?? null, role: a.role, image: a.image ?? null })),
-      ];
+      availableUsers = users.map((user: UserSelect) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email ?? null,
+        role: user.role,
+        image: user.image ?? null,
+      }));
     }
 
     // Dédupliquer par ID

@@ -16,14 +16,52 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {}
     if (moduleId) where.moduleId = moduleId
 
+    // ✅ OPTIMISÉ: Retirer submissions include, utiliser _count
     const homework = await prisma.homework.findMany({
       where,
-      include: {
-        module: true,
-        enseignant: true,
-        submissions: studentId ? {
-          where: { studentId }
-        } : true
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        dueDate: true,
+        maxPoints: true,
+        moduleId: true,
+        enseignantId: true,
+        createdAt: true,
+        updatedAt: true,
+        module: {
+          select: {
+            id: true,
+            nom: true
+          }
+        },
+        enseignant: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            titre: true
+          }
+        },
+        _count: {
+          select: {
+            submissions: true
+          }
+        },
+        // Inclure submissions seulement si studentId fourni
+        ...(studentId && {
+          submissions: {
+            where: { studentId },
+            select: {
+              id: true,
+              status: true,
+              submittedAt: true,
+              grade: true,
+              feedback: true
+            }
+          }
+        })
       },
       orderBy: { dueDate: 'desc' }
     })

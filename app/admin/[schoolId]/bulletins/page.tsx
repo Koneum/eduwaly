@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import { getAuthUser } from '@/lib/auth-utils'
 import { redirect } from "next/navigation"
 import BulletinsGenerator from "@/components/admin/bulletins-generator"
+import BulletinsList, { BulletinListItem } from "@/components/admin/bulletins-list"
 
 export default async function BulletinsPage({ 
   params 
@@ -81,6 +82,79 @@ export default async function BulletinsPage({
     }
   })
 
+  // Récupérer les templates de bulletins
+  const bulletinTemplates = await prisma.pDFTemplate.findMany({
+    where: { schoolId },
+    orderBy: { createdAt: 'desc' }
+  })
+
+  // Récupérer l'abonnement pour connaître la limite de templates
+  const subscription = await prisma.subscription.findFirst({
+    where: { schoolId },
+    include: { plan: true }
+  })
+
+  let maxBulletinTemplates = 1
+  if (subscription?.plan) {
+    const rawFeatures = subscription.plan.features as unknown
+    const features = typeof rawFeatures === 'string'
+      ? JSON.parse(rawFeatures)
+      : rawFeatures || {}
+
+    maxBulletinTemplates = features?.bulletinTemplatesLimit ?? 1
+  }
+
+  // Récupérer les bulletins générés pour l'historique (après avoir les filtres)
+  const bulletinsRaw = await prisma.bulletin.findMany({
+    where: { schoolId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      gradingPeriod: true,
+      filiere: true,
+      student: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  })
+
+  const bulletins: BulletinListItem[] = bulletinsRaw.map((b) => {
+    const startYear = b.gradingPeriod.startDate.getFullYear()
+    const academicYear = `${startYear}-${startYear + 1}`
+
+    return {
+      id: b.id,
+      createdAt: b.createdAt.toISOString(),
+      generalAverage: b.generalAverage,
+      gradingPeriodId: b.gradingPeriodId,
+      gradingPeriodName: b.gradingPeriod.name,
+      academicYear,
+      filiereId: b.filiereId,
+      filiereName: b.filiere?.nom ?? null,
+      studentId: b.studentId,
+      studentName: b.student?.user?.name ?? null,
+      studentNumber: b.student?.studentNumber ?? null,
+    }
+  })
+
+  const periodOptions = gradingPeriods.map((p) => ({ id: p.id, label: p.name }))
+  const academicYearSet = new Set<string>()
+  bulletins.forEach((b) => academicYearSet.add(b.academicYear))
+  const academicYearOptions = Array.from(academicYearSet).sort().map((year) => ({
+    id: year,
+    label: year,
+  }))
+  const filiereOptions = (
+    isHighSchool
+      ? classes.map((c) => ({ id: c.id, label: c.name }))
+      : filieres.map((f) => ({ id: f.id, label: f.nom }))
+  )
+  const studentOptions = students.map((s) => ({
+    id: s.id,
+    label: `${s.user?.name || 'Étudiant'} (${s.studentNumber})`,
+  }))
+
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
@@ -100,6 +174,17 @@ export default async function BulletinsPage({
         filieres={isHighSchool ? classes.map(c => ({ id: c.id, nom: c.name })) : filieres}
         students={students}
         isHighSchool={isHighSchool}
+        bulletinTemplates={bulletinTemplates}
+        maxBulletinTemplates={maxBulletinTemplates}
+      />
+
+      {/* Historique des bulletins générés */}
+      <BulletinsList
+        bulletins={bulletins}
+        periods={periodOptions}
+        filieres={filiereOptions}
+        students={studentOptions}
+        academicYears={academicYearOptions}
       />
     </div>
   )

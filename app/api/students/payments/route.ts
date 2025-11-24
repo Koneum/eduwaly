@@ -32,23 +32,40 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    // Récupérer les paiements
+    // ✅ OPTIMISÉ: Select précis au lieu de include
     const payments = await prisma.studentPayment.findMany({
       where: {
         studentId,
         student: { schoolId },
       },
-      include: {
+      select: {
+        id: true,
+        amountDue: true,
+        amountPaid: true,
+        dueDate: true,
+        paidAt: true,
+        paymentMethod: true,
+        status: true,
+        studentId: true,
+        feeStructureId: true,
+        createdAt: true,
+        updatedAt: true,
         student: {
           select: {
-            user: {
-              select: { name: true, email: true },
-            },
+            id: true,
             studentNumber: true,
+            user: {
+              select: { 
+                id: true,
+                name: true, 
+                email: true 
+              },
+            },
           },
         },
         feeStructure: {
           select: {
+            id: true,
             name: true,
             amount: true,
           },
@@ -106,6 +123,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Vérifier que la structure de frais est bien de type TUITION
+    const fee = await prisma.feeStructure.findUnique({
+      where: { id: feeStructureId },
+      select: { type: true },
+    })
+
+    if (!fee) {
+      return NextResponse.json(
+        { error: 'Structure de frais introuvable' },
+        { status: 404 },
+      )
+    }
+
     // Créer le paiement
     const payment = await prisma.studentPayment.create({
       data: {
@@ -120,16 +150,48 @@ export async function POST(req: NextRequest) {
       },
       include: {
         student: {
-          select: {
+          include: {
             user: { select: { name: true, email: true } },
-            studentNumber: true,
+            parents: true,
           },
         },
         feeStructure: {
-          select: { name: true, amount: true },
+          select: { name: true, amount: true, type: true },
         },
       },
     })
+
+    // Si c'est un frais de scolarité (TUITION) et que c'est le premier paiement, activer les comptes
+    if (payment.feeStructure.type === 'TUITION') {
+      const existingTuitionPayments = await prisma.studentPayment.count({
+        where: {
+          studentId,
+          feeStructure: { type: 'TUITION' },
+          id: { not: payment.id },
+        },
+      })
+
+      if (existingTuitionPayments === 0) {
+        // Premier paiement de scolarité: activer l'étudiant et ses parents
+        await prisma.student.update({
+          where: { id: studentId },
+          data: {
+            isEnrolled: true,
+          },
+        })
+
+        if (payment.student.parents.length > 0) {
+          await prisma.parent.updateMany({
+            where: {
+              id: { in: payment.student.parents.map((p) => p.id) },
+            },
+            data: {
+              isEnrolled: true,
+            },
+          })
+        }
+      }
+    }
 
     return NextResponse.json({ payment }, { status: 201 })
   } catch (error) {

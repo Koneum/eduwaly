@@ -14,29 +14,36 @@ export async function GET() {
       );
     }
 
+    // ✅ OPTIMISÉ: Retirer emplois include, utiliser _count
     const enseignants = await prisma.enseignant.findMany({
       where: {
         schoolId: user.schoolId
       },
-      include: {
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        titre: true,
+        grade: true,
+        type: true,
+        email: true,
+        telephone: true,
+        userId: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,
             name: true,
             email: true,
-            image: true
+            image: true,
+            isActive: true
           }
         },
-        emplois: {
-          include: {
-            module: {
-              include: {
-                filiere: true
-              }
-            }
-          },
-          orderBy: {
-            dateDebut: 'asc'
+        _count: {
+          select: {
+            emplois: true
           }
         }
       },

@@ -27,18 +27,62 @@ export async function GET(request: NextRequest) {
       whereClause.anneeUnivId = anneeUniv.id;
     }
 
-    // Configuration de base pour la requête
+    // ✅ OPTIMISÉ: Select précis au lieu de include profond + pagination
     const baseQuery = {
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        titre: true,
+        dateDebut: true,
+        dateFin: true,
+        heureDebut: true,
+        heureFin: true,
+        salle: true,
+        niveau: true,
+        semestre: true,
+        vh: true,
+        joursCours: true,
+        schoolId: true,
+        moduleId: true,
+        enseignantId: true,
+        filiereId: true,
+        anneeUnivId: true,
+        createdAt: true,
+        updatedAt: true,
         module: {
-          include: {
-            filiere: true
+          select: {
+            id: true,
+            nom: true,
+            code: true,
+            type: true,
+            filiere: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
           }
         },
-        filiere: true,
-        enseignant: true,
-        anneeUniv: true
+        filiere: {
+          select: {
+            id: true,
+            nom: true
+          }
+        },
+        enseignant: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            titre: true
+          }
+        },
+        anneeUniv: {
+          select: {
+            id: true,
+            annee: true
+          }
+        }
       }
     };
 
@@ -54,13 +98,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(emplois);
     }
 
-    // Requête standard pour tous les emplois
+    // Requête standard avec pagination
     const emplois = await prisma.emploiDuTemps.findMany({
       ...baseQuery,
       orderBy: [
         { dateDebut: 'asc' },
         { heureDebut: 'asc' }
-      ]
+      ],
+      take: 100 // Pagination
     });
 
     return NextResponse.json(emplois);

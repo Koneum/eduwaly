@@ -3,14 +3,19 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
+    // ✅ OPTIMISÉ: Liste légère avec _count au lieu de charger toutes les relations
     const filieres = await prisma.filiere.findMany({
-      include: {
-        modules: true,
-        emplois: {
-          include: {
-            module: true,
-            enseignant: true,
-            anneeUniv: true
+      select: {
+        id: true,
+        nom: true,
+        schoolId: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            modules: true,
+            emplois: true,
+            students: true
           }
         }
       },

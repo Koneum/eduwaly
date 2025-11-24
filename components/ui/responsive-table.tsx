@@ -63,16 +63,16 @@ export function ResponsiveTable<T = any>({
   // Vue Desktop: Table classique
   if (!isMobile) {
     return (
-      <div className={cn("rounded-md border overflow-x-auto", className)}>
+      <div className={cn("rounded-md border overflow-x-auto bg-foreground text-background", className)}>
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-foreground text-background">
             <TableRow>
               {columns.map((column, index) => (
-                <TableHead key={index} className={column.className}>
+                <TableHead key={index} className={cn("text-background", column.className)}>
                   {column.header}
                 </TableHead>
               ))}
-              {actions && <TableHead>Actions</TableHead>}
+              {actions && <TableHead className="text-background">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -114,24 +114,24 @@ export function ResponsiveTable<T = any>({
         <Card
           key={keyExtractor(row)}
           className={cn(
-            "overflow-hidden",
-            onRowClick && "cursor-pointer active:scale-98 transition-transform"
+            "overflow-hidden border border-foreground/20 bg-foreground text-background",
+            onRowClick && "cursor-pointer active:scale-98 transition-transform hover:shadow-md"
           )}
           onClick={() => onRowClick?.(row)}
         >
           <CardContent className="p-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               {mobileColumns.map((column, index) => {
                 const value = typeof column.accessor === 'function'
                   ? column.accessor(row)
                   : String(row[column.accessor] ?? '-')
 
                 return (
-                  <div key={index} className="flex justify-between items-start gap-2">
-                    <span className="text-sm font-medium text-muted-foreground min-w-[100px]">
+                  <div key={index} className="flex justify-between items-start gap-4">
+                    <span className="text-sm font-medium text-background/80 min-w-[100px]">
                       {column.mobileLabel || column.header}
                     </span>
-                    <span className="text-sm text-right flex-1">
+                    <span className="text-sm text-right flex-1 text-background">
                       {value}
                     </span>
                   </div>

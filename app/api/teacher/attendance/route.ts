@@ -29,15 +29,31 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Récupérer les étudiants de la filière
+    // ✅ OPTIMISÉ: Select précis au lieu de include
     const students = await prisma.student.findMany({
       where: {
         filiereId,
         schoolId: user.schoolId,
       },
-      include: {
-        user: true,
-        filiere: true,
+      select: {
+        id: true,
+        studentNumber: true,
+        niveau: true,
+        userId: true,
+        filiereId: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        filiere: {
+          select: {
+            id: true,
+            nom: true
+          }
+        },
       },
       orderBy: {
         user: {

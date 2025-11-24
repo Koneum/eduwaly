@@ -19,16 +19,46 @@ export async function GET(request: NextRequest) {
     if (studentId) where.studentId = studentId
     if (moduleId) where.moduleId = moduleId
 
+    // ✅ OPTIMISÉ: Select précis au lieu de include profond
     const evaluations = await prisma.evaluation.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        note: true,
+        coefficient: true,
+        type: true,
+        date: true,
+        validated: true,
+        comment: true,
+        studentId: true,
+        moduleId: true,
+        createdAt: true,
+        updatedAt: true,
         student: {
-          include: {
-            user: true,
-            filiere: true
+          select: {
+            id: true,
+            studentNumber: true,
+            niveau: true,
+            user: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            filiere: {
+              select: {
+                id: true,
+                nom: true
+              }
+            }
           }
         },
-        module: true
+        module: {
+          select: {
+            id: true,
+            nom: true
+          }
+        }
       },
       orderBy: { date: 'desc' }
     })
@@ -116,7 +146,7 @@ export async function PUT(request: NextRequest) {
 
     const evaluation = await prisma.evaluation.update({
       where: { id },
-      data: updateData as any
+      data: updateData
     })
 
     return NextResponse.json({ evaluation })

@@ -15,7 +15,7 @@ export async function GET() {
     const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-    // Récupérer les abonnements qui expirent dans 7 jours
+    // ✅ OPTIMISÉ: Include admin directement pour éviter N requêtes
     const subscriptions7Days = await prisma.subscription.findMany({
       where: {
         status: 'ACTIVE',
@@ -24,13 +24,36 @@ export async function GET() {
           lte: in7Days
         }
       },
-      include: {
-        school: true,
-        plan: true
+      select: {
+        id: true,
+        schoolId: true,
+        currentPeriodEnd: true,
+        school: {
+          select: {
+            id: true,
+            name: true,
+            users: {
+              where: { role: 'SCHOOL_ADMIN' },
+              select: {
+                id: true,
+                name: true,
+                email: true
+              },
+              take: 1
+            }
+          }
+        },
+        plan: {
+          select: {
+            id: true,
+            name: true,
+            price: true
+          }
+        }
       }
     })
 
-    // Récupérer les abonnements qui expirent demain
+    // ✅ OPTIMISÉ: Include admin directement
     const subscriptions1Day = await prisma.subscription.findMany({
       where: {
         status: 'ACTIVE',
@@ -39,9 +62,32 @@ export async function GET() {
           lte: tomorrow
         }
       },
-      include: {
-        school: true,
-        plan: true
+      select: {
+        id: true,
+        schoolId: true,
+        currentPeriodEnd: true,
+        school: {
+          select: {
+            id: true,
+            name: true,
+            users: {
+              where: { role: 'SCHOOL_ADMIN' },
+              select: {
+                id: true,
+                name: true,
+                email: true
+              },
+              take: 1
+            }
+          }
+        },
+        plan: {
+          select: {
+            id: true,
+            name: true,
+            price: true
+          }
+        }
       }
     })
 
@@ -49,15 +95,10 @@ export async function GET() {
     let sent1Day = 0
     let errors = 0
 
-    // Envoyer les rappels 7 jours avant
+    // ✅ Envoyer les rappels 7 jours avant (admin déjà chargé)
     for (const sub of subscriptions7Days) {
       try {
-        const admin = await prisma.user.findFirst({
-          where: {
-            schoolId: sub.schoolId,
-            role: 'SCHOOL_ADMIN'
-          }
-        })
+        const admin = sub.school.users[0]
 
         if (admin?.email) {
           await sendPaymentReminderEmail(
@@ -74,15 +115,10 @@ export async function GET() {
       }
     }
 
-    // Envoyer les rappels 1 jour avant
+    // ✅ Envoyer les rappels 1 jour avant (admin déjà chargé)
     for (const sub of subscriptions1Day) {
       try {
-        const admin = await prisma.user.findFirst({
-          where: {
-            schoolId: sub.schoolId,
-            role: 'SCHOOL_ADMIN'
-          }
-        })
+        const admin = sub.school.users[0]
 
         if (admin?.email) {
           await sendPaymentReminderEmail(

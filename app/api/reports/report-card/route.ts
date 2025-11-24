@@ -15,9 +15,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
     }
 
+    // ✅ OPTIMISÉ: Select précis
     const student = await prisma.student.findUnique({
       where: { id: studentId },
-      include: { user: true, filiere: true },
+      select: {
+        id: true,
+        studentNumber: true,
+        enrollmentId: true,
+        niveau: true,
+        user: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        filiere: {
+          select: {
+            id: true,
+            nom: true
+          }
+        }
+      },
     });
 
     if (!student) {
@@ -26,7 +44,20 @@ export async function POST(request: NextRequest) {
 
     const evaluations = await prisma.evaluation.findMany({
       where: { studentId },
-      include: { module: true },
+      select: {
+        id: true,
+        note: true,
+        coefficient: true,
+        type: true,
+        date: true,
+        moduleId: true,
+        module: {
+          select: {
+            id: true,
+            nom: true
+          }
+        }
+      },
       orderBy: { date: 'asc' },
     });
 
