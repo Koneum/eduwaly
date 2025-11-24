@@ -1,41 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAuthUser } from '@/lib/auth-utils'
-import { vitepay } from '@/lib/vitepay/client'
-import prisma from '@/lib/prisma'
-import { checkFeatureAccess } from '@/lib/check-plan-limit'
+import { NextRequest, NextResponse } from "next/server"
+import crypto from "crypto"
+import { getAuthUser } from "@/lib/auth-utils"
+import prisma from "@/lib/prisma"
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔥 Début création paiement VitePay')
+    console.log("🔥 Début création paiement VitePay")
     
     const user = await getAuthUser()
     
     if (!user || (user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ 
+        success: false,
+        error: 'Non autorisé' 
+      }, { status: 401 })
     }
 
-    const { planId, schoolId } = await request.json()
-    console.log('📦 Données reçues:', { planId, schoolId })
+    const body = await request.json()
+    console.log("� Body reçu:", body)
+    
+    const { planId, schoolId } = body
 
-    // Vérifier la configuration VitePay
-    console.log('🔧 Config VitePay:', {
-      hasApiKey: !!process.env.VITEPAY_API_KEY,
-      hasApiSecret: !!process.env.VITEPAY_API_SECRET,
-      mode: process.env.VITEPAY_MODE,
-      baseUrl: process.env.VITEPAY_BASE_URL
-    })
-
-    // Vérifier si les paiements en ligne sont disponibles dans le plan
-    const featureCheck = await checkFeatureAccess(schoolId, 'onlinePayments')
-    if (!featureCheck.allowed) {
-      return NextResponse.json({ 
-        error: 'Fonctionnalité non disponible',
-        message: featureCheck.error,
-        upgradeRequired: true
-      }, { status: 403 })
+    // Validation des paramètres
+    if (!planId || !schoolId) {
+      console.error("❌ Paramètres manquants:", { planId, schoolId })
+      return NextResponse.json(
+        { 
+          success: false,
+          error: "Paramètres manquants: planId, schoolId requis",
+          received: { planId, schoolId }
+        },
+        { status: 400 }
+      )
     }
 
     // Récupérer le plan et l'école
@@ -49,51 +48,140 @@ export async function POST(request: NextRequest) {
 
     if (!plan || !school) {
       return NextResponse.json(
-        { error: 'Plan ou école introuvable' },
+        { 
+          success: false,
+          error: 'Plan ou école introuvable' 
+        },
         { status: 404 }
+      )
+    }
+
+    // Configuration VitePay
+    const apiKey = process.env.VITEPAY_API_KEY
+    const apiSecret = process.env.VITEPAY_API_SECRET
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+
+    console.log("🔑 Config VitePay:", { 
+      hasApiKey: !!apiKey, 
+      hasApiSecret: !!apiSecret,
+      baseUrl 
+    })
+
+    if (!apiKey || !apiSecret) {
+      console.error("❌ Configuration VitePay manquante")
+      return NextResponse.json(
+        { 
+          success: false,
+          error: "Configuration VitePay manquante",
+          details: "VITEPAY_API_KEY ou VITEPAY_API_SECRET non défini"
+        },
+        { status: 500 }
       )
     }
 
     // Générer un ID de commande unique
     const orderId = `SUB-${school.id}-${Date.now()}`
-    // Utiliser NEXT_PUBLIC_BASE_URL en priorité pour la cohérence
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
-    
-    console.log('🌐 URLs de callback:', {
-      baseUrl,
-      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-      returnUrl: `${baseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`,
-      callbackUrl: `${baseUrl}/api/vitepay/webhook`
+
+    // Montant en centimes (multiplier par 100)
+    const amount100 = Math.round(Number(plan.price) * 100)
+
+    // Nettoyer baseUrl (enlever le slash final s'il existe)
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+
+    // URLs de callback
+    const callbackUrl = `${cleanBaseUrl}/api/vitepay/webhook`
+    const returnUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`
+    const declineUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=declined&order_id=${orderId}`
+    const cancelUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`
+
+    // Générer le hash SHA1
+    // Format: SHA1(UPPERCASE("order_id;amount_100;currency_code;callback_url;api_secret"))
+    const hashString = `${orderId.toString().toUpperCase()};${amount100};XOF;${callbackUrl};${apiSecret}`
+    const hash = crypto
+      .createHash("sha1")
+      .update(hashString.toUpperCase())
+      .digest("hex")
+      .toLowerCase() // VitePay attend le hash en minuscules !
+
+    console.log("🔐 Hash généré:", {
+      hashString,
+      hash,
+      orderId,
+      amount100
     })
 
-    // Créer le paiement avec VitePay selon leur documentation
-    const paymentResponse = await vitepay.createPayment({
+    // Préparer les données pour VitePay
+    const formData = new URLSearchParams({
+      "payment[language_code]": "fr",
+      "payment[currency_code]": "XOF",
+      "payment[country_code]": "ML",
+      "payment[order_id]": orderId.toString(),
+      "payment[description]": `Abonnement ${plan.name} - ${school.name}`,
+      "payment[amount_100]": amount100.toString(),
+      "payment[buyer_ip_adress]": request.headers.get("x-forwarded-for") || "127.0.0.1",
+      "payment[return_url]": returnUrl,
+      "payment[decline_url]": declineUrl,
+      "payment[cancel_url]": cancelUrl,
+      "payment[callback_url]": callbackUrl,
+      "payment[email]": school.email || user.email,
+      "payment[p_type]": "orange_money",
+      api_key: apiKey,
+      hash: hash,
+    })
+
+    console.log("📤 Données envoyées à VitePay:", {
       orderId,
-      amount: Number(plan.price), // Montant en francs (sera converti en centimes par le client)
-      description: `Abonnement ${plan.name} - ${school.name}`,
+      amount100,
       email: school.email || user.email,
-      returnUrl: `${baseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`,
-      declineUrl: `${baseUrl}/admin/${schoolId}/subscription?status=declined&order_id=${orderId}`,
-      cancelUrl: `${baseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`,
-      callbackUrl: `${baseUrl}/api/vitepay/webhook`,
-      buyerIpAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
+      hash,
+      callbackUrl
     })
 
-    console.log('✅ Réponse VitePay:', paymentResponse)
-
-    // Note: Pour les paiements d'abonnement école, on pourrait créer un modèle séparé
-    // Pour l'instant, on stocke l'orderId dans les métadonnées de la souscription
-
-    return NextResponse.json({
-      success: true,
-      orderId,
-      redirectUrl: paymentResponse.redirect_url,
+    // Appel à l'API VitePay
+    const vitepayResponse = await fetch("https://api.vitepay.com/v1/prod/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData.toString(),
     })
-  } catch (error) {
-    console.error('Erreur création paiement VitePay:', error)
+
+    const responseText = await vitepayResponse.text()
+    
+    console.log("📡 Réponse VitePay:", {
+      status: vitepayResponse.status,
+      statusText: vitepayResponse.statusText,
+      response: responseText,
+    })
+    
+    // VitePay retourne directement l'URL de redirection en texte
+    if (vitepayResponse.ok && responseText.includes("checkout")) {
+      return NextResponse.json({
+        success: true,
+        redirectUrl: responseText.trim(),
+        orderId: orderId,
+        amount: Number(plan.price)
+      })
+    }
+
+    // En cas d'erreur
+    console.error("❌ Erreur VitePay:", responseText)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erreur lors de la création du paiement' },
+      {
+        success: false,
+        error: "Erreur lors de l'initialisation du paiement",
+        details: responseText,
+      },
+      { status: 400 }
+    )
+  } catch (error) {
+    console.error("❌ Erreur création paiement VitePay:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erreur serveur lors de l'initialisation du paiement",
+        details: error instanceof Error ? error.message : "Erreur inconnue"
+      },
       { status: 500 }
     )
   }

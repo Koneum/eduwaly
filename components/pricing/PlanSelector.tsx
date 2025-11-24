@@ -2,19 +2,31 @@
 
 import { useState, useEffect } from "react"
 import { PricingSection } from "@/components/pricing/PricingSection"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, CreditCard, Calendar, CheckCircle2 } from "lucide-react"
+
+interface Plan {
+  id: string
+  name: string
+  displayName: string
+  description: string | null
+  price: number
+  interval: string
+  maxStudents: number
+  maxTeachers: number
+  features: string
+  isPopular: boolean
+  isActive: boolean
+}
 
 interface PlanSelectorProps {
   schoolId: string
   currentPlan?: string
 }
 
-export function PlanSelector({ currentPlan: initialPlan }: PlanSelectorProps) {
-  const router = useRouter()
+export function PlanSelector({ currentPlan: initialPlan, schoolId }: PlanSelectorProps) {
   const [loading, setLoading] = useState(false)
   const [currentPlan, setCurrentPlan] = useState(initialPlan || 'STARTER')
   const [subscriptionInfo, setSubscriptionInfo] = useState<{
@@ -43,7 +55,7 @@ export function PlanSelector({ currentPlan: initialPlan }: PlanSelectorProps) {
     fetchSubscriptionInfo()
   }, [])
 
-  const handleSelectPlan = async (planName: string) => {
+  const handleSelectPlan = async (planId: string, planName: string) => {
     // Vérifier si déjà sur ce plan
     if (planName === currentPlan) {
       toast.info("Vous êtes déjà sur ce plan")
@@ -60,33 +72,59 @@ export function PlanSelector({ currentPlan: initialPlan }: PlanSelectorProps) {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/school-admin/subscription/upgrade', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planName }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de la mise à jour")
+      // Récupérer les plans pour trouver l'ID correspondant au nom
+      const plansResponse = await fetch('/api/plans')
+      if (!plansResponse.ok) {
+        throw new Error("Erreur lors de la récupération des plans")
+      }
+      const plansData = await plansResponse.json()
+      
+      // Trouver le plan par nom
+      const plan = plansData.plans.find((p: Plan) => p.name === planName)
+      if (!plan) {
+        throw new Error("Plan non trouvé")
       }
 
-      // Si paiement nécessaire, rediriger vers VitePay
-      if (data.paymentUrl) {
-        console.log('URL retournée par l\'API:', data.paymentUrl)
-        toast.success("Redirection vers la page de paiement...", {
-          description: `Montant: ${data.amount.toLocaleString('fr-FR')} FCFA`,
+      // Créer le paiement VitePay directement avec le vrai ID
+      const paymentResponse = await fetch('/api/vitepay/create-payment', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: plan.id, // Utiliser l'ID réel du plan
+          schoolId: schoolId
+          // paymentMethod n'est pas nécessaire pour l'API VitePay
+        }),
+      })
+
+      console.log('📡 Réponse API paiement:', {
+        status: paymentResponse.status,
+        statusText: paymentResponse.statusText
+      })
+
+      const paymentData = await paymentResponse.json()
+      console.log('📦 Données reçues de l\'API:', paymentData)
+
+      if (!paymentData.success) {
+        console.error('❌ Erreur API paiement:', {
+          status: paymentResponse.status,
+          error: paymentData.error,
+          details: paymentData.details
+        })
+        throw new Error(paymentData.error || "Erreur lors de la création du paiement")
+      }
+
+      // Rediriger directement vers VitePay
+      if (paymentData.redirectUrl) {
+        console.log('Redirection vers VitePay:', paymentData.redirectUrl)
+        toast.success("Redirection vers VitePay...", {
+          description: `Montant: ${paymentData.amount?.toLocaleString('fr-FR') || '...'} FCFA`,
         })
         
-        // Rediriger vers VitePay
         setTimeout(() => {
-          console.log('Redirection vers:', data.paymentUrl)
-          window.location.href = data.paymentUrl
+          window.location.href = paymentData.redirectUrl
         }, 1500)
       } else {
-        toast.success("Plan mis à jour avec succès!")
-        router.refresh()
+        throw new Error("URL de paiement non reçue")
       }
     } catch (error) {
       console.error('Erreur:', error)

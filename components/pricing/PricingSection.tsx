@@ -31,7 +31,7 @@ function parseFeatures(features: string): string[] {
 }
 
 interface PricingSectionProps {
-  onSelectPlan?: (planName: string) => void
+  onSelectPlan?: (planId: string, planName: string) => void
   currentPlan?: string
 }
 
@@ -167,7 +167,7 @@ export function PricingSection({ onSelectPlan, currentPlan }: PricingSectionProp
 
                 {/* Button placé en bas des spécifications */}
                 <Button
-                  onClick={() => onSelectPlan?.(plan.name)}
+                  onClick={() => onSelectPlan?.(plan.id, plan.name)}
                   disabled={isCurrent}
                   className={`w-full mt-auto ${
                     isCurrent
@@ -197,7 +197,7 @@ export function PricingSection({ onSelectPlan, currentPlan }: PricingSectionProp
 
         {/* Enterprise Plan - Style Freepik */}
         {plans.find(p => p.name === 'ENTERPRISE') && (
-          <Card className="p-6 sm:p-8 mb-12 bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 text-white border-slate-700">
+          <Card className="p-6 sm:p-8 mb-12 bg-linear-to-r from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 text-white border-slate-700">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -212,7 +212,7 @@ export function PricingSection({ onSelectPlan, currentPlan }: PricingSectionProp
                   AI-powered creativity at scale—unlimited users, advanced controls, and full support
                 </p>
                 <Button
-                  onClick={() => onSelectPlan?.('ENTERPRISE')}
+                  onClick={() => onSelectPlan?.('enterprise', 'ENTERPRISE')}
                   variant="outline"
                   className="bg-white text-slate-900 hover:bg-slate-100 border-0"
                 >
@@ -314,7 +314,7 @@ export function PricingSection({ onSelectPlan, currentPlan }: PricingSectionProp
                             )}
                             {!isCurrent && (
                               <Button
-                                onClick={() => onSelectPlan?.(plan.name)}
+                                onClick={() => onSelectPlan?.(plan.id, plan.name)}
                                 size="sm"
                                 className={isPopular ? 'bg-blue-500 hover:bg-blue-600 text-white' : ''}
                               >

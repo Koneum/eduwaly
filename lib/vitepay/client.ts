@@ -116,6 +116,12 @@ class VitepayClient {
 
     const url = `${this.baseUrl}/v1/${this.mode}/payments`
 
+    console.log('🌐 Appel VitePay API:', {
+      url,
+      mode: this.mode,
+      formData: Object.fromEntries(formData.entries())
+    })
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -125,9 +131,20 @@ class VitepayClient {
         body: formData.toString(),
       })
 
+      console.log('📡 Réponse VitePay:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      })
+
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('VitePay API Error:', errorText)
+        console.error('❌ VitePay API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText,
+          url
+        })
         throw new Error(`VitePay API error: ${response.status} - ${errorText}`)
       }
 
@@ -155,7 +172,7 @@ class VitepayClient {
     isSuccess: boolean
     response: { status: string; message?: string }
   } {
-    const { order_id, amount_100, currency_code, authenticity, success, failure } = callbackData
+    const { order_id, amount_100, currency_code, authenticity, success } = callbackData
 
     // Vérifier l'authenticité
     const isValid = this.verifyCallbackAuthenticity(
