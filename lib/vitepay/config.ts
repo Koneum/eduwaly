@@ -7,7 +7,7 @@ export const VITEPAY_CONFIG = {
   apiKey: process.env.VITEPAY_API_KEY || '',
   apiSecret: process.env.VITEPAY_API_SECRET || '',
   baseUrl: process.env.VITEPAY_BASE_URL || 'https://api.vitepay.com',
-  mode: 'prod' as const, // Forcer le mode production avec le type correct
+  mode: (process.env.VITEPAY_MODE || 'sandbox') as 'sandbox' | 'prod', // sandbox par défaut pour éviter erreurs en test
   // Utiliser NEXT_PUBLIC_BASE_URL en priorité pour la cohérence
   returnUrl: process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   currency: 'XOF', // Franc CFA

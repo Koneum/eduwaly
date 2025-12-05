@@ -98,17 +98,32 @@ export function PlanSelector({ currentPlan: initialPlan, schoolId }: PlanSelecto
 
       console.log('📡 Réponse API paiement:', {
         status: paymentResponse.status,
-        statusText: paymentResponse.statusText
+        statusText: paymentResponse.statusText,
+        ok: paymentResponse.ok
       })
 
       const paymentData = await paymentResponse.json()
       console.log('📦 Données reçues de l\'API:', paymentData)
+      console.log('🔍 Structure de la réponse:', {
+        keys: Object.keys(paymentData),
+        hasSuccess: 'success' in paymentData,
+        successValue: paymentData.success,
+        hasRedirectUrl: 'redirectUrl' in paymentData,
+        redirectUrlValue: paymentData.redirectUrl
+      })
 
-      if (!paymentData.success) {
+      // Vérifier si la réponse contient soit success=true, soit redirectUrl
+      const isSuccess = paymentData.success === true
+      const hasRedirectUrl = paymentData.redirectUrl
+      
+      console.log('🎯 Vérifications:', { isSuccess, hasRedirectUrl })
+
+      if (!isSuccess && !hasRedirectUrl) {
         console.error('❌ Erreur API paiement:', {
           status: paymentResponse.status,
           error: paymentData.error,
-          details: paymentData.details
+          details: paymentData.details,
+          fullResponse: paymentData
         })
         throw new Error(paymentData.error || "Erreur lors de la création du paiement")
       }

@@ -1,72 +1,128 @@
-import { NextRequest } from 'next/server'
-import { vitepay } from '@/lib/vitepay/client'
-import type { VitepayCallbackData } from '@/lib/vitepay/client'
+import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import prisma from '@/lib/prisma'
-import { handleCorsOptions, corsJsonResponse } from '@/lib/cors'
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
 
 /**
- * Webhook VitePay - Reçoit les callbacks serveur-à-serveur
+ * Webhook VitePay - Traite les callbacks serveur-à-serveur
  * Documentation: https://api.vitepay.com/developers section 5
  * 
- * Support CORS pour les requêtes cross-origin de VitePay
+ * Format du callback VitePay:
+ * - authenticity: SHA1("order_id;amount_100;currency_code;api_secret")
+ * - order_id: doit être en majuscules (sauf numérique)
+ * - currency_code: doit être en majuscules
+ * - success=1 ou failure=1
  */
-
-// Gérer les requêtes OPTIONS (CORS preflight)
-export async function OPTIONS() {
-  return handleCorsOptions()
-}
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('📨 Callback VitePay reçu')
+    
     // VitePay envoie les données en form-urlencoded
     const formData = await request.formData()
     
-    const callbackData: VitepayCallbackData = {
-      order_id: formData.get('order_id') as string,
-      amount_100: formData.get('amount_100') as string,
-      currency_code: formData.get('currency_code') as string,
-      authenticity: formData.get('authenticity') as string,
-      success: formData.get('success') as string | undefined,
-      failure: formData.get('failure') as string | undefined,
-      sandbox: formData.get('sandbox') as string | undefined,
-    }
+    const order_id = formData.get('order_id') as string
+    const amount_100 = formData.get('amount_100') as string
+    const currency_code = formData.get('currency_code') as string
+    const authenticity = formData.get('authenticity') as string
+    const success = formData.get('success') as string
+    const failure = formData.get('failure') as string
+    const sandbox = formData.get('sandbox') as string
 
-    console.log('📨 Callback VitePay reçu:', {
-      orderId: callbackData.order_id,
-      success: callbackData.success,
-      failure: callbackData.failure,
-      sandbox: callbackData.sandbox
+    console.log('📦 Données callback:', {
+      order_id,
+      amount_100,
+      currency_code,
+      success,
+      failure,
+      sandbox
     })
 
-    // Vérifier l'authenticité et traiter le callback
-    const result = vitepay.handleCallback(callbackData)
-
-    if (!result.isValid) {
-      console.error('❌ Signature invalide pour order_id:', callbackData.order_id)
-      return corsJsonResponse(result.response)
+    // 1. Recalculer la signature selon la doc
+    const apiSecret = process.env.VITEPAY_API_SECRET
+    if (!apiSecret) {
+      console.error('❌ VITEPAY_API_SECRET manquant')
+      return NextResponse.json({ 
+        status: '0', 
+        message: 'Configuration manquante' 
+      }, { status: 500 })
     }
 
-    // Extraire les informations de l'order_id (format: SUB-{schoolId}-{timestamp})
-    const orderParts = callbackData.order_id.split('-')
-    if (orderParts[0] === 'SUB' && orderParts.length >= 3) {
-      const schoolId = orderParts[1]
-      
-      if (result.isSuccess) {
-        // Paiement réussi - Activer l'abonnement
+    // Format: SHA1("order_id;amount_100;currency_code;api_secret")
+    const hashString = `${order_id};${amount_100};${currency_code};${apiSecret}`
+    const calculatedAuthenticity = crypto
+      .createHash("sha1")
+      .update(hashString.toUpperCase()) // order_id et currency_code en majuscules
+      .digest("hex")
+      .toUpperCase() // Le résultat doit être en majuscules
+
+    console.log('🔐 Vérification signature:', {
+      received: authenticity,
+      calculated: calculatedAuthenticity,
+      hashString
+    })
+
+    // 2. Comparer la signature calculée à celle transmise par VitePay
+    if (authenticity !== calculatedAuthenticity) {
+      console.error('❌ Signature invalide')
+      return NextResponse.json({ 
+        status: '0', 
+        message: 'Signature invalide' 
+      }, { status: 400 })
+    }
+
+    // 3. Vérifier que le numéro de commande est valide
+    if (!order_id || !order_id.startsWith('SUB-')) {
+      console.error('❌ Order ID invalide:', order_id)
+      return NextResponse.json({ 
+        status: '0', 
+        message: 'Order ID invalide' 
+      }, { status: 400 })
+    }
+
+    // Extraire schoolId depuis order_id (format: SUB-{schoolId}-{timestamp})
+    const orderParts = order_id.split('-')
+    const schoolId = orderParts[1]
+    
+    if (!schoolId) {
+      console.error('❌ School ID extrait invalide')
+      return NextResponse.json({ 
+        status: '0', 
+        message: 'School ID invalide' 
+      }, { status: 400 })
+    }
+
+    // 4. Mettre à jour l'abonnement selon le statut
+    const isSuccess = success === '1'
+    const isFailure = failure === '1'
+
+    console.log('🎯 Traitement paiement:', { schoolId, isSuccess, isFailure })
+
+    if (isSuccess) {
+      // Paiement réussi - Activer/mettre à jour l'abonnement
+      try {
         const school = await prisma.school.findUnique({
           where: { id: schoolId },
           include: { subscription: true }
         })
 
-        if (school?.subscription) {
-          // Calculer la nouvelle période (30 jours)
-          const now = new Date()
-          const newPeriodEnd = new Date(now)
-          newPeriodEnd.setDate(newPeriodEnd.getDate() + 30)
+        if (!school) {
+          console.error('❌ École non trouvée:', schoolId)
+          return NextResponse.json({ 
+            status: '0', 
+            message: 'École non trouvée' 
+          }, { status: 404 })
+        }
 
+        // Calculer la nouvelle période (30 jours)
+        const now = new Date()
+        const newPeriodEnd = new Date(now)
+        newPeriodEnd.setDate(newPeriodEnd.getDate() + 30)
+
+        if (school.subscription) {
+          // Mettre à jour l'abonnement existant
           await prisma.subscription.update({
             where: { id: school.subscription.id },
             data: {
@@ -75,23 +131,72 @@ export async function POST(request: NextRequest) {
               updatedAt: now
             }
           })
-
-          console.log('✅ Abonnement activé pour l\'\u00e9cole:', schoolId)
+          console.log('✅ Abonnement mis à jour pour école:', schoolId)
+        } else {
+          // Créer un nouvel abonnement
+          await prisma.subscription.create({
+            data: {
+              schoolId: schoolId,
+              status: 'ACTIVE',
+              currentPeriodStart: now, // Date de début de période
+              currentPeriodEnd: newPeriodEnd,
+              planId: 'cmiddzrbh00027dfmcw9rdxoa', // Plan TEST par défaut
+              createdAt: now,
+              updatedAt: now
+            }
+          })
+          console.log('✅ Nouvel abonnement créé pour école:', schoolId)
         }
-      } else {
-        // Paiement échoué
-        console.log('⚠️ Paiement échoué pour order_id:', callbackData.order_id)
+
+        // 5. Retourner la réponse de confirmation à VitePay
+        return NextResponse.json({ status: '1' })
+
+      } catch (dbError) {
+        console.error('❌ Erreur base de données:', dbError)
+        return NextResponse.json({ 
+          status: '0', 
+          message: 'Erreur lors de la mise à jour' 
+        }, { status: 500 })
       }
+    } else if (isFailure) {
+      // Paiement échoué
+      console.log('⚠️ Paiement échoué pour order_id:', order_id)
+      
+      // Mettre à jour le statut si abonnement existe
+      try {
+        const school = await prisma.school.findUnique({
+          where: { id: schoolId },
+          include: { subscription: true }
+        })
+
+        if (school?.subscription) {
+          await prisma.subscription.update({
+            where: { id: school.subscription.id },
+            data: {
+              status: 'CANCELED', // Corrigé: CANCELED au lieu de CANCELLED
+              updatedAt: new Date()
+            }
+          })
+        }
+      } catch (dbError) {
+        console.error('❌ Erreur mise à jour échec:', dbError)
+      }
+
+      return NextResponse.json({ status: '1' }) // Confirmer réception même si échec
+    } else {
+      // Statut inconnu
+      console.error('❌ Statut de paiement inconnu:', { success, failure })
+      return NextResponse.json({ 
+        status: '0', 
+        message: 'Statut de paiement inconnu' 
+      }, { status: 400 })
     }
 
-    // Retourner la réponse attendue par VitePay (avec CORS)
-    return corsJsonResponse(result.response)
   } catch (error) {
     console.error('❌ Erreur webhook VitePay:', error)
-    // Même en cas d'erreur, retourner un statut 200 avec status: "0" (avec CORS)
-    return corsJsonResponse({
-      status: '0',
-      message: 'Erreur lors du traitement du callback'
-    })
+    return NextResponse.json({ 
+      status: '0', 
+      message: 'Erreur serveur lors du traitement' 
+    }, { status: 500 })
   }
 }
