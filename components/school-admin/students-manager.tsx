@@ -37,6 +37,7 @@ interface Student {
   } | null
   phone: string | null
   isEnrolled: boolean
+  status: string | null
   payments: Array<{
     status: string
     amountDue: number
@@ -133,7 +134,8 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
     studentNumber: '',
     niveau: '',
     phone: '',
-    filiereId: ''
+    filiereId: '',
+    status: ''
   })
   
   // Payment form state
@@ -445,7 +447,8 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
       studentNumber: '',
       niveau: '',
       phone: '',
-      filiereId: ''
+      filiereId: '',
+      status: ''
     })
   }
 
@@ -951,6 +954,20 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
               </Select>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="status" className="text-responsive-sm">Statut étudiant</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                <SelectTrigger className="text-responsive-sm">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="REGULIER" className="text-responsive-sm">Régulier</SelectItem>
+                  <SelectItem value="PROFESSIONNEL" className="text-responsive-sm">Professionnel</SelectItem>
+                  <SelectItem value="CL" className="text-responsive-sm">Candidat Libre (CL)</SelectItem>
+                  <SelectItem value="PROFESSIONNEL_ETAT" className="text-responsive-sm">Professionnel État</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 sm:space-y-2">
               <Label htmlFor="phone" className="text-responsive-sm">Téléphone</Label>
               <Input 
                 id="phone" 
@@ -1016,7 +1033,17 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
                   <p className="text-responsive-sm font-medium">{selectedStudent.phone || '-'}</p>
                 </div>
                 <div>
-                  <Label className="text-responsive-sm text-muted-foreground">Statut</Label>
+                  <Label className="text-responsive-sm text-muted-foreground">Type étudiant</Label>
+                  <Badge variant="outline" className="text-responsive-xs">
+                    {selectedStudent.status === 'REGULIER' ? 'Régulier' :
+                     selectedStudent.status === 'PROFESSIONNEL' ? 'Professionnel' :
+                     selectedStudent.status === 'CL' ? 'Candidat Libre' :
+                     selectedStudent.status === 'PROFESSIONNEL_ETAT' ? 'Prof. État' : 
+                     'Non défini'}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-responsive-sm text-muted-foreground">Inscription</Label>
                   <Badge variant={selectedStudent.isEnrolled ? 'default' : 'secondary'} className="text-responsive-xs">
                     {selectedStudent.isEnrolled ? 'Inscrit' : 'Non inscrit'}
                   </Badge>

@@ -89,7 +89,19 @@ export async function POST(request: NextRequest) {
     const orderId = `SUB-${school.id}-${Date.now()}`.toUpperCase() // Nouveau : Mettre orderId en majuscules immédiatement
 
     // Montant en centimes (multiplier par 100)
-    const amount100 = Math.round(Number(plan.price) * 100)
+    // VitePay a un montant minimum (généralement 100 XOF)
+    const planPrice = Number(plan.price)
+    if (planPrice < 100) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: "Montant minimum requis: 100 XOF",
+          details: `Le plan ${plan.name} a un prix de ${planPrice} XOF, minimum accepté: 100 XOF`
+        },
+        { status: 400 }
+      )
+    }
+    const amount100 = Math.round(planPrice * 100)
 
     // Nettoyer baseUrl (enlever le slash final s'il existe)
     const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl

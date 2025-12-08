@@ -1,8 +1,6 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
 import { 
   LayoutDashboard, 
   Users, 
@@ -23,9 +21,10 @@ import {
   Megaphone,
   Receipt,
   ClipboardList,
-  FileBarChart
+  FileBarChart,
+  UsersRound,
+  BarChart3
 } from "lucide-react"
-import { FaChartBar } from 'react-icons/fa';
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ThemeToggle } from "./theme-toggle"
@@ -33,6 +32,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import NotificationCenter from "./notifications/NotificationCenter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { NavAccordion, NavSimpleItem, type NavGroup, type NavItem } from "./nav-accordion"
 
 interface AdminSchoolNavProps {
   schoolId: string
@@ -57,103 +57,71 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
     router.push('/login')
   }
 
-  const navItems = [
+  // Item principal (Dashboard) - non groupé
+  const dashboardItem: NavItem = {
+    title: "Dashboard",
+    href: `/admin/${schoolId}`,
+    icon: LayoutDashboard,
+  }
+
+  // Groupes de navigation accordéon
+  const navGroups: NavGroup[] = [
     {
-      title: "Dashboard",
-      href: `/admin/${schoolId}`,
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Étudiants",
-      href: `/admin/${schoolId}/students`,
-      icon: Users,
-    },
-    {
-      title: "Emplois du Temps",
-      href: `/admin/${schoolId}/schedule`,
-      icon: Calendar,
-    },
-    {
-      title: schoolType === 'HIGH_SCHOOL' ? "Séries" : "Filières",
-      href: `/admin/${schoolId}/filieres`,
+      title: "Académique",
       icon: GraduationCap,
+      defaultOpen: true,
+      items: [
+        { title: "Étudiants", href: `/admin/${schoolId}/students`, icon: Users },
+        { title: "Emplois du Temps", href: `/admin/${schoolId}/schedule`, icon: Calendar },
+        { title: schoolType === 'HIGH_SCHOOL' ? "Séries" : "Filières", href: `/admin/${schoolId}/filieres`, icon: GraduationCap },
+        { title: schoolType === 'HIGH_SCHOOL' ? "Matières" : "Modules", href: `/admin/${schoolId}/modules`, icon: BookOpen },
+        { title: schoolType === 'HIGH_SCHOOL' ? "Classes" : "Salles", href: `/admin/${schoolId}/rooms`, icon: Building2 },
+      ],
     },
     {
-      title: schoolType === 'HIGH_SCHOOL' ? "Matières" : "Modules",
-      href: `/admin/${schoolId}/modules`,
-      icon: BookOpen,
+      title: "Personnel",
+      icon: UsersRound,
+      items: [
+        { title: "Enseignants", href: `/admin/${schoolId}/enseignants`, icon: UserCog },
+        { title: "Staff", href: `/admin/${schoolId}/staff`, icon: CircleUser },
+      ],
     },
     {
-      title: schoolType === 'HIGH_SCHOOL' ? "Classes" : "Salles",
-      href: `/admin/${schoolId}/rooms`,
-      icon: Building2,
+      title: "Évaluations",
+      icon: BarChart3,
+      items: [
+        { title: "Configuration Notation", href: `/admin/${schoolId}/settings/grading`, icon: ClipboardList },
+        { title: "Bulletins de Notes", href: `/admin/${schoolId}/bulletins`, icon: FileBarChart },
+        { title: "Statistiques", href: `/admin/${schoolId}/statistiques`, icon: BarChart3 },
+        { title: "Rapports & Documents", href: `/admin/${schoolId}/reports`, icon: FileText },
+      ],
     },
     {
-      title: "Enseignants",
-      href: `/admin/${schoolId}/enseignants`,
-      icon: UserCog,
-    },
-    {
-      title: "Staff",
-      href: `/admin/${schoolId}/staff`,
-      icon: CircleUser,
-    },
-    {
-      title: "Statistiques",
-      href: `/admin/${schoolId}/statistiques`,
-      icon: FaChartBar,
-    },
-    {
-      title: "Rapports & Documents",
-      href: `/admin/${schoolId}/reports`,
-      icon: FileText,
-    },
-    {
-      title: "Configuration Notation",
-      href: `/admin/${schoolId}/settings/grading`, 
-      icon: ClipboardList,
-    },
-    {
-      title: "Bulletins de Notes",
-      href: `/admin/${schoolId}/bulletins`,
-      icon: FileBarChart,
-    },
-    {
-      title: "Messages",
-      href: `/admin/${schoolId}/messages`,
+      title: "Communication",
       icon: MessageSquare,
+      items: [
+        { title: "Messages", href: `/admin/${schoolId}/messages`, icon: MessageSquare },
+        { title: "Annonces", href: `/admin/${schoolId}/announcements`, icon: Megaphone },
+      ],
     },
     {
-      title: "Annonces",
-      href: `/admin/${schoolId}/announcements`,
-      icon: Megaphone,
-    },
-    {
-      title: "Finance & Scolarité",
-      href: `/admin/${schoolId}/finance`,
+      title: "Finance",
       icon: DollarSign,
-    },
-    {
-      title: "Prix & Bourses",
-      href: `/admin/${schoolId}/finance-settings`,
-      icon: CreditCard,
-    },
-    {
-      title: "Templates de Reçu",
-      href: `/admin/${schoolId}/receipt-templates`,
-      icon: Receipt,
-    },
-    {
-      title: "Abonnement",
-      href: `/admin/${schoolId}/subscription`,
-      icon: Wallet,
-    },
-    {
-      title: "Paramètres",
-      href: `/admin/${schoolId}/settings`,
-      icon: Settings,
+      items: [
+        { title: "Finance & Scolarité", href: `/admin/${schoolId}/finance`, icon: DollarSign },
+        { title: "Prix & Bourses", href: `/admin/${schoolId}/finance-settings`, icon: CreditCard },
+        { title: "Templates de Reçu", href: `/admin/${schoolId}/receipt-templates`, icon: Receipt },
+        { title: "Abonnement", href: `/admin/${schoolId}/subscription`, icon: Wallet },
+      ],
     },
   ]
+
+  // Item paramètres - non groupé (en bas)
+  const settingsItem: NavItem = {
+    title: "Paramètres",
+    href: `/admin/${schoolId}/settings`,
+    icon: Settings,
+  }
 
   return (
     <>
@@ -170,25 +138,14 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
           </div>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <Icon className="icon-responsive" />
-                {item.title}
-              </Link>
-            )
-          })}
+          {/* Dashboard - non groupé */}
+          <NavSimpleItem item={dashboardItem} pathname={pathname} />
+          
+          {/* Groupes accordéon */}
+          <NavAccordion groups={navGroups} pathname={pathname} />
+          
+          {/* Paramètres - non groupé */}
+          <NavSimpleItem item={settingsItem} pathname={pathname} />
         </nav>
         <div className="p-4 border-t border-border space-y-2">
           <div className="flex items-center justify-between px-4">
@@ -225,25 +182,14 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
               </div>
             </div>
             <nav className="px-4 py-6 space-y-2 overflow-y-auto h-[calc(100vh-12rem)]">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg text-responsive-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    )}
-                  >
-                    <Icon className="icon-responsive" />
-                    {item.title}
-                  </Link>
-                )
-              })}
+              {/* Dashboard - non groupé */}
+              <NavSimpleItem item={dashboardItem} pathname={pathname} />
+              
+              {/* Groupes accordéon */}
+              <NavAccordion groups={navGroups} pathname={pathname} />
+              
+              {/* Paramètres - non groupé */}
+              <NavSimpleItem item={settingsItem} pathname={pathname} />
             </nav>
             <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
               <Button onClick={handleSignOut} variant="ghost" className="w-full justify-start gap-3">

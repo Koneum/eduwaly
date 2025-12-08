@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { type, subject, coefficient, classId, date, moduleId } = body
+    const { type, subject, coefficient, classId, date, moduleId, maxPoints = 20 } = body
 
-    console.log('Données reçues:', { type, subject, coefficient, classId, date, moduleId })
+    console.log('Données reçues:', { type, subject, coefficient, classId, date, moduleId, maxPoints })
 
     if (!type || !subject || !classId || !date) {
       return NextResponse.json({ 
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
             type,
             date: new Date(date),
             note: 0, // Note par défaut à 0, à modifier ensuite
+            maxPoints: maxPoints ? parseFloat(maxPoints) : 20, // Barème variable
             coefficient: coefficient ? parseFloat(coefficient) : 1
           }
         })

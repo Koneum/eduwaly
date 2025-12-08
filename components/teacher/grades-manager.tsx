@@ -47,8 +47,20 @@ export default function GradesManager({ evaluations, stats, classes, isHighSchoo
     subject: '',
     coefficient: '',
     classId: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    maxPoints: '20' // Barème par défaut /20
   })
+
+  const baremeOptions = [
+    { value: '5', label: '/5' },
+    { value: '8', label: '/8' },
+    { value: '10', label: '/10' },
+    { value: '12', label: '/12' },
+    { value: '15', label: '/15' },
+    { value: '20', label: '/20' },
+    { value: '40', label: '/40' },
+    { value: '100', label: '/100' },
+  ]
 
   const handleCreateEvaluation = async () => {
     if (!formData.type || !formData.subject || !formData.classId) {
@@ -65,7 +77,8 @@ export default function GradesManager({ evaluations, stats, classes, isHighSchoo
           subject: formData.subject,
           coefficient: formData.coefficient || '1',
           classId: formData.classId,
-          date: formData.date
+          date: formData.date,
+          maxPoints: formData.maxPoints || '20'
         })
       })
 
@@ -85,7 +98,8 @@ export default function GradesManager({ evaluations, stats, classes, isHighSchoo
         subject: '',
         coefficient: '',
         classId: '',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        maxPoints: '20'
       })
       
       router.refresh()
@@ -262,7 +276,22 @@ export default function GradesManager({ evaluations, stats, classes, isHighSchoo
                 className="text-responsive-sm"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxPoints" className="text-responsive-sm">Barème *</Label>
+                <Select value={formData.maxPoints} onValueChange={(value) => setFormData({...formData, maxPoints: value})}>
+                  <SelectTrigger className="text-responsive-sm">
+                    <SelectValue placeholder="/20" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {baremeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value} className="text-responsive-sm">
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="coefficient" className="text-responsive-sm">Coefficient</Label>
                 <Input

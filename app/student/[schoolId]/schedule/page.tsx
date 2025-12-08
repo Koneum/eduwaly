@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Clock, MapPin, Calendar } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
+import { StudentScheduleView } from "@/components/schedule/StudentScheduleView"
 
 export default async function StudentSchedulePage({ 
   params 
@@ -62,8 +61,8 @@ export default async function StudentSchedulePage({
   const now = new Date()
   const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
   
-  const schedule = emploiDuTemps.map((cours: any) => {
-    let status = 'upcoming'
+  const initialSchedule = emploiDuTemps.map((cours: any) => {
+    let status: 'current' | 'upcoming' | 'completed' = 'upcoming'
     if (currentTime > cours.heureFin) {
       status = 'completed'
     } else if (currentTime >= cours.heureDebut && currentTime <= cours.heureFin) {
@@ -71,10 +70,13 @@ export default async function StudentSchedulePage({
     }
     
     return {
+      id: cours.id,
       time: `${cours.heureDebut} - ${cours.heureFin}`,
       subject: cours.module.nom,
-      teacher: `${cours.enseignant.titre} ${cours.enseignant.prenom} ${cours.enseignant.nom}`,
-      room: cours.salle,
+      teacher: cours.enseignant 
+        ? `${cours.enseignant.titre || ''} ${cours.enseignant.prenom} ${cours.enseignant.nom}`.trim()
+        : 'Non assigné',
+      room: cours.salle || 'Non définie',
       status,
       type: cours.module.type
     }
@@ -127,130 +129,43 @@ export default async function StudentSchedulePage({
   })
   const attendanceRate = totalSessions > 0 ? Math.round(((totalSessions - totalAbsences) / totalSessions) * 100) : 100
 
-  // Prochain cours
-  const nextCourse = schedule.find((c: any) => c.status === 'upcoming') || schedule.find((c: any) => c.status === 'current')
-
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-responsive-xl font-bold text-foreground">Mon Emploi du Temps</h1>
-        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Vos cours du jour - {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <p className="text-muted-foreground text-responsive-sm mt-1 sm:mt-2">Consultez vos cours par jour</p>
       </div>
 
+      {/* Vue du jour avec sélecteur */}
+      <StudentScheduleView
+        schoolId={schoolId}
+        filiereId={student.filiereId}
+        niveau={student.niveau}
+        initialSchedule={initialSchedule}
+      />
+
+      {/* Statistiques de la semaine */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-responsive-lg">Aujourd&apos;hui</CardTitle>
-          <CardDescription className="text-responsive-sm">Vos cours de la journée</CardDescription>
+          <CardTitle className="text-responsive-lg">Statistiques de la Semaine</CardTitle>
         </CardHeader>
         <CardContent>
-          {schedule.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-responsive-base sm:text-responsive-lg font-semibold text-foreground mb-2">Aucun cours aujourd&apos;hui</h3>
-              <p className="text-responsive-sm text-muted-foreground">Profitez de votre journée libre !</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-responsive-xl sm:text-responsive-2xl font-bold text-foreground">{Math.round(totalHoursWeek)}h</p>
+              <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Heures de cours</p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {schedule.map((item: any, idx: number) => (
-              <div
-                key={idx}
-                className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg transition-colors ${
-                  item.status === "current"
-                    ? "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-950/30"
-                    : item.status === "completed"
-                      ? "border-border bg-muted opacity-60"
-                      : "border-border hover:bg-accent/50"
-                }`}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div
-                    className={`p-2 rounded-lg shrink-0 ${
-                      item.status === "current"
-                        ? "bg-green-100 dark:bg-green-900/30"
-                        : item.status === "completed"
-                          ? "bg-muted"
-                          : "bg-primary/10 dark:bg-primary/20"
-                    }`}
-                  >
-                    <Clock
-                      className={`icon-responsive ${item.status === "current" ? "text-green-600 dark:text-green-400" : "text-primary"}`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-responsive-sm sm:text-responsive-base font-semibold text-foreground">{item.subject}</h3>
-                      {item.status === "current" && (
-                        <Badge variant="default" className="bg-green-600 dark:bg-green-700 text-responsive-xs">
-                          En cours
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
-                      <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground truncate">{item.teacher}</p>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-                        <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">{item.room}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right shrink-0">
-                  <p className="text-responsive-xs sm:text-responsive-sm font-medium text-foreground">{item.time}</p>
-                </div>
-              </div>
-            ))}
+            <div className="text-center">
+              <p className="text-responsive-xl sm:text-responsive-2xl font-bold text-foreground">{uniqueModules}</p>
+              <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Matières</p>
             </div>
-          )}
+            <div className="text-center">
+              <p className="text-responsive-xl sm:text-responsive-2xl font-bold text-green-600 dark:text-green-400">{attendanceRate}%</p>
+              <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Présence</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-responsive-lg">Prochain Cours</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {nextCourse ? (
-              <div className="space-y-2">
-                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground">{nextCourse.subject}</p>
-                <p className="text-responsive-sm text-muted-foreground">{nextCourse.teacher}</p>
-                <div className="flex items-center gap-2 mt-3">
-                  <Clock className="icon-responsive text-primary" />
-                  <p className="text-responsive-xs sm:text-responsive-sm font-medium">{nextCourse.time}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="icon-responsive text-primary" />
-                  <p className="text-responsive-xs sm:text-responsive-sm font-medium">{nextCourse.room}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <p className="text-responsive-sm text-muted-foreground">Aucun cours à venir aujourd&apos;hui</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-responsive-lg">Statistiques</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Heures cette semaine</span>
-              <span className="text-responsive-base sm:text-responsive-lg font-bold text-foreground">{Math.round(totalHoursWeek)}h</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Matières</span>
-              <span className="text-responsive-base sm:text-responsive-lg font-bold text-foreground">{uniqueModules}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-responsive-xs sm:text-responsive-sm text-muted-foreground">Taux de présence</span>
-              <span className="text-responsive-base sm:text-responsive-lg font-bold text-green-600 dark:text-green-400">{attendanceRate}%</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

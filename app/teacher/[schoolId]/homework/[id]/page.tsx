@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from '@/lib/auth-utils'
 import { redirect } from "next/navigation"
-import { ArrowLeft, Calendar, Download, FileText } from "lucide-react"
+import { ArrowLeft, Calendar, Download, FileText, CheckCheck } from "lucide-react"
 import Link from "next/link"
 
 export default async function HomeworkDetailPage({ 
@@ -61,6 +61,7 @@ export default async function HomeworkDetailPage({
   const submittedCount = homework.submissions.filter(s => s.status === 'SUBMITTED' || s.status === 'GRADED').length
   const gradedCount = homework.submissions.filter(s => s.status === 'GRADED').length
   const pendingCount = homework.submissions.filter(s => s.status === 'PENDING').length
+  const completedCount = homework.submissions.filter(s => s.isCompleted).length
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
@@ -111,7 +112,7 @@ export default async function HomeworkDetailPage({
       </Card>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle className="text-responsive-xs sm:text-responsive-sm font-medium text-muted-foreground">Soumis</CardTitle>
@@ -134,6 +135,17 @@ export default async function HomeworkDetailPage({
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <p className="text-responsive-xl sm:text-responsive-2xl font-bold text-orange-600">{pendingCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="text-responsive-xs sm:text-responsive-sm font-medium text-muted-foreground flex items-center gap-1">
+              <CheckCheck className="h-4 w-4" />
+              Terminés
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <p className="text-responsive-xl sm:text-responsive-2xl font-bold text-blue-500">{completedCount}</p>
           </CardContent>
         </Card>
       </div>
@@ -179,6 +191,12 @@ export default async function HomeworkDetailPage({
                           )}
                           {submission.status === 'PENDING' && (
                             <Badge variant="secondary" className="text-[10px] sm:text-responsive-xs">En attente</Badge>
+                          )}
+                          {submission.isCompleted && (
+                            <Badge className="bg-blue-500 text-[10px] sm:text-responsive-xs">
+                              <CheckCheck className="h-3 w-3 mr-1" />
+                              Terminé
+                            </Badge>
                           )}
                         </div>
                         <p className="text-responsive-xs sm:text-responsive-sm text-muted-foreground mb-1 sm:mb-2">

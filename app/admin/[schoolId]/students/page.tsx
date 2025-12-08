@@ -22,6 +22,7 @@ type StudentRow = {
   phone?: string | null
   isEnrolled?: boolean
   niveau: string
+  status?: string | null
   user?: { name?: string; email?: string | null } | null
   filiere?: { id?: string; nom?: string } | null
   payments: PaymentRow[]
@@ -145,6 +146,7 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
     enrollmentId: s.enrollmentId ?? '',
     phone: s.phone ?? null,
     isEnrolled: Boolean(s.isEnrolled),
+    status: s.status ?? null,
   }))
   .map(s => ({
     ...s,
@@ -156,10 +158,11 @@ export default async function StudentsPage({ params }: { params: Promise<{ schoo
     filiere: f.filiere ? { nom: f.filiere.nom ?? '' } : null
   }))
 
-  // Ensure student.filiere has required fields
+  // Ensure student.filiere has required fields and status is properly typed
   const finalStudents = students.map(s => ({
     ...s,
-    filiere: s.filiere ? { id: s.filiere.id ?? '', nom: s.filiere.nom ?? '' } : null
+    filiere: s.filiere ? { id: s.filiere.id ?? '', nom: s.filiere.nom ?? '' } : null,
+    status: s.status ?? null
   }))
 
   // Calculer les statistiques

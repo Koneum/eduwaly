@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Users, Calendar, DollarSign, MessageSquare, LogOut, Menu, LineChart } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, DollarSign, MessageSquare, LogOut, Menu, LineChart, BookOpenCheck, CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -55,6 +55,16 @@ export function ParentNav({ schoolId, schoolName, isEnrolled }: ParentNavProps) 
       title: "Emploi du Temps",
       href: `/parent/${schoolId}/schedule`,
       icon: Calendar,
+    },
+    {
+      title: "Correspondance",
+      href: `/parent/${schoolId}/correspondence`,
+      icon: BookOpenCheck,
+    },
+    {
+      title: "Rendez-vous",
+      href: `/parent/${schoolId}/appointments`,
+      icon: CalendarClock,
     },
     {
       title: "Scolarité",

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Calendar, Upload, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { FileText, Calendar, CheckCircle, Clock, AlertCircle, CheckCheck } from "lucide-react"
 import prisma from "@/lib/prisma"
 import { getAuthUser } from "@/lib/auth-utils"
 import { redirect } from "next/navigation"
 import { SubmitHomeworkDialog } from "@/components/homework/SubmitHomeworkDialog"
+import { MarkCompleteButton } from "@/components/homework/MarkCompleteButton"
 
 export default async function StudentHomeworkPage() {
   const user = await getAuthUser()
@@ -52,7 +52,14 @@ export default async function StudentHomeworkPage() {
 
   // Séparer les devoirs en catégories
   const now = new Date()
-  const submittedIds = student.submissions.map((s: any) => s.homeworkId)
+  const submittedIds = student.submissions
+    .filter((s: any) => s.status === 'SUBMITTED' || s.status === 'GRADED')
+    .map((s: any) => s.homeworkId)
+  
+  // Devoirs marqués comme terminés (mais pas forcément soumis)
+  const completedIds = student.submissions
+    .filter((s: any) => s.isCompleted)
+    .map((s: any) => s.homeworkId)
   
   const pendingHomework = allHomework.filter((h: any) => 
     !submittedIds.includes(h.id) && h.dueDate >= now
@@ -65,6 +72,9 @@ export default async function StudentHomeworkPage() {
   const submittedHomework = allHomework.filter((h: any) => 
     submittedIds.includes(h.id)
   )
+  
+  // Compteur des devoirs marqués comme terminés
+  const completedCount = completedIds.length
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -134,9 +144,14 @@ export default async function StudentHomeworkPage() {
         </Card>
         <Card>
           <CardContent className="p-3 sm:p-4 md:p-6">
-            <div>
-              <p className="text-responsive-xs font-medium text-muted-foreground">Total</p>
-              <p className="text-responsive-lg sm:text-responsive-xl font-bold text-foreground mt-1 sm:mt-2">{allHomework.length}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-responsive-xs font-medium text-muted-foreground">Terminés</p>
+                <p className="text-responsive-lg sm:text-responsive-xl font-bold text-blue-600 dark:text-blue-400 mt-1 sm:mt-2">{completedCount}</p>
+              </div>
+              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-xl">
+                <CheckCheck className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -172,13 +187,19 @@ export default async function StudentHomeworkPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {getStatusBadge('overdue')}
-                      <SubmitHomeworkDialog
-                        homeworkId={homework.id}
-                        homeworkTitle={homework.title}
-                        moduleName={homework.module.nom}
-                        dueDate={homework.dueDate}
-                        isOverdue={true}
-                      />
+                      <div className="flex flex-wrap gap-2">
+                        <MarkCompleteButton
+                          homeworkId={homework.id}
+                          initialCompleted={completedIds.includes(homework.id)}
+                        />
+                        <SubmitHomeworkDialog
+                          homeworkId={homework.id}
+                          homeworkTitle={homework.title}
+                          moduleName={homework.module.nom}
+                          dueDate={homework.dueDate}
+                          isOverdue={true}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -224,12 +245,18 @@ export default async function StudentHomeworkPage() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {getStatusBadge('pending')}
-                      <SubmitHomeworkDialog
-                        homeworkId={homework.id}
-                        homeworkTitle={homework.title}
-                        moduleName={homework.module.nom}
-                        dueDate={homework.dueDate}
-                      />
+                      <div className="flex flex-wrap gap-2">
+                        <MarkCompleteButton
+                          homeworkId={homework.id}
+                          initialCompleted={completedIds.includes(homework.id)}
+                        />
+                        <SubmitHomeworkDialog
+                          homeworkId={homework.id}
+                          homeworkTitle={homework.title}
+                          moduleName={homework.module.nom}
+                          dueDate={homework.dueDate}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

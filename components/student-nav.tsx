@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Calendar, BookOpen, DollarSign, LogOut, Menu, GraduationCap, UserX, MessageSquare, ClipboardList } from "lucide-react"
+import { LayoutDashboard, Calendar, BookOpen, DollarSign, LogOut, Menu, GraduationCap, UserX, MessageSquare, ClipboardList, Users, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -65,6 +65,16 @@ export function StudentNav({ schoolId, schoolName, isEnrolled }: StudentNavProps
       title: "Devoirs",
       href: `/student/${schoolId}/homework`,
       icon: ClipboardList,
+    },
+    {
+      title: "Équipe Pédagogique",
+      href: `/student/${schoolId}/teachers`,
+      icon: Users,
+    },
+    {
+      title: "Agenda",
+      href: `/student/${schoolId}/calendar`,
+      icon: CalendarDays,
     },
     {
       title: "Messages",

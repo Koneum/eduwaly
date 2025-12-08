@@ -1,20 +1,15 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema 
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Prisma 7: Nouveau provider prisma-client + output obligatoire
 generator client {
-  provider = "prisma-client-js"
-  // Ne PAS mettre output dans app/ - Next.js le bundlerait côté client
-  // Prisma utilise node_modules/.prisma/client par défaut
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
-//provider = "postgresql"
-//directUrl  = env("DIRECT_URL")
 
+// Prisma 7: url est maintenant dans prisma.config.ts
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Filiere {
@@ -35,87 +30,97 @@ model Filiere {
 }
 
 model Module {
-  id            String          @id @default(cuid())
-  nom           String
-  type          String
-  vh            Int
-  semestre      String         @default("S1") // S1 ou S2
-  isUeCommune   Boolean         @default(false)
-  schoolId      String
-  school        School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  filiereId     String?
-  filiere       Filiere?        @relation(fields: [filiereId], references: [id])
-  emplois       EmploiDuTemps[]
-  evaluations   Evaluation[]
-  homework      Homework[]
-  absences      Absence[]
-  documents     Document[]
-  attendances   Attendance[]
-  workGroups    WorkGroup[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String          @id @default(cuid())
+  nom         String
+  type        String
+  vh          Int
+  semestre    String          @default("S1") // S1 ou S2
+  isUeCommune Boolean         @default(false)
+  schoolId    String
+  school      School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  filiereId   String?
+  filiere     Filiere?        @relation(fields: [filiereId], references: [id])
+  emplois     EmploiDuTemps[]
+  evaluations Evaluation[]
+  homework    Homework[]
+  absences    Absence[]
+  documents   Document[]
+  attendances Attendance[]
+  workGroups  WorkGroup[]
+  incidents   Incident[] // Incidents survenus pendant ce cours
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@map("modules")
 }
 
 model EmploiDuTemps {
-  id             String      @id @default(cuid())
+  id             String              @id @default(cuid())
   titre          String
   dateDebut      DateTime
   dateFin        DateTime
   heureDebut     String
   heureFin       String
   salle          String
-  niveau         String      // L1, L2, L3, M1, M2
-  semestre       String      // S1, S2, S3, S4, S5, S6
+  niveau         String // L1, L2, L3, M1, M2
+  semestre       String // S1, S2, S3, S4, S5, S6
   vh             Int
-  joursCours     String     @default("[]") // JSON array: ["LUNDI", "MARDI", ...]
-  evaluation     Boolean     @default(false)
-  jourEvaluation String?    // "LUNDI", "MARDI", etc.
-  ueCommune      Boolean     @default(false)
+  joursCours     String              @default("[]") // JSON array: ["LUNDI", "MARDI", ...]
+  evaluation     Boolean             @default(false)
+  jourEvaluation String? // "LUNDI", "MARDI", etc.
+  ueCommune      Boolean             @default(false)
   schoolId       String
-  school         School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school         School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   moduleId       String
-  module         Module      @relation(fields: [moduleId], references: [id])
+  module         Module              @relation(fields: [moduleId], references: [id])
   enseignantId   String
-  enseignant     Enseignant @relation(fields: [enseignantId], references: [id])
+  enseignant     Enseignant          @relation(fields: [enseignantId], references: [id])
   filiereId      String?
-  filiere        Filiere?   @relation(fields: [filiereId], references: [id])
+  filiere        Filiere?            @relation(fields: [filiereId], references: [id])
   anneeUnivId    String?
   anneeUniv      AnneeUniversitaire? @relation(fields: [anneeUnivId], references: [id])
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@map("emplois")
 }
 
 model Enseignant {
-  id            String          @id @default(cuid())
-  nom           String
-  prenom        String
-  titre         String
-  telephone     String
-  email         String
-  schoolId      String
-  school        School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  userId        String?         @unique
-  user          User?           @relation(fields: [userId], references: [id])
-  type          TypeEnseignant
-  grade         Grade
-  emplois       EmploiDuTemps[]
-  homework      Homework[]
-  attendances   Attendance[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id        String         @id @default(cuid())
+  nom       String
+  prenom    String
+  titre     String
+  telephone String
+  email     String
+  schoolId  String
+  school    School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  userId    String?        @unique
+  user      User?          @relation(fields: [userId], references: [id])
+  type      TypeEnseignant
+  grade     Grade
+
+  // Prof principal (surtout pour lycée)
+  isPrincipal Boolean @default(false)
+  classId     String? // Classe assignée si prof principal (lycée)
+
+  // Relations
+  emplois      EmploiDuTemps[]
+  homework     Homework[]
+  attendances  Attendance[]
+  appointments Appointment[] // RDV parent-prof
+  incidents    Incident[] // Incidents signalés par ce prof
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([email, schoolId])
   @@map("enseignants")
 }
 
 model Parametre {
-  id                String   @id @default(uuid())
-  schoolId          String   @unique
-  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  schoolId         String   @unique
+  school           School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   chefDepartement  String
   titre            String
   grade            Grade
@@ -126,15 +131,15 @@ model Parametre {
 
 model AnneeUniversitaire {
   id        String          @id @default(cuid())
-  annee     String         // Format: "2023-2024"
-  dateDebut DateTime?      // Date de début de l'année universitaire
-  dateFin   DateTime?      // Date de fin de l'année universitaire
-  estActive Boolean        @default(false) // Année universitaire active
+  annee     String // Format: "2023-2024"
+  dateDebut DateTime? // Date de début de l'année universitaire
+  dateFin   DateTime? // Date de fin de l'année universitaire
+  estActive Boolean         @default(false) // Année universitaire active
   schoolId  String
   school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   emplois   EmploiDuTemps[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@unique([annee, schoolId])
   @@map("annees_universitaires")
@@ -146,85 +151,91 @@ model AnneeUniversitaire {
 
 // Modèle École (Tenant)
 model School {
-  id                String               @id @default(cuid())
-  name              String
-  subdomain         String               @unique
-  shortName         String?              // Sigle officiel de l'école (ex: EC, IUFP)
-  logo              String?
-  stamp             String?              // Cachet/tampon officiel de l'école
-  address           String?
-  phone             String?
-  email             String?
-  primaryColor      String               @default("#4F46E5")
-  secondaryColor    String               @default("#10B981")
-  maxStudents       Int                  @default(100)
-  maxTeachers       Int                  @default(20)
-  isActive          Boolean              @default(true)
-  schoolType        SchoolType           @default(UNIVERSITY) // UNIVERSITY ou HIGH_SCHOOL
-  
+  id             String     @id @default(cuid())
+  name           String
+  subdomain      String     @unique
+  shortName      String? // Sigle officiel de l'école (ex: EC, IUFP)
+  logo           String?
+  stamp          String? // Cachet/tampon officiel de l'école
+  address        String?
+  phone          String?
+  email          String?
+  primaryColor   String     @default("#4F46E5")
+  secondaryColor String     @default("#10B981")
+  maxStudents    Int        @default(100)
+  maxTeachers    Int        @default(20)
+  isActive       Boolean    @default(true)
+  schoolType     SchoolType @default(UNIVERSITY) // UNIVERSITY ou HIGH_SCHOOL
+
   // Configuration système de notation
-  gradingSystem     GradingSystem        @default(SEMESTER) // TRIMESTER ou SEMESTER
-  gradingFormula    String?              // Formule personnalisée (ex: "(examens + devoirs * 2) / 3")
-  
+  gradingSystem  GradingSystem @default(SEMESTER) // TRIMESTER ou SEMESTER
+  gradingFormula String? // Formule personnalisée (ex: "(examens + devoirs * 2) / 3")
+
   // Relations
-  subscriptionId    String?              @unique
-  subscription      Subscription?
-  users             User[]
-  students          Student[]
-  filieres          Filiere[]
-  modules           Module[]
-  workGroups        WorkGroup[]
-  emplois           EmploiDuTemps[]
-  enseignants       Enseignant[]
-  parametres        Parametre?
-  annees            AnneeUniversitaire[]
-  feeStructures     FeeStructure[]
-  scholarships      Scholarship[]
-  issueReports      IssueReport[]
-  rooms             Room[]
-  classes           Class[]
-  documents         Document[]
-  announcements     Announcement[]
-  gradingPeriods    GradingPeriod[]      // Périodes de notation (trimestres/semestres)
-  evaluationTypes   EvaluationType[]     // Types d'évaluations personnalisables
-  receiptTemplates  ReceiptTemplate[]    // Templates de reçu personnalisables
-  pdfTemplates      PDFTemplate[]        // Templates PDF personnalisables (bulletins, certificats, etc.)
-  bulletins         Bulletin[]           // Bulletins générés et archivés
-  
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  subscriptionId   String?              @unique
+  subscription     Subscription?
+  users            User[]
+  students         Student[]
+  filieres         Filiere[]
+  modules          Module[]
+  workGroups       WorkGroup[]
+  emplois          EmploiDuTemps[]
+  enseignants      Enseignant[]
+  parametres       Parametre?
+  annees           AnneeUniversitaire[]
+  feeStructures    FeeStructure[]
+  scholarships     Scholarship[]
+  issueReports     IssueReport[]
+  rooms            Room[]
+  classes          Class[]
+  documents        Document[]
+  announcements    Announcement[]
+  gradingPeriods   GradingPeriod[] // Périodes de notation (trimestres/semestres)
+  evaluationTypes  EvaluationType[] // Types d'évaluations personnalisables
+  receiptTemplates ReceiptTemplate[] // Templates de reçu personnalisables
+  pdfTemplates     PDFTemplate[] // Templates PDF personnalisables (bulletins, certificats, etc.)
+  bulletins        Bulletin[] // Bulletins générés et archivés
+
+  // Vie scolaire & Agenda
+  incidents      Incident[] // Incidents (retards, oublis, etc.)
+  calendarEvents CalendarEvent[] // Événements du calendrier
+  appointments   Appointment[] // RDV parent-prof
+  polls          Poll[] // Sondages
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("schools")
 }
 
 // Modèle Utilisateur
 model User {
-  id                String      @id @default(cuid())
-  email             String      @unique
-  password          String?     // Optional - Better Auth uses Account.password
-  name              String
-  avatar            String?
-  image             String?     // For Better Auth compatibility
-  role              UserRole
-  schoolId          String?     // Null pour SUPER_ADMIN
-  school            School?     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  isActive          Boolean     @default(true)
-  emailVerified     Boolean     @default(false)
-  lastLoginAt       DateTime?
-  
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String? // Optional - Better Auth uses Account.password
+  name          String
+  avatar        String?
+  image         String? // For Better Auth compatibility
+  role          UserRole
+  schoolId      String? // Null pour SUPER_ADMIN
+  school        School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+
   // Relations
   student           Student?
   parent            Parent?
   enseignant        Enseignant?
   permissions       UserPermission[]
   uploadPermissions UserUploadPermission[]
-  
+
   // Better Auth relations
-  sessions          Session[]
-  accounts          Account[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  sessions Session[]
+  accounts Account[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([email])
   @@map("users")
@@ -232,38 +243,40 @@ model User {
 
 // Modèle Étudiant
 model Student {
-  id                String            @id @default(cuid())
-  userId            String?           @unique // Null si pas encore enrôlé
-  user              User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  schoolId          String
-  school            School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  studentNumber     String
-  enrollmentId      String            @unique // ID unique pour s'enrôler
-  filiereId         String?
-  filiere           Filiere?          @relation(fields: [filiereId], references: [id])
-  niveau            String            // L1, L2, L3, M1, M2, 10E, 11E, 12E
-  enrollmentYear    Int?              // Année d'inscription (ex: 2021) pour calculer promotion
-  courseSchedule    CourseSchedule    @default(DAY) // DAY ou EVENING (pour universités)
-  status            StudentStatus?
-  dateOfBirth       DateTime?
-  placeOfBirth      String?
-  address           String?
-  phone             String?
-  isEnrolled        Boolean           @default(false) // True si l'étudiant a créé son compte
-  
+  id             String         @id @default(cuid())
+  userId         String?        @unique // Null si pas encore enrôlé
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schoolId       String
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentNumber  String
+  enrollmentId   String         @unique // ID unique pour s'enrôler
+  filiereId      String?
+  filiere        Filiere?       @relation(fields: [filiereId], references: [id])
+  niveau         String // L1, L2, L3, M1, M2, 10E, 11E, 12E
+  enrollmentYear Int? // Année d'inscription (ex: 2021) pour calculer promotion
+  courseSchedule CourseSchedule @default(DAY) // DAY ou EVENING (pour universités)
+  status         StudentStatus?
+  dateOfBirth    DateTime?
+  placeOfBirth   String?
+  address        String?
+  phone          String?
+  isEnrolled     Boolean        @default(false) // True si l'étudiant a créé son compte
+
   // Relations
-  parents           Parent[]          @relation("StudentParents")
-  evaluations       Evaluation[]
-  absences          Absence[]
-  submissions       Submission[]
-  payments          StudentPayment[]
-  scholarships      Scholarship[]
-  attendances       Attendance[]
-  workGroupMembers  WorkGroupMember[]
-  bulletins         Bulletin[]
-  
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  parents          Parent[]          @relation("StudentParents")
+  evaluations      Evaluation[]
+  absences         Absence[]
+  submissions      Submission[]
+  payments         StudentPayment[]
+  scholarships     Scholarship[]
+  attendances      Attendance[]
+  workGroupMembers WorkGroupMember[]
+  bulletins        Bulletin[]
+  incidents        Incident[] // Incidents (retards, oublis, etc.)
+  appointments     Appointment[] // RDV parent-prof concernant cet élève
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([studentNumber, schoolId])
   @@map("students")
@@ -278,112 +291,118 @@ enum StudentStatus {
 
 // Modèle Parent
 model Parent {
-  id                String      @id @default(cuid())
-  userId            String?     @unique // Null si pas encore enrôlé
-  user              User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enrollmentId      String      @unique // ID unique pour s'enrôler (même que l'étudiant)
-  phone             String?
-  address           String?
-  occupation        String?
-  isEnrolled        Boolean     @default(false) // True si le parent a créé son compte
-  
+  id           String  @id @default(cuid())
+  userId       String? @unique // Null si pas encore enrôlé
+  user         User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentId String  @unique // ID unique pour s'enrôler (même que l'étudiant)
+  phone        String?
+  address      String?
+  occupation   String?
+  isEnrolled   Boolean @default(false) // True si le parent a créé son compte
+
   // Relations
-  students          Student[]   @relation("StudentParents")
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  students     Student[]     @relation("StudentParents")
+  appointments Appointment[] // RDV parent-prof
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("parents")
 }
 
 // Modèle Évaluation/Notes
 model Evaluation {
-  id                String      @id @default(cuid())
-  studentId         String
-  student           Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  moduleId          String
-  module            Module      @relation(fields: [moduleId], references: [id])
-  note              Float
-  coefficient       Float       @default(1.0)
-  type              String      // "CC", "TP", "Examen", etc.
-  date              DateTime
-  validated         Boolean     @default(false)
-  comment           String?
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id])
+  note        Float
+  maxPoints   Float    @default(20) // Barème variable: /8, /10, /12, /20, etc.
+  coefficient Float    @default(1.0)
+  type        String // "CC", "TP", "Examen", etc.
+  date        DateTime
+  validated   Boolean  @default(false)
+  comment     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("evaluations")
 }
 
 // Modèle Absence
 model Absence {
-  id                String      @id @default(cuid())
-  studentId         String
-  student           Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  moduleId          String?
-  module            Module?     @relation(fields: [moduleId], references: [id])
-  date              DateTime
-  period            String?     // "Matin", "Après-midi", "Toute la journée"
-  justified         Boolean     @default(false)
-  justification     String?
-  notifiedParent    Boolean     @default(false)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id             String   @id @default(cuid())
+  studentId      String
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  moduleId       String?
+  module         Module?  @relation(fields: [moduleId], references: [id])
+  date           DateTime
+  period         String? // "Matin", "Après-midi", "Toute la journée"
+  justified      Boolean  @default(false)
+  justification  String?
+  notifiedParent Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("absences")
 }
 
 // Modèle Devoir
 model Homework {
-  id                String        @id @default(cuid())
-  moduleId          String
-  module            Module        @relation(fields: [moduleId], references: [id])
-  enseignantId      String
-  enseignant        Enseignant    @relation(fields: [enseignantId], references: [id])
-  title             String
-  description       String
-  type              String        // "Devoir", "Projet", "Lecture", "Exercice"
-  dueDate           DateTime
-  maxPoints         Float?
-  
+  id           String     @id @default(cuid())
+  moduleId     String
+  module       Module     @relation(fields: [moduleId], references: [id])
+  enseignantId String
+  enseignant   Enseignant @relation(fields: [enseignantId], references: [id])
+  title        String
+  description  String
+  type         String // "Devoir", "Projet", "Lecture", "Exercice"
+  dueDate      DateTime
+  maxPoints    Float?
+
   // Type d'assignation
-  assignmentType    String        @default("INDIVIDUAL") // INDIVIDUAL, GROUP
-  workGroupId       String?       // Si assigné à un groupe spécifique
-  workGroup         WorkGroup?    @relation(fields: [workGroupId], references: [id])
-  
+  assignmentType String     @default("INDIVIDUAL") // INDIVIDUAL, GROUP
+  workGroupId    String? // Si assigné à un groupe spécifique
+  workGroup      WorkGroup? @relation(fields: [workGroupId], references: [id])
+
   // Fichiers attachés
-  fileUrl           String?
-  fileName          String?
-  fileSize          Int?
-  fileType          String?
-  
+  fileUrl  String?
+  fileName String?
+  fileSize Int?
+  fileType String?
+
   // Relations
-  submissions       Submission[]
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("homework")
 }
 
 // Modèle Soumission de Devoir
 model Submission {
-  id                String           @id @default(cuid())
-  homeworkId        String
-  homework          Homework         @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
-  studentId         String
-  student           Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  content           String?
-  fileUrl           String?
-  submittedAt       DateTime?
-  status            SubmissionStatus @default(PENDING)
-  grade             Float?
-  feedback          String?
-  
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id          String           @id @default(cuid())
+  homeworkId  String
+  homework    Homework         @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  content     String?
+  fileUrl     String?
+  submittedAt DateTime?
+  status      SubmissionStatus @default(PENDING)
+  grade       Float?
+  feedback    String?
+
+  // Suivi "J'ai terminé" (côté étudiant)
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([homeworkId, studentId])
   @@map("submissions")
@@ -401,84 +420,84 @@ enum SubmissionStatus {
 
 // Structure des Frais (créée par Admin-School)
 model FeeStructure {
-  id                String            @id @default(cuid())
-  schoolId          String
-  school            School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  name              String            // "Frais de scolarité L1", "Inscription", etc.
-  amount            Decimal           @db.Decimal(10, 2)
-  type              FeeType
-  niveau            String?           // L1, L2, L3, M1, M2 (optionnel)
-  filiereId         String?
-  filiere           Filiere?          @relation(fields: [filiereId], references: [id])
-  academicYear      String            // "2024-2025"
-  dueDate           DateTime?
-  isActive          Boolean           @default(true)
-  
+  id           String    @id @default(cuid())
+  schoolId     String
+  school       School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name         String // "Frais de scolarité L1", "Inscription", etc.
+  amount       Decimal   @db.Decimal(10, 2)
+  type         FeeType
+  niveau       String? // L1, L2, L3, M1, M2 (optionnel)
+  filiereId    String?
+  filiere      Filiere?  @relation(fields: [filiereId], references: [id])
+  academicYear String // "2024-2025"
+  dueDate      DateTime?
+  isActive     Boolean   @default(true)
+
   // Relations
-  payments          StudentPayment[]
-  
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  payments StudentPayment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("fee_structures")
 }
 
 // Paiements Étudiants (visible par Student, Parent, Admin-School)
 model StudentPayment {
-  id                String          @id @default(cuid())
-  studentId         String
-  student           Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  feeStructureId    String
-  feeStructure      FeeStructure    @relation(fields: [feeStructureId], references: [id])
-  
+  id             String       @id @default(cuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeStructureId String
+  feeStructure   FeeStructure @relation(fields: [feeStructureId], references: [id])
+
   // Montants
-  amountDue         Decimal         @db.Decimal(10, 2)
-  amountPaid        Decimal         @default(0) @db.Decimal(10, 2)
-  discountAmount    Decimal         @default(0) @db.Decimal(10, 2) // Réduction/Bourse
-  
+  amountDue      Decimal @db.Decimal(10, 2)
+  amountPaid     Decimal @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal @default(0) @db.Decimal(10, 2) // Réduction/Bourse
+
   // Statut
-  status            PaymentStatus
-  dueDate           DateTime
-  paidAt            DateTime?
-  
+  status  PaymentStatus
+  dueDate DateTime
+  paidAt  DateTime?
+
   // Informations de paiement
-  paymentMethod     String?         // "Cash", "Mobile Money", "Virement", "Carte"
-  transactionId     String?
-  paidBy            String?         // "Student" ou "Parent" (userId)
-  receiptUrl        String?
-  
+  paymentMethod String? // "Cash", "Mobile Money", "Virement", "Carte"
+  transactionId String?
+  paidBy        String? // "Student" ou "Parent" (userId)
+  receiptUrl    String?
+
   // Notes
-  notes             String?
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("student_payments")
 }
 
 // Bourses et Réductions (créées par Admin-School)
 model Scholarship {
-  id                String          @id @default(cuid())
-  studentId         String?
-  student           Student?        @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  
-  schoolId          String          // École qui a créé la bourse
-  school            School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  
-  name              String          // "Bourse d'excellence", "Réduction sociale", etc.
-  type              ScholarshipType
-  amount            Decimal?        @db.Decimal(10, 2) // Montant fixe
-  percentage        Float?          // Pourcentage de réduction (0-100)
-  
-  reason            String          // Raison de la bourse/réduction
-  academicYear      String          // "2024-2025"
-  
-  isActive          Boolean         @default(true)
-  approvedBy        String?         // userId de l'admin qui a approuvé
-  approvedAt        DateTime?
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id        String   @id @default(cuid())
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  schoolId String // École qui a créé la bourse
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  name       String // "Bourse d'excellence", "Réduction sociale", etc.
+  type       ScholarshipType
+  amount     Decimal?        @db.Decimal(10, 2) // Montant fixe
+  percentage Float? // Pourcentage de réduction (0-100)
+
+  reason       String // Raison de la bourse/réduction
+  academicYear String // "2024-2025"
+
+  isActive   Boolean   @default(true)
+  approvedBy String? // userId de l'admin qui a approuvé
+  approvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("scholarships")
 }
@@ -489,57 +508,57 @@ model Scholarship {
 
 // Plan d'Abonnement
 model Plan {
-  id                String          @id @default(cuid())
-  name              String          // Nom technique (STARTER, PROFESSIONAL, etc.)
-  displayName       String          @default("") // Nom affiché (Starter, Professional, etc.)
-  description       String?
-  price             Decimal         @db.Decimal(10, 2)
-  interval          String          // "MONTHLY", "YEARLY"
-  maxStudents       Int
-  maxTeachers       Int
-  features          String          @default("[]") // JSON array
-  stripePriceId     String?
-  isActive          Boolean         @default(true)
-  isPopular         Boolean         @default(false) // Badge "Recommandé"
-  
+  id            String  @id @default(cuid())
+  name          String // Nom technique (STARTER, PROFESSIONAL, etc.)
+  displayName   String  @default("") // Nom affiché (Starter, Professional, etc.)
+  description   String?
+  price         Decimal @db.Decimal(10, 2)
+  interval      String // "MONTHLY", "YEARLY"
+  maxStudents   Int
+  maxTeachers   Int
+  features      String  @default("[]") // JSON array
+  stripePriceId String?
+  isActive      Boolean @default(true)
+  isPopular     Boolean @default(false) // Badge "Recommandé"
+
   // Relations
-  subscriptions     Subscription[]
-  comparisonValues  PlanComparisonValue[]
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  subscriptions    Subscription[]
+  comparisonValues PlanComparisonValue[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("plans")
 }
 
 // Lignes de comparaison pour le tableau comparatif
 model ComparisonRow {
-  id          String                @id @default(cuid())
-  category    String                // Catégorie (ex: "Tarifs & Limites", "Fonctionnalités")
-  label       String                // Label de la ligne (ex: "Stockage", "API & Webhooks")
-  order       Int                   @default(0) // Ordre d'affichage
-  isActive    Boolean               @default(true)
-  
+  id       String  @id @default(cuid())
+  category String // Catégorie (ex: "Tarifs & Limites", "Fonctionnalités")
+  label    String // Label de la ligne (ex: "Stockage", "API & Webhooks")
+  order    Int     @default(0) // Ordre d'affichage
+  isActive Boolean @default(true)
+
   // Relations
-  values      PlanComparisonValue[]
-  
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  values PlanComparisonValue[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("comparison_rows")
 }
 
 // Valeurs de comparaison pour chaque plan
 model PlanComparisonValue {
-  id              String          @id @default(cuid())
+  id              String        @id @default(cuid())
   planId          String
-  plan            Plan            @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan            Plan          @relation(fields: [planId], references: [id], onDelete: Cascade)
   comparisonRowId String
-  comparisonRow   ComparisonRow   @relation(fields: [comparisonRowId], references: [id], onDelete: Cascade)
-  value           String          // Valeur (ex: "5 GB", "✅", "❌", "Illimité")
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  comparisonRow   ComparisonRow @relation(fields: [comparisonRowId], references: [id], onDelete: Cascade)
+  value           String // Valeur (ex: "5 GB", "✅", "❌", "Illimité")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([planId, comparisonRowId])
   @@map("plan_comparison_values")
@@ -547,23 +566,23 @@ model PlanComparisonValue {
 
 // Abonnement École
 model Subscription {
-  id                    String              @id @default(cuid())
-  schoolId              String              @unique
-  school                School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  planId                String
-  plan                  Plan                @relation(fields: [planId], references: [id])
-  
-  status                SubscriptionStatus
-  stripeCustomerId      String?
-  stripeSubscriptionId  String?
-  
-  currentPeriodStart    DateTime
-  currentPeriodEnd      DateTime
-  trialEndsAt           DateTime?
-  canceledAt            DateTime?
-  
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  id       String @id @default(cuid())
+  schoolId String @unique
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  planId   String
+  plan     Plan   @relation(fields: [planId], references: [id])
+
+  status               SubscriptionStatus
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  trialEndsAt        DateTime?
+  canceledAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("subscriptions")
 }
@@ -574,25 +593,25 @@ model Subscription {
 
 // Signalement de Problème
 model IssueReport {
-  id                String          @id @default(cuid())
-  schoolId          String
-  school            School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  reportedBy        String          // userId
-  reporterName      String
-  reporterEmail     String
-  
-  title             String
-  description       String
-  priority          IssuePriority
-  status            IssueStatus     @default(OPEN)
-  category          IssueCategory
-  
-  resolvedBy        String?         // Super-Admin userId
-  resolvedAt        DateTime?
-  resolution        String?
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id            String @id @default(cuid())
+  schoolId      String
+  school        School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  reportedBy    String // userId
+  reporterName  String
+  reporterEmail String
+
+  title       String
+  description String
+  priority    IssuePriority
+  status      IssueStatus   @default(OPEN)
+  category    IssueCategory
+
+  resolvedBy String? // Super-Admin userId
+  resolvedAt DateTime?
+  resolution String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("issue_reports")
 }
@@ -602,24 +621,24 @@ model IssueReport {
 // ============================================
 
 model Announcement {
-  id                String                @id @default(cuid())
-  schoolId          String?               // Null si annonce Super Admin (toutes écoles)
-  school            School?               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  authorId          String
-  authorName        String
-  authorRole        UserRole
-  
-  title             String
-  content           String
-  priority          AnnouncementPriority  @default(NORMAL)
-  targetAudience    Json                  // ["TEACHER", "STUDENT", "PARENT"] ou ["ALL"] - JSON pour compatibilité MySQL
-  
-  isActive          Boolean               @default(true)
-  publishedAt       DateTime              @default(now())
-  expiresAt         DateTime?
-  
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
+  id         String   @id @default(cuid())
+  schoolId   String? // Null si annonce Super Admin (toutes écoles)
+  school     School?  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  authorId   String
+  authorName String
+  authorRole UserRole
+
+  title          String
+  content        String
+  priority       AnnouncementPriority @default(NORMAL)
+  targetAudience Json // ["TEACHER", "STUDENT", "PARENT"] ou ["ALL"] - JSON pour compatibilité MySQL
+
+  isActive    Boolean   @default(true)
+  publishedAt DateTime  @default(now())
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("announcements")
 }
@@ -629,49 +648,49 @@ model Announcement {
 // ============================================
 
 enum UserRole {
-  SUPER_ADMIN      // Administrateur de la plateforme SAAS
-  SCHOOL_ADMIN     // Administrateur d'une école spécifique
-  MANAGER          // Manager avec permissions personnalisées
-  PERSONNEL        // Personnel avec permissions personnalisées
-  ASSISTANT        // Assistant avec permissions personnalisées
-  SECRETARY        // Secrétaire avec permissions personnalisées
-  TEACHER          // Enseignant
-  STUDENT          // Étudiant
-  PARENT           // Parent d'étudiant
+  SUPER_ADMIN // Administrateur de la plateforme SAAS
+  SCHOOL_ADMIN // Administrateur d'une école spécifique
+  MANAGER // Manager avec permissions personnalisées
+  PERSONNEL // Personnel avec permissions personnalisées
+  ASSISTANT // Assistant avec permissions personnalisées
+  SECRETARY // Secrétaire avec permissions personnalisées
+  TEACHER // Enseignant
+  STUDENT // Étudiant
+  PARENT // Parent d'étudiant
 }
 
 enum PaymentStatus {
-  PENDING          // En attente
-  PAID             // Payé
-  OVERDUE          // En retard
-  PARTIAL          // Paiement partiel
-  CANCELED         // Annulé
+  PENDING // En attente
+  PAID // Payé
+  OVERDUE // En retard
+  PARTIAL // Paiement partiel
+  CANCELED // Annulé
 }
 
 enum FeeType {
-  TUITION          // Frais de scolarité
-  REGISTRATION     // Frais d'inscription
-  EXAM             // Frais d'examen
-  LIBRARY          // Frais de bibliothèque
-  SPORT            // Frais sportifs
-  TRANSPORT        // Frais de transport
-  OTHER            // Autres frais
+  TUITION // Frais de scolarité
+  REGISTRATION // Frais d'inscription
+  EXAM // Frais d'examen
+  LIBRARY // Frais de bibliothèque
+  SPORT // Frais sportifs
+  TRANSPORT // Frais de transport
+  OTHER // Autres frais
 }
 
 enum ScholarshipType {
-  MERIT            // Bourse au mérite
-  NEED_BASED       // Bourse sociale
-  DISCOUNT         // Réduction
-  FULL             // Bourse complète
-  PARTIAL          // Bourse partielle
+  MERIT // Bourse au mérite
+  NEED_BASED // Bourse sociale
+  DISCOUNT // Réduction
+  FULL // Bourse complète
+  PARTIAL // Bourse partielle
 }
 
 enum SubscriptionStatus {
-  TRIAL            // Période d'essai
-  ACTIVE           // Actif
-  PAST_DUE         // Paiement en retard
-  CANCELED         // Annulé
-  UNPAID           // Non payé
+  TRIAL // Période d'essai
+  ACTIVE // Actif
+  PAST_DUE // Paiement en retard
+  CANCELED // Annulé
+  UNPAID // Non payé
 }
 
 enum IssuePriority {
@@ -689,12 +708,12 @@ enum IssueStatus {
 }
 
 enum IssueCategory {
-  TECHNICAL        // Problème technique
-  BILLING          // Problème de facturation
-  FEATURE_REQUEST  // Demande de fonctionnalité
-  BUG              // Bug
-  SUPPORT          // Support général
-  OTHER            // Autre
+  TECHNICAL // Problème technique
+  BILLING // Problème de facturation
+  FEATURE_REQUEST // Demande de fonctionnalité
+  BUG // Bug
+  SUPPORT // Support général
+  OTHER // Autre
 }
 
 enum TypeEnseignant {
@@ -711,8 +730,8 @@ enum Grade {
 }
 
 enum SchoolType {
-  UNIVERSITY      // Université (gestion par salles)
-  HIGH_SCHOOL     // Lycée (gestion par classes)
+  UNIVERSITY // Université (gestion par salles)
+  HIGH_SCHOOL // Lycée (gestion par classes)
 }
 
 enum AnnouncementPriority {
@@ -722,7 +741,37 @@ enum AnnouncementPriority {
   URGENT
 }
 
+// ============================================
+// ENUMS VIE SCOLAIRE & AGENDA
+// ============================================
 
+enum IncidentType {
+  RETARD // Retard en cours
+  RETARD_NON_JUSTIFIE // Retard non justifié
+  OUBLI_MATERIEL // Oubli de matériel
+  COMPORTEMENT // Problème de comportement
+  EXCLUSION // Exclusion de cours
+  AUTRE // Autre incident
+}
+
+enum EventType {
+  CONSEIL_CLASSE // Conseil de classe
+  REUNION_PARENTS // Réunion parents-professeurs
+  JOUR_FERIE // Jour férié
+  VACANCES // Vacances scolaires
+  EXAMEN // Examen/DS
+  EVENEMENT_SPORTIF // Événement sportif
+  SORTIE_SCOLAIRE // Sortie scolaire
+  CONFERENCE // Conférence
+  AUTRE // Autre événement
+}
+
+enum AppointmentStatus {
+  PENDING // En attente de confirmation
+  CONFIRMED // Confirmé
+  CANCELLED // Annulé
+  COMPLETED // Terminé
+}
 
 // ============================================
 // GESTION DES SALLES ET CLASSES
@@ -730,20 +779,20 @@ enum AnnouncementPriority {
 
 // Modèle Salle (pour Universités)
 model Room {
-  id                String          @id @default(cuid())
-  name              String          // "Amphi A", "Salle 201", "Lab 1"
-  code              String          // "A01", "S201", "L1"
-  capacity          Int             // Capacité en nombre d'étudiants
-  type              RoomType        // AMPHITHEATER, CLASSROOM, LABORATORY, etc.
-  building          String?         // Bâtiment
-  floor             String?         // Étage
-  equipment         String          @default("[]") // JSON array: ["Projecteur", "Tableau", "Ordinateurs"]
-  isAvailable       Boolean         @default(true)
-  schoolId          String
-  school            School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id          String   @id @default(cuid())
+  name        String // "Amphi A", "Salle 201", "Lab 1"
+  code        String // "A01", "S201", "L1"
+  capacity    Int // Capacité en nombre d'étudiants
+  type        RoomType // AMPHITHEATER, CLASSROOM, LABORATORY, etc.
+  building    String? // Bâtiment
+  floor       String? // Étage
+  equipment   String   @default("[]") // JSON array: ["Projecteur", "Tableau", "Ordinateurs"]
+  isAvailable Boolean  @default(true)
+  schoolId    String
+  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([code, schoolId])
   @@map("rooms")
@@ -751,17 +800,17 @@ model Room {
 
 // Modèle Classe (pour Lycées)
 model Class {
-  id                String          @id @default(cuid())
-  name              String          // "Terminale S1", "Première A", "Seconde B"
-  code              String          // "TS1", "1A", "2B"
-  niveau            String          // "Terminale", "Première", "Seconde"
-  capacity          Int             // Capacité en nombre d'élèves
-  mainRoom          String?         // Salle principale assignée
-  schoolId          String
-  school            School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id       String  @id @default(cuid())
+  name     String // "Terminale S1", "Première A", "Seconde B"
+  code     String // "TS1", "1A", "2B"
+  niveau   String // "Terminale", "Première", "Seconde"
+  capacity Int // Capacité en nombre d'élèves
+  mainRoom String? // Salle principale assignée
+  schoolId String
+  school   School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([code, schoolId])
   @@map("classes")
@@ -781,7 +830,7 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@map("session")
 }
 
@@ -816,14 +865,14 @@ model Verification {
 }
 
 enum RoomType {
-  AMPHITHEATER    // Amphithéâtre
-  CLASSROOM       // Salle de classe
-  LABORATORY      // Laboratoire
-  COMPUTER_LAB    // Salle informatique
-  LIBRARY         // Bibliothèque
-  SPORTS_HALL     // Salle de sport
-  CONFERENCE      // Salle de conférence
-  OTHER           // Autre
+  AMPHITHEATER // Amphithéâtre
+  CLASSROOM // Salle de classe
+  LABORATORY // Laboratoire
+  COMPUTER_LAB // Salle informatique
+  LIBRARY // Bibliothèque
+  SPORTS_HALL // Salle de sport
+  CONFERENCE // Salle de conférence
+  OTHER // Autre
 }
 
 // ============================================
@@ -832,34 +881,34 @@ enum RoomType {
 
 // Document (pour partage de ressources pédagogiques)
 model Document {
-  id            String          @id @default(cuid())
-  title         String
-  description   String?
-  fileName      String
-  fileUrl       String
-  fileSize      Int             // Taille en bytes
-  mimeType      String
-  category      DocumentCategory
-  schoolId      String
-  school        School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  moduleId      String?
-  module        Module?         @relation(fields: [moduleId], references: [id])
-  uploadedBy    String          // userId
-  isPublic      Boolean         @default(false) // Visible par tous ou seulement enseignants
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  fileName    String
+  fileUrl     String
+  fileSize    Int // Taille en bytes
+  mimeType    String
+  category    DocumentCategory
+  schoolId    String
+  school      School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  moduleId    String?
+  module      Module?          @relation(fields: [moduleId], references: [id])
+  uploadedBy  String // userId
+  isPublic    Boolean          @default(false) // Visible par tous ou seulement enseignants
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@map("documents")
 }
 
 enum DocumentCategory {
-  COURSE          // Cours
-  EXERCISE        // Exercice
-  EXAM            // Examen
-  CORRECTION      // Correction
-  PRESENTATION    // Présentation
-  VIDEO           // Vidéo
-  OTHER           // Autre
+  COURSE // Cours
+  EXERCISE // Exercice
+  EXAM // Examen
+  CORRECTION // Correction
+  PRESENTATION // Présentation
+  VIDEO // Vidéo
+  OTHER // Autre
 }
 
 // ============================================
@@ -868,30 +917,30 @@ enum DocumentCategory {
 
 // Permission (définit les permissions disponibles)
 model Permission {
-  id            String            @id @default(cuid())
-  name          String            @unique // Ex: "students.view", "students.create"
-  description   String            // Description lisible
-  category      String            // Ex: "students", "teachers", "finance"
+  id              String           @id @default(cuid())
+  name            String           @unique // Ex: "students.view", "students.create"
+  description     String // Description lisible
+  category        String // Ex: "students", "teachers", "finance"
   userPermissions UserPermission[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@map("permissions")
 }
 
 // UserPermission (associe les permissions aux utilisateurs)
 model UserPermission {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permissionId  String
-  permission    Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  canView       Boolean     @default(false)
-  canCreate     Boolean     @default(false)
-  canEdit       Boolean     @default(false)
-  canDelete     Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  canView      Boolean    @default(false)
+  canCreate    Boolean    @default(false)
+  canEdit      Boolean    @default(false)
+  canDelete    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@unique([userId, permissionId])
   @@map("user_permissions")
@@ -903,35 +952,35 @@ model UserPermission {
 
 // Conversation (fil de discussion entre utilisateurs)
 model Conversation {
-  id                String              @id @default(cuid())
-  schoolId          String
-  subject           String?             // Sujet de la conversation
-  type              ConversationType    @default(DIRECT) // DIRECT, GROUP, ANNOUNCEMENT
-  
+  id       String           @id @default(cuid())
+  schoolId String
+  subject  String? // Sujet de la conversation
+  type     ConversationType @default(DIRECT) // DIRECT, GROUP, ANNOUNCEMENT
+
   // Relations
-  participants      ConversationParticipant[]
-  messages          Message[]
-  
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("conversations")
 }
 
 // Participant à une conversation
 model ConversationParticipant {
-  id                String        @id @default(cuid())
-  conversationId    String
-  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  userId            String
-  
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+
   // Métadonnées
-  lastReadAt        DateTime?     // Dernière lecture
-  isArchived        Boolean       @default(false)
-  isMuted           Boolean       @default(false)
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  lastReadAt DateTime? // Dernière lecture
+  isArchived Boolean   @default(false)
+  isMuted    Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([conversationId, userId])
   @@map("conversation_participants")
@@ -939,25 +988,25 @@ model ConversationParticipant {
 
 // Message dans une conversation
 model Message {
-  id                String        @id @default(cuid())
-  conversationId    String
-  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId          String        // userId de l'expéditeur
-  senderName        String        // Nom de l'expéditeur (dénormalisé pour performance)
-  senderRole        UserRole      // Rôle de l'expéditeur
-  
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String // userId de l'expéditeur
+  senderName     String // Nom de l'expéditeur (dénormalisé pour performance)
+  senderRole     UserRole // Rôle de l'expéditeur
+
   // Contenu
-  content           String        @db.Text
-  attachments       String        @default("[]") // JSON array: [{name, url, size, type}]
-  
+  content     String @db.Text
+  attachments String @default("[]") // JSON array: [{name, url, size, type}]
+
   // Métadonnées
-  isRead            Boolean       @default(false)
-  readBy            String        @default("[]") // JSON array: [userId1, userId2, ...]
-  isEdited          Boolean       @default(false)
-  isDeleted         Boolean       @default(false)
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  isRead    Boolean @default(false)
+  readBy    String  @default("[]") // JSON array: [userId1, userId2, ...]
+  isEdited  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([conversationId])
   @@index([senderId])
@@ -970,29 +1019,29 @@ model Message {
 
 // Notification (système de notifications push)
 model Notification {
-  id                String            @id @default(cuid())
-  userId            String            // Destinataire
-  schoolId          String?           // École concernée (optionnel pour SUPER_ADMIN)
-  
+  id       String  @id @default(cuid())
+  userId   String // Destinataire
+  schoolId String? // École concernée (optionnel pour SUPER_ADMIN)
+
   // Contenu
-  title             String
-  message           String            @db.Text
-  type              NotificationType
-  category          NotificationCategory
-  
+  title    String
+  message  String               @db.Text
+  type     NotificationType
+  category NotificationCategory
+
   // Métadonnées
-  isRead            Boolean           @default(false)
-  readAt            DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Lien d'action (optionnel)
-  actionUrl         String?
-  actionLabel       String?
-  
+  actionUrl   String?
+  actionLabel String?
+
   // Données additionnelles (JSON)
-  metadata          String            @default("{}") // JSON: {studentId, paymentId, etc.}
-  
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  metadata String @default("{}") // JSON: {studentId, paymentId, etc.}
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([schoolId])
@@ -1004,28 +1053,28 @@ model Notification {
 // ============================================
 
 enum ConversationType {
-  DIRECT          // Conversation 1-à-1
-  GROUP           // Conversation de groupe
-  ANNOUNCEMENT    // Annonce (admin → tous)
+  DIRECT // Conversation 1-à-1
+  GROUP // Conversation de groupe
+  ANNOUNCEMENT // Annonce (admin → tous)
 }
 
 enum NotificationType {
-  INFO            // Information générale
-  SUCCESS         // Succès
-  WARNING         // Avertissement
-  ERROR           // Erreur
-  REMINDER        // Rappel
+  INFO // Information générale
+  SUCCESS // Succès
+  WARNING // Avertissement
+  ERROR // Erreur
+  REMINDER // Rappel
 }
 
 enum NotificationCategory {
-  MESSAGE         // Nouveau message
-  PAYMENT         // Paiement
-  GRADE           // Note
-  ABSENCE         // Absence
-  HOMEWORK        // Devoir
-  ANNOUNCEMENT    // Annonce
-  SYSTEM          // Système
-  OTHER           // Autre
+  MESSAGE // Nouveau message
+  PAYMENT // Paiement
+  GRADE // Note
+  ABSENCE // Absence
+  HOMEWORK // Devoir
+  ANNOUNCEMENT // Annonce
+  SYSTEM // Système
+  OTHER // Autre
 }
 
 // ============================================
@@ -1033,19 +1082,19 @@ enum NotificationCategory {
 // ============================================
 
 model Attendance {
-  id          String            @id @default(cuid())
-  studentId   String
-  moduleId    String
-  teacherId   String
-  date        DateTime
-  status      AttendanceStatus
-  notes       String?           @db.Text
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id        String           @id @default(cuid())
+  studentId String
+  moduleId  String
+  teacherId String
+  date      DateTime
+  status    AttendanceStatus
+  notes     String?          @db.Text
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
-  student     Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  module      Module            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  teacher     Enseignant        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  student Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  module  Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  teacher Enseignant @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@index([moduleId])
@@ -1066,29 +1115,29 @@ enum AttendanceStatus {
 // ============================================
 
 model WorkGroup {
-  id          String            @id @default(cuid())
-  name        String
-  schoolId    String
-  school      School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  
+  id       String @id @default(cuid())
+  name     String
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
   // Contexte du groupe
-  moduleId    String?           // Pour université
-  module      Module?           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  filiereId   String?           // Pour université
-  filiere     Filiere?          @relation(fields: [filiereId], references: [id])
-  
+  moduleId  String? // Pour université
+  module    Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  filiereId String? // Pour université
+  filiere   Filiere? @relation(fields: [filiereId], references: [id])
+
   // Créateur du groupe
-  createdBy   String            // userId (peut être étudiant ou enseignant)
-  creatorRole String            // STUDENT, TEACHER
-  
+  createdBy   String // userId (peut être étudiant ou enseignant)
+  creatorRole String // STUDENT, TEACHER
+
   // Membres
-  members     WorkGroupMember[]
-  
+  members WorkGroupMember[]
+
   // Devoirs assignés à ce groupe
-  homework    Homework[]
-  
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  homework Homework[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([schoolId])
   @@index([moduleId])
@@ -1097,13 +1146,13 @@ model WorkGroup {
 }
 
 model WorkGroupMember {
-  id          String      @id @default(cuid())
-  groupId     String
-  group       WorkGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  studentId   String
-  student     Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  role        String      @default("MEMBER") // LEADER, MEMBER
-  joinedAt    DateTime    @default(now())
+  id        String    @id @default(cuid())
+  groupId   String
+  group     WorkGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId String
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  role      String    @default("MEMBER") // LEADER, MEMBER
+  joinedAt  DateTime  @default(now())
 
   @@unique([groupId, studentId])
   @@index([groupId])
@@ -1116,18 +1165,18 @@ model WorkGroupMember {
 // ============================================
 
 model UserUploadPermission {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  grantedBy         String   // userId qui a accordé les permissions
-  grantedAt         DateTime @default(now())
-  customCategories  Json     // Catégories supplémentaires autorisées - JSON pour compatibilité MySQL
-  customMaxSizes    Json?    // Tailles max personnalisées par catégorie
-  expiresAt         DateTime?
-  reason            String?
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy        String // userId qui a accordé les permissions
+  grantedAt        DateTime  @default(now())
+  customCategories Json // Catégories supplémentaires autorisées - JSON pour compatibilité MySQL
+  customMaxSizes   Json? // Tailles max personnalisées par catégorie
+  expiresAt        DateTime?
+  reason           String?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([userId])
   @@index([grantedBy])
@@ -1140,16 +1189,16 @@ model UserUploadPermission {
 
 // Périodes de notation (Trimestres ou Semestres)
 model GradingPeriod {
-  id          String    @id @default(cuid())
-  schoolId    String
-  school      School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  name        String    // "Trimestre 1", "Semestre 1", etc.
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  bulletins   Bulletin[]
+  id        String     @id @default(cuid())
+  schoolId  String
+  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name      String // "Trimestre 1", "Semestre 1", etc.
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  bulletins Bulletin[]
 
   @@index([schoolId])
   @@map("grading_periods")
@@ -1157,15 +1206,15 @@ model GradingPeriod {
 
 // Types d'évaluations personnalisables par école
 model EvaluationType {
-  id          String       @id @default(cuid())
-  schoolId    String
-  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  name        String       // "Devoir", "Examen", "Projet", "TP", etc.
-  category    String       // "HOMEWORK" ou "EXAM" pour le calcul
-  weight      Float        @default(1.0) // Poids dans le calcul (ex: 2.0 pour devoirs)
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String   @id @default(cuid())
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name      String // "Devoir", "Examen", "Projet", "TP", etc.
+  category  String // "HOMEWORK" ou "EXAM" pour le calcul
+  weight    Float    @default(1.0) // Poids dans le calcul (ex: 2.0 pour devoirs)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([schoolId])
   @@map("evaluation_types")
@@ -1173,20 +1222,20 @@ model EvaluationType {
 
 // Templates de reçu personnalisables
 model ReceiptTemplate {
-  id          String   @id @default(cuid())
-  schoolId    String
-  school      School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  name        String   // "Reçu Standard", "Reçu avec Logo", etc.
-  logoUrl     String?  // URL du logo de l'école
-  headerText  String?  // Texte d'en-tête personnalisé
-  footerText  String?  // Texte de pied de page personnalisé
-  showLogo    Boolean  @default(true)
-  showStamp   Boolean  @default(false)
-  stampUrl    String?  // URL du tampon/cachet
-  primaryColor String  @default("#4F46E5")
-  isActive    Boolean  @default(false) // Un seul template actif à la fois
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name         String // "Reçu Standard", "Reçu avec Logo", etc.
+  logoUrl      String? // URL du logo de l'école
+  headerText   String? // Texte d'en-tête personnalisé
+  footerText   String? // Texte de pied de page personnalisé
+  showLogo     Boolean  @default(true)
+  showStamp    Boolean  @default(false)
+  stampUrl     String? // URL du tampon/cachet
+  primaryColor String   @default("#4F46E5")
+  isActive     Boolean  @default(false) // Un seul template actif à la fois
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([schoolId])
   @@index([schoolId, isActive])
@@ -1195,41 +1244,41 @@ model ReceiptTemplate {
 
 // Templates PDF personnalisables (bulletins, certificats, etc.)
 model PDFTemplate {
-  id                String   @id @default(cuid())
-  schoolId          String
-  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  name              String   @default("Bulletin standard")
+  name String @default("Bulletin standard")
 
   // Configuration en-tête
-  showLogo          Boolean  @default(true)
-  logoPosition      String   @default("left") // "left", "center", "right"
-  headerColor       String   @default("#4F46E5")
-  schoolNameSize    Int      @default(24)
+  showLogo       Boolean @default(true)
+  logoPosition   String  @default("left") // "left", "center", "right"
+  headerColor    String  @default("#4F46E5")
+  schoolNameSize Int     @default(24)
 
   // Informations à afficher
-  showAddress       Boolean  @default(true)
-  showPhone         Boolean  @default(true)
-  showEmail         Boolean  @default(true)
-  showStamp         Boolean  @default(true)
+  showAddress Boolean @default(true)
+  showPhone   Boolean @default(true)
+  showEmail   Boolean @default(true)
+  showStamp   Boolean @default(true)
 
   // Configuration tableau
-  gradeTableStyle   String   @default("detailed") // "simple" ou "detailed"
+  gradeTableStyle String @default("detailed") // "simple" ou "detailed"
 
   // Pied de page
-  footerText        String   @default("Ce document est officiel et certifié conforme.")
-  showSignatures    Boolean  @default(true)
+  footerText     String  @default("Ce document est officiel et certifié conforme.")
+  showSignatures Boolean @default(true)
 
-  isActive          Boolean  @default(false)
+  isActive Boolean @default(false)
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  bulletins         Bulletin[]
+  bulletins Bulletin[]
 
+  @@unique([schoolId])
   @@index([schoolId])
   @@index([schoolId, isActive])
-  @@unique([schoolId])
   @@map("pdf_templates")
 }
 
@@ -1246,8 +1295,8 @@ model Bulletin {
   gradingPeriod   GradingPeriod @relation(fields: [gradingPeriodId], references: [id], onDelete: Cascade)
   templateId      String?
   template        PDFTemplate?  @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  html            String        // Snapshot HTML complet
-  generalAverage  String        // Moyenne générale au moment de la génération
+  html            String // Snapshot HTML complet
+  generalAverage  String // Moyenne générale au moment de la génération
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -1263,11 +1312,209 @@ model Bulletin {
 // ============================================
 
 enum CourseSchedule {
-  DAY      // Cours du jour
-  EVENING  // Cours du soir
+  DAY // Cours du jour
+  EVENING // Cours du soir
 }
 
 enum GradingSystem {
-  TRIMESTER  // Système trimestriel (lycées)
-  SEMESTER   // Système semestriel (universités)
+  TRIMESTER // Système trimestriel (lycées)
+  SEMESTER // Système semestriel (universités)
+}
+
+// ============================================
+// VIE SCOLAIRE - INCIDENTS
+// ============================================
+
+// Modèle Incident (retards, oublis de matériel, comportement, etc.)
+model Incident {
+  id          String       @id @default(cuid())
+  studentId   String
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type        IncidentType
+  date        DateTime
+  time        String? // Heure de l'incident (ex: "08h30")
+  description String?
+
+  // Contexte du cours (optionnel)
+  moduleId String?
+  module   Module? @relation(fields: [moduleId], references: [id])
+
+  // Qui a signalé l'incident
+  reportedById String
+  reportedBy   Enseignant @relation(fields: [reportedById], references: [id])
+
+  // Notification parent
+  notifiedParent       Boolean   @default(false)
+  parentAcknowledged   Boolean   @default(false) // Parent a vu/confirmé
+  parentAcknowledgedAt DateTime?
+
+  // École
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([schoolId])
+  @@index([date])
+  @@map("incidents")
+}
+
+// ============================================
+// AGENDA & ÉVÉNEMENTS SCOLAIRES
+// ============================================
+
+// Modèle CalendarEvent (événements du calendrier scolaire)
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean   @default(false)
+  type        EventType
+
+  // Ciblage
+  targetRoles    String  @default("[]") // JSON: ["STUDENT", "PARENT", "TEACHER"]
+  targetNiveaux  String? // JSON: ["L1", "L2"] ou null = tous les niveaux
+  targetFilieres String? // JSON: ["filiereId1", "filiereId2"] ou null = toutes
+
+  // École
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Créateur
+  createdBy String // userId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([startDate])
+  @@index([type])
+  @@map("calendar_events")
+}
+
+// ============================================
+// RENDEZ-VOUS PARENT-PROFESSEUR
+// ============================================
+
+// Modèle Appointment (RDV parent-prof)
+model Appointment {
+  id String @id @default(cuid())
+
+  // Participants
+  parentId     String
+  parent       Parent     @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  enseignantId String
+  enseignant   Enseignant @relation(fields: [enseignantId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Détails du RDV
+  date       DateTime
+  duration   Int      @default(15) // Durée en minutes
+  location   String? // Salle ou "En ligne"
+  meetingUrl String? // Lien visio si en ligne
+
+  // Statut et notes
+  status       AppointmentStatus @default(PENDING)
+  subject      String? // Sujet du RDV
+  notes        String? // Notes privées
+  parentNotes  String? // Notes du parent
+  teacherNotes String? // Notes du professeur après le RDV
+
+  // École
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Qui a initié le RDV
+  initiatedBy String // "PARENT" ou "TEACHER"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+  @@index([enseignantId])
+  @@index([studentId])
+  @@index([date])
+  @@index([schoolId])
+  @@map("appointments")
+}
+
+// ============================================
+// SONDAGES
+// ============================================
+
+// Modèle Poll (sondage)
+model Poll {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+
+  // École
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  // Ciblage
+  targetRoles   String  @default("[]") // JSON: ["PARENT", "STUDENT", "TEACHER"]
+  targetNiveaux String? // JSON: ["L1", "L2"] ou null = tous
+
+  // Période
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+
+  // Options
+  isAnonymous   Boolean @default(false)
+  allowMultiple Boolean @default(false) // Permettre plusieurs réponses
+
+  // Créateur
+  createdBy String // userId
+
+  // Relations
+  options   PollOption[]
+  responses PollResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([isActive])
+  @@map("polls")
+}
+
+// Option de sondage
+model PollOption {
+  id     String @id @default(cuid())
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text   String
+  order  Int    @default(0)
+
+  // Relations
+  responses PollResponse[]
+
+  createdAt DateTime @default(now())
+
+  @@index([pollId])
+  @@map("poll_options")
+}
+
+// Réponse à un sondage
+model PollResponse {
+  id       String     @id @default(cuid())
+  pollId   String
+  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId String
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId   String // Qui a répondu
+
+  createdAt DateTime @default(now())
+
+  @@unique([pollId, userId, optionId]) // Une réponse par option par utilisateur
+  @@index([pollId])
+  @@index([userId])
+  @@map("poll_responses")
 }
