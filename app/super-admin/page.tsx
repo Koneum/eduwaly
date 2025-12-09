@@ -20,6 +20,10 @@ export default async function SuperAdminDashboard() {
   const activeSchools = await prisma.school.count({ where: { isActive: true } })
   const totalStudents = await prisma.student.count()
   
+  // Stats par type d'école
+  const universityCount = await prisma.school.count({ where: { schoolType: 'UNIVERSITY' } })
+  const highSchoolCount = await prisma.school.count({ where: { schoolType: 'HIGH_SCHOOL' } })
+  
   // Calcul des revenus réels
   const activeSubscriptions: any = await prisma.subscription.findMany({
     where: { status: 'ACTIVE' },
@@ -161,41 +165,62 @@ export default async function SuperAdminDashboard() {
   const activePlans = await prisma.plan.count({ where: { isActive: true } })
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground text-balance">Tableau de Bord Super Admin</h1>
-        <p className="text-muted-foreground mt-2">Vue d&apos;ensemble de toutes les écoles et abonnements</p>
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
+      {/* Header avec gradient */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-6 md:p-8 text-white shadow-xl">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
+        <div className="relative">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Tableau de Bord Super Admin</h1>
+              <p className="text-white/80 mt-1 text-sm md:text-base">Vue d&apos;ensemble de toutes les écoles et abonnements</p>
+            </div>
+            <div className="flex gap-2">
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
+                <p className="text-xs text-white/70">Universités</p>
+                <p className="text-xl font-bold">{universityCount}</p>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
+                <p className="text-xs text-white/70">Lycées</p>
+                <p className="text-xl font-bold">{highSchoolCount}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Écoles"
           value={totalSchools}
           description={`${activeSchools} actives`}
           icon={School}
+          variant="info"
           trend={{ value: Number(growthRate), isPositive: Number(growthRate) > 0 }}
         />
         <StatCard
           title="Total Étudiants"
           value={totalStudents.toLocaleString()}
-          description="Tous les étudiants"
+          description="Tous établissements"
           icon={Users}
+          variant="primary"
           trend={{ value: Number(studentGrowthRate), isPositive: Number(studentGrowthRate) > 0 }}
         />
         <StatCard
           title="Revenus Mensuels"
-          value={`${totalRevenue.toLocaleString()} FCFA`}
-          description={`${activeSubscriptions.length} abonnements actifs`}
+          value={`${totalRevenue.toLocaleString()} F`}
+          description={`${activeSubscriptions.length} abonnements`}
           icon={DollarSign}
+          variant="success"
           trend={{ value: Number(revenueGrowthRate), isPositive: Number(revenueGrowthRate) > 0 }}
         />
         <StatCard
-          title="Taux de Croissance"
+          title="Croissance"
           value={`${growthRate}%`}
-          description="Croissance mensuelle"
+          description="Ce mois-ci"
           icon={TrendingUp}
+          variant="warning"
           trend={{ value: Number(growthRate), isPositive: Number(growthRate) > 0 }}
         />
       </div>
@@ -210,78 +235,93 @@ export default async function SuperAdminDashboard() {
         </div>
       </div>
 
-      {/* Liens Rapides */}
+      {/* Liens Rapides - Design amélioré */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Plans & Tarifs
-            </CardTitle>
-            <CardDescription>
-              Gérez les plans d&apos;abonnement et les tarifs
-            </CardDescription>
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-violet-500 dark:border-l-violet-400">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 group-hover:scale-110 transition-transform">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Plans & Tarifs</CardTitle>
+                <CardDescription className="text-xs">
+                  Gérez les abonnements
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2 mb-4">
-              <p className="text-sm text-muted-foreground">
-                {totalPlans} plan(s) total • {activePlans} actif(s)
-              </p>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-4 text-sm">
+                <span className="text-muted-foreground">{totalPlans} plans</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">{activePlans} actifs</span>
+              </div>
             </div>
             <Link href="/super-admin/plans">
-              <Button className="w-full">
+              <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white">
                 Gérer les Plans
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Abonnements
-            </CardTitle>
-            <CardDescription>
-              Gérez tous les abonnements des écoles
-            </CardDescription>
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-emerald-500 dark:border-l-emerald-400">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Abonnements</CardTitle>
+                <CardDescription className="text-xs">
+                  Suivi des souscriptions
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2 mb-4">
-              <p className="text-sm text-muted-foreground">
-                {activeSubscriptions.length} abonnement(s) actif(s)
-              </p>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-4 text-sm">
+                <span className="text-green-600 dark:text-green-400 font-medium">{activeSubscriptions.length} actifs</span>
+                <span className="text-muted-foreground">{totalRevenue.toLocaleString()} FCFA</span>
+              </div>
             </div>
             <Link href="/super-admin/subscriptions">
               <Button className="w-full" variant="outline">
                 Voir les Abonnements
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <School className="h-5 w-5" />
-              Écoles
-            </CardTitle>
-            <CardDescription>
-              Gérez toutes les écoles inscrites
-            </CardDescription>
+        <Card className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500 dark:border-l-blue-400">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                <School className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Écoles</CardTitle>
+                <CardDescription className="text-xs">
+                  Gestion des établissements
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2 mb-4">
-              <p className="text-sm text-muted-foreground">
-                {totalSchools} école(s) • {activeSchools} active(s)
-              </p>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-4 text-sm">
+                <span className="text-muted-foreground">{totalSchools} écoles</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">{activeSchools} actives</span>
+              </div>
             </div>
             <Link href="/super-admin/schools">
               <Button className="w-full" variant="outline">
                 Voir les Écoles
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </CardContent>

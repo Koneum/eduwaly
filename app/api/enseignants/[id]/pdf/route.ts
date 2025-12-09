@@ -16,7 +16,7 @@ interface EmploiDuTemps extends Omit<EmploiDuTempsBase, 'vh'> {
 // Étendre le type jsPDF pour inclure autoTable
 declare module 'jspdf' {
   interface jsPDF {
-    autoTable: (options: any) => any;
+    autoTable: (options: Record<string, unknown>) => void;
     lastAutoTable: {
       finalY: number;
     };
@@ -45,7 +45,8 @@ function formatGrade(grade: string | null): string {
 function getSemestreFromDate(dateString: string | Date): string {
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
   const month = date.getMonth() + 1; // Les mois commencent à 0
-  return month >= 8 && month <= 12 ? 'S2' : 'S1';
+  // S1 = Septembre-Janvier (rentrée), S2 = Février-Juillet
+  return (month >= 9 || month <= 1) ? 'S1' : 'S2';
 }
 
 // Selon la documentation Next.js 15, nous devons utiliser cette signature pour les routes API dynamiques
@@ -101,6 +102,17 @@ export async function POST(
       }
     });
 
+    // Récupérer le nom de l'école
+    const school = await prisma.school.findFirst({
+      where: {
+        enseignants: {
+          some: { id }
+        }
+      },
+      select: { name: true }
+    });
+    const schoolName = school?.name || 'Institut Universitaire de Formation Professionnelle';
+
     // Définir manuellement les dates de début et fin pour l'année universitaire
     // en fonction de l'année universitaire récupérée et du semestre sélectionné
     let dateDebutAnnee, dateFinAnnee;
@@ -146,7 +158,7 @@ export async function POST(
     // Ajouter les titres
     doc.setFontSize(16);
     doc.setTextColor(0, 128, 0); // Vert
-    doc.text('Institut Universitaire de Formation Professionnelle', 105, 45, { align: 'center' });
+    doc.text(schoolName, 105, 45, { align: 'center' });
     
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0); // Noir
@@ -427,7 +439,8 @@ export async function POST(
       .reduce((sum: number, emploi: EmploiDuTemps) => sum + emploi.vh, 0);
     
     // Heures dues selon le type d'enseignant et le semestre
-    const heuresDues = enseignant.type === 'PERMANENT' ? 56 : 28; // 56h pour un semestre (permanent)
+    // Permanent: 192h/an = 96h/semestre, Vacataire: 96h/an = 48h/semestre
+    const heuresDues = enseignant.type === 'PERMANENT' ? 96 : 48;
     const heuresSupp = Math.max(0, totalVH - heuresDues);
 
     // Afficher les totaux (alignés à gauche) - ajusté pour le format portrait

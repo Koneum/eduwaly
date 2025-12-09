@@ -6,6 +6,13 @@ export default async function StaffPage({ params }: { params: Promise<{ schoolId
   const { schoolId } = await params
   await requireSchoolAccess(schoolId)
 
+  // Récupérer le type d'école
+  const school = await prisma.school.findUnique({
+    where: { id: schoolId },
+    select: { schoolType: true }
+  })
+  const schoolType = school?.schoolType || 'UNIVERSITY'
+
   // Récupérer tous les membres du staff de l'école
   const staffMembersData = await prisma.user.findMany({
     where: {
@@ -71,6 +78,7 @@ export default async function StaffPage({ params }: { params: Promise<{ schoolId
         staffMembers={staffMembers} 
         permissions={permissions}
         schoolId={schoolId}
+        schoolType={schoolType as 'UNIVERSITY' | 'HIGH_SCHOOL'}
       />
     </div>
   )

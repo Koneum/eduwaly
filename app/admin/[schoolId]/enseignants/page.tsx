@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { use } from 'react';
 
 // Importation des dépendances nécessaires
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -38,7 +38,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTeachers, Teacher } from "@/hooks/useTeachers";
 import { PermissionButton } from '@/components/permission-button';
-import { Mail } from 'lucide-react';
+import { Mail, Crown } from 'lucide-react';
+import { PrincipalTeacherDialog, PrincipalTeacherBadge } from '@/components/admin/principal-teacher-manager';
 import { toast as sonnerToast } from 'sonner';
 import { DialogDescription } from '@/components/ui/dialog';
 
@@ -61,6 +62,8 @@ interface EnhancedTeacher extends Teacher {
   type: string;
   titre: string;
   grade: string;
+  isPrincipal?: boolean;
+  classId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   user?: {
@@ -72,11 +75,13 @@ interface EnhancedTeacher extends Teacher {
 }
 
 // Composant Card pour les enseignants
-const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo }: { 
+const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo, onPrincipal, schoolType }: { 
   enseignant: EnhancedTeacher;
   onEdit: () => void;
   onDelete: () => void;
   onViewInfo: () => void;
+  onPrincipal?: () => void;
+  schoolType?: 'UNIVERSITY' | 'HIGH_SCHOOL';
 }) => {
   const handleExportPDF = async () => {
     try {
@@ -119,6 +124,7 @@ const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo }: {
               {enseignant.type}
             </Badge>
             <Badge className="bg-indigo-50 text-indigo-700 text-[10px] sm:text-responsive-xs whitespace-nowrap" variant="outline">{enseignant.grade}</Badge>
+            <PrincipalTeacherBadge isPrincipal={enseignant.isPrincipal || false} className="text-[10px] sm:text-responsive-xs" />
           </div>
         </div>
       </div>
@@ -202,6 +208,30 @@ const TeacherCard = ({ enseignant, onEdit, onDelete, onViewInfo }: {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        {/* Bouton Prof Principal - visible uniquement pour les lycées */}
+        {schoolType === 'HIGH_SCHOOL' && onPrincipal && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className={enseignant.isPrincipal 
+                    ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-300" 
+                    : "bg-white dark:bg-gray-800 text-yellow-600 dark:text-yellow-400"
+                  }
+                  variant="outline" 
+                  size="icon" 
+                  onClick={onPrincipal}
+                >
+                  <Crown className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{enseignant.isPrincipal ? 'Gérer Prof Principal' : 'Assigner Prof Principal'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </Card>
   );
@@ -259,6 +289,27 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [showSendEmailDialog, setShowSendEmailDialog] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState('');
+  
+  // States pour Prof Principal (lycée uniquement)
+  const [showPrincipalDialog, setShowPrincipalDialog] = useState(false);
+  const [selectedPrincipalTeacher, setSelectedPrincipalTeacher] = useState<EnhancedTeacher | null>(null);
+  const [schoolType, setSchoolType] = useState<'UNIVERSITY' | 'HIGH_SCHOOL'>('UNIVERSITY');
+
+  // Charger le type d'école
+  useEffect(() => {
+    const fetchSchoolType = async () => {
+      try {
+        const response = await fetch('/api/school/info');
+        if (response.ok) {
+          const data = await response.json();
+          setSchoolType(data.schoolType || 'UNIVERSITY');
+        }
+      } catch (error) {
+        console.error('Erreur chargement type école:', error);
+      }
+    };
+    fetchSchoolType();
+  }, []);
 
   // Validation des champs
   const validateField = (name: string, value: string) => {
@@ -390,6 +441,12 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
     </div>
   );
 
+  // Gestionnaire pour le prof principal
+  const handlePrincipal = (teacher: EnhancedTeacher) => {
+    setSelectedPrincipalTeacher(teacher);
+    setShowPrincipalDialog(true);
+  };
+
   // Affichage en cards
   const TeacherCards = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -403,6 +460,8 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
             setSelectedTeacherInfo(teacher);
             setShowInfoDialog(true);
           }}
+          onPrincipal={() => handlePrincipal(teacher)}
+          schoolType={schoolType}
         />
       ))}
     </div>
@@ -988,6 +1047,23 @@ export default function EnseignantsPage({ params }: { params: Promise<{ id?: str
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog Prof Principal (lycée uniquement) */}
+        {selectedPrincipalTeacher && (
+          <PrincipalTeacherDialog
+            open={showPrincipalDialog}
+            onOpenChange={setShowPrincipalDialog}
+            teacherId={selectedPrincipalTeacher.id}
+            teacherName={`${selectedPrincipalTeacher.titre} ${selectedPrincipalTeacher.prenom} ${selectedPrincipalTeacher.nom}`}
+            currentClassId={selectedPrincipalTeacher.classId}
+            isPrincipal={selectedPrincipalTeacher.isPrincipal || false}
+            schoolType={schoolType}
+            onSuccess={() => {
+              router.refresh();
+              setSelectedPrincipalTeacher(null);
+            }}
+          />
+        )}
       </div>
     </Suspense>
   );

@@ -36,10 +36,23 @@ export async function POST(req: NextRequest) {
       dateFin,
     } = body
 
-    // Validation
-    if (!schoolId || !moduleId || !enseignantId || !niveau || !salle || !heureDebut || !heureFin || !joursCours || !Array.isArray(joursCours) || !semestre) {
+    // Validation avec log détaillé
+    const missingFields = []
+    if (!schoolId) missingFields.push('schoolId')
+    if (!moduleId) missingFields.push('moduleId')
+    if (!enseignantId) missingFields.push('enseignantId')
+    if (!niveau) missingFields.push('niveau')
+    if (!salle) missingFields.push('salle')
+    if (!heureDebut) missingFields.push('heureDebut')
+    if (!heureFin) missingFields.push('heureFin')
+    if (!joursCours) missingFields.push('joursCours')
+    if (!Array.isArray(joursCours)) missingFields.push('joursCours (not array)')
+    if (!semestre) missingFields.push('semestre')
+    
+    if (missingFields.length > 0) {
+      console.error('Champs manquants:', missingFields, 'Body reçu:', body)
       return NextResponse.json(
-        { error: 'Tous les champs sont requis' },
+        { error: `Champs manquants: ${missingFields.join(', ')}` },
         { status: 400 }
       )
     }
@@ -64,8 +77,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Module non trouvé' }, { status: 404 })
     }
 
-    // Utiliser la filière du module
-    const filiereId = moduleRecord.filiereId
+    // Pour les UE communes, pas besoin de filière
+    // Sinon, utiliser la filière du module
+    const filiereId = moduleRecord.isUeCommune ? null : moduleRecord.filiereId
 
     // Vérifier que l'enseignant existe
     const enseignant = await prisma.enseignant.findFirst({

@@ -8,7 +8,7 @@ export default defineConfig({
   // Configuration des migrations
   migrations: {
     path: 'prisma/migrations',
-    seed: 'tsx prisma/seed.ts',
+    seed: 'npx tsx prisma/seed.mjs && npx tsx prisma/seed-permissions.ts && npx tsx prisma/seed-comparison.ts',
   },
   
   // URL de la base de données (Prisma 7)

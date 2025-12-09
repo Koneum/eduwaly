@@ -217,6 +217,7 @@ model User {
   avatar        String?
   image         String? // For Better Auth compatibility
   role          UserRole
+  jobTitle      String?   // Titre/Poste: "Chef de Département", "Directeur", etc.
   schoolId      String? // Null pour SUPER_ADMIN
   school        School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   isActive      Boolean   @default(true)
@@ -508,18 +509,19 @@ model Scholarship {
 
 // Plan d'Abonnement
 model Plan {
-  id            String  @id @default(cuid())
-  name          String // Nom technique (STARTER, PROFESSIONAL, etc.)
-  displayName   String  @default("") // Nom affiché (Starter, Professional, etc.)
+  id            String     @id @default(cuid())
+  name          String     // Nom technique (STARTER, PROFESSIONAL, etc.)
+  displayName   String     @default("") // Nom affiché (Starter, Professional, etc.)
   description   String?
-  price         Decimal @db.Decimal(10, 2)
-  interval      String // "MONTHLY", "YEARLY"
+  price         Decimal    @db.Decimal(10, 2)
+  interval      String     // "MONTHLY", "YEARLY"
   maxStudents   Int
   maxTeachers   Int
-  features      String  @default("[]") // JSON array
+  features      String     @default("[]") // JSON array
   stripePriceId String?
-  isActive      Boolean @default(true)
-  isPopular     Boolean @default(false) // Badge "Recommandé"
+  isActive      Boolean    @default(true)
+  isPopular     Boolean    @default(false) // Badge "Recommandé"
+  schoolType    SchoolType @default(UNIVERSITY) // Type d'établissement cible
 
   // Relations
   subscriptions    Subscription[]

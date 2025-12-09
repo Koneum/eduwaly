@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Calendar, BookOpen, DollarSign, LogOut, Menu, GraduationCap, UserX, MessageSquare, ClipboardList, Users, CalendarDays } from "lucide-react"
+import { LayoutDashboard, Calendar, BookOpen, DollarSign, LogOut, Menu, GraduationCap, UserX, MessageSquare, ClipboardList, Users, CalendarDays, Vote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -80,6 +80,11 @@ export function StudentNav({ schoolId, schoolName, isEnrolled }: StudentNavProps
       title: "Messages",
       href: `/student/${schoolId}/messages`,
       icon: MessageSquare,
+    },
+    {
+      title: "Sondages",
+      href: `/student/${schoolId}/polls`,
+      icon: Vote,
     },
     {
       title: "Scolarité",

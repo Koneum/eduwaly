@@ -3,15 +3,17 @@
 import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
-import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 
 export default function LoginPage() {
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false) 
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,119 +21,125 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      console.log('🔐 [LOGIN] Tentative de connexion pour:', email)
       const result = await signIn(email, password)
 
-      console.log('🔐 [LOGIN] Résultat signIn:', result)
-
       if (result?.error) {
-        console.error('❌ [LOGIN] Erreur signIn:', result.error)
         setError('Email ou mot de passe incorrect')
         setLoading(false)
         return
       }
 
-      console.log('✅ [LOGIN] SignIn réussi, attente de la création de session...')
-      
-      // Attendre que la session soit bien créée
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      console.log('🔄 [LOGIN] Récupération de l\'URL de redirection...')
-      
-      // Récupérer l'URL de redirection depuis le serveur
       const redirectResponse = await fetch('/api/auth/redirect-url', {
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       })
-      
-      console.log('📡 [LOGIN] Response status:', redirectResponse.status)
-      
+
       if (!redirectResponse.ok) {
-        console.error('❌ [LOGIN] Erreur lors de la récupération de l\'URL:', redirectResponse.status)
-        // Fallback: rediriger vers la page d'accueil
         window.location.href = '/'
         return
       }
-      
+
       const data = await redirectResponse.json()
-      console.log('📍 [LOGIN] Données de redirection:', data)
-      const { redirectUrl } = data
-      
-      console.log('🚀 [LOGIN] Redirection vers:', redirectUrl)
-      window.location.href = redirectUrl
-    } catch (err) {
-      console.error('💥 [LOGIN] Exception:', err)
+      window.location.href = data.redirectUrl
+    } catch {
       setError('Une erreur est survenue')
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen py-5 flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100 px-4">
-      <div className="max-w-md w-full">
-        {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-blue-950 rounded-2xl mb-4">
-            <Image
-              src="/Eduwaly-mascote.png"
-              alt="Logo"
-              width={50}
-              height={50}
-            />
-            
-          </div>
-          <h1 className="text-3xl font-bold text-blue-950">EDUWALY</h1>
-          <p className="text-muted-foreground mt-2">Connectez-vous à votre compte</p>
-        </div>
-
-        {/* Formulaire */}
-        <div className="bg-card rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-responsive-sm font-medium text-muted-foreground mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/70" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border text-foreground dark:text-white border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  placeholder="votre@email.com"
-                  required
+    <div className="min-h-screen flex">
+      {/* Partie gauche - Formulaire */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white dark:bg-gray-950">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-xl overflow-hidden">
+                <Image
+                  src="/Eduwaly-mascote.png"
+                  alt="Eduwaly"
+                  width={48}
+                  height={48}
+                  className="object-cover"
                 />
               </div>
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">EDUWALY</span>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Bon retour !
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              Connectez-vous avec vos identifiants
+            </p>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="votre@email.com"
+                required
+              />
             </div>
 
             {/* Mot de passe */}
             <div>
-              <label htmlFor="password" className="block text-responsive-sm font-medium text-muted-foreground mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Mot de passe
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/70" />
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 text-foreground dark:text-white border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  placeholder="MDP"
+                  className="w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="8-16 caractères"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
+            </div>
+
+            {/* Remember me & Forgot password */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">Se souvenir de moi</span>
+              </label>
+              <Link href="#" className="text-sm text-gray-900 dark:text-white font-medium hover:underline">
+                Mot de passe oublié ?
+              </Link>
             </div>
 
             {/* Message d'erreur */}
             {error && (
-              <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
 
@@ -139,12 +147,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-foreground hover:text-primary py-3 rounded-lg font-medium hover:bg-secondary   focus:ring-4 focus:ring-indigo-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3.5 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Connexion en cours...
+                  Connexion...
                 </>
               ) : (
                 'Se connecter'
@@ -153,45 +161,90 @@ export default function LoginPage() {
           </form>
 
           {/* Lien d'inscription */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Pas encore de compte ?{' '}
-              <Link href="/register" className="text-foreground dark:text-primary hover:text-green-600 font-medium">
-                S&apos;inscrire
-              </Link>
-            </p>
-          </div>
-        </div>
+          <p className="mt-8 text-center text-gray-600 dark:text-gray-400">
+            Pas encore de compte ?{' '}
+            <Link href="/register" className="text-gray-900 dark:text-white font-semibold hover:underline">
+              S&apos;inscrire
+            </Link>
+          </p>
 
-        {/* Comptes de test */}
-        <div className="mt-6 bg-card rounded-xl p-6 shadow-lg">
-          <h3 className="font-semibold text-foreground mb-3">Comptes de test :</h3>
-          <div className="space-y-2 text-sm">
-            {/* <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
-              <span className="font-medium text-purple-900">Super Admin:</span>
-              <code className="text-purple-700 text-xs">superadmin@saas.com</code>
-            </div> */}
-            <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-              <span className="font-medium text-blue-900">Admin École:</span>
-              <code className="text-[var(--link)] text-xs">admin@excellence-dakar.sn</code>
+          {/* Comptes de test */}
+          <div className="mt-8 p-5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-sm">🧪 Comptes de test (Mali)</h3>
+            
+            <div className="space-y-3 text-xs">
+              {/* Super Admin */}
+              <div className="flex justify-between items-center p-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                <span className="font-medium text-purple-900 dark:text-purple-300">👑 Super Admin</span>
+                <code className="text-purple-700 dark:text-purple-400">superadmin@eduwaly.com</code>
+              </div>
+              
+              {/* Université */}
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-gray-500 dark:text-gray-400 mb-2 font-medium">🏛️ Université Sciences Bamako</p>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <span className="text-blue-900 dark:text-blue-300">Admin</span>
+                    <code className="text-blue-700 dark:text-blue-400">admin@usb.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <span className="text-green-900 dark:text-green-300">Professeur</span>
+                    <code className="text-green-700 dark:text-green-400">prof@usb.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <span className="text-orange-900 dark:text-orange-300">Étudiant</span>
+                    <code className="text-orange-700 dark:text-orange-400">etudiant@usb.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                    <span className="text-pink-900 dark:text-pink-300">Parent</span>
+                    <code className="text-pink-700 dark:text-pink-400">parent@usb.ml</code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lycée */}
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-gray-500 dark:text-gray-400 mb-2 font-medium">🏫 Lycée Prosper Kamara</p>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <span className="text-blue-900 dark:text-blue-300">Admin</span>
+                    <code className="text-blue-700 dark:text-blue-400">admin@lpk.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <span className="text-green-900 dark:text-green-300">Professeur</span>
+                    <code className="text-green-700 dark:text-green-400">prof@lpk.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <span className="text-orange-900 dark:text-orange-300">Élève</span>
+                    <code className="text-orange-700 dark:text-orange-400">eleve@lpk.ml</code>
+                  </div>
+                  <div className="flex justify-between p-2 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                    <span className="text-pink-900 dark:text-pink-300">Parent</span>
+                    <code className="text-pink-700 dark:text-pink-400">parent@lpk.ml</code>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-center pt-2 text-gray-500 dark:text-gray-400">
+                MDP Super Admin: <code className="bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">Saas@2025</code>
+                <br />
+                Autres: <code className="bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">[Role]@2025</code>
+              </p>
             </div>
-            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-              <span className="font-medium text-green-900">Enseignant:</span>
-              <code className="text-success text-xs">teacher@excellence-dakar.sn</code>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-              <span className="font-medium text-orange-900">Étudiant:</span>
-              <code className="text-orange-700 text-xs">student1@excellence-dakar.sn</code>
-            </div>
-            <div className="flex justify-between items-center p-2 bg-pink-50 rounded">
-              <span className="font-medium text-pink-900">Parent:</span>
-              <code className="text-pink-700 text-xs">parent@excellence-dakar.sn</code>
-            </div>
-            <p className="text-xs text-muted-foreground mt-3 text-center">
-              Mot de passe pour tous : <code className="bg-muted px-2 py-1 rounded">password123</code>
-            </p>
           </div>
         </div>
+      </div>
+
+      {/* Partie droite - Image de fond */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        <Image
+          src="/loginpage-design.jpg"
+          alt="Login illustration"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-linear-to-br from-cyan-400/20 via-transparent to-pink-400/20" />
       </div>
     </div>
   )

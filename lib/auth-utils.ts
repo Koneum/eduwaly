@@ -12,6 +12,7 @@ export interface AuthUser {
   emailVerified: boolean
   name: string
   role: UserRole
+  jobTitle?: string | null  // Titre/Poste: "Chef de Département", "Directeur", etc.
   schoolId: string | null
   avatar?: string | null
   createdAt: Date

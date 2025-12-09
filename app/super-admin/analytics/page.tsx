@@ -197,19 +197,30 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Analytics & Statistiques</h1>
-        <p className="text-muted-foreground mt-2">Analyse détaillée des performances et tendances</p>
+      {/* Header avec gradient */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-6 md:p-8 text-white shadow-xl">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
+        <div className="relative">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+              <TrendingUp className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Analytics & Statistiques</h1>
+              <p className="text-white/80 mt-1 text-sm md:text-base">Analyse détaillée des performances et tendances</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats principales */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Écoles"
           value={totalSchools}
           description={`${activeSchools} actives`}
           icon={School}
+          variant="info"
           trend={{ value: Number(growthRate), isPositive: Number(growthRate) > 0 }}
         />
         <StatCard
@@ -217,13 +228,15 @@ export default async function AnalyticsPage() {
           value={totalStudents.toLocaleString()}
           description="Tous les étudiants"
           icon={Users}
+          variant="primary"
           trend={{ value: Number(studentGrowthRate), isPositive: Number(studentGrowthRate) > 0 }}
         />
         <StatCard
           title="Revenus Mensuels"
-          value={`${totalRevenue.toLocaleString()} FCFA`}
+          value={`${totalRevenue.toLocaleString()} F`}
           description="Abonnements actifs"
           icon={DollarSign}
+          variant="success"
           trend={{ value: Number(revenueGrowthRate), isPositive: Number(revenueGrowthRate) > 0 }}
         />
         <StatCard
@@ -231,6 +244,7 @@ export default async function AnalyticsPage() {
           value={totalTeachers}
           description="Total enseignants"
           icon={Users}
+          variant="warning"
           trend={{ value: Number(teacherGrowthRate), isPositive: Number(teacherGrowthRate) > 0 }}
         />
       </div>

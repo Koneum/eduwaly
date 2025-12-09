@@ -29,31 +29,82 @@ interface PlanSelectorProps {
 export function PlanSelector({ currentPlan: initialPlan, schoolId }: PlanSelectorProps) {
   const [loading, setLoading] = useState(false)
   const [currentPlan, setCurrentPlan] = useState(initialPlan || 'STARTER')
+  const [detectedSchoolType, setDetectedSchoolType] = useState<'UNIVERSITY' | 'HIGH_SCHOOL' | null>(null)
+  const [schoolInfo, setSchoolInfo] = useState<{
+    name?: string
+    email?: string
+    adminName?: string
+    adminEmail?: string
+  }>({})
   const [subscriptionInfo, setSubscriptionInfo] = useState<{
     status: string
     currentPeriodEnd?: Date
   } | null>(null)
 
   useEffect(() => {
-    // Charger les infos de l'abonnement
-    const fetchSubscriptionInfo = async () => {
+    // Charger les infos de l'abonnement et le type d'école
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/school-admin/subscription/upgrade')
-        if (response.ok) {
-          const data = await response.json()
+        let schoolTypeDetected = false
+
+        // Récupérer les infos de subscription
+        const subResponse = await fetch('/api/school-admin/subscription/upgrade')
+        if (subResponse.ok) {
+          const data = await subResponse.json()
           setCurrentPlan(data.currentPlan)
           setSubscriptionInfo({
             status: data.status,
             currentPeriodEnd: data.currentPeriodEnd ? new Date(data.currentPeriodEnd) : undefined,
           })
+          // Si l'API retourne le schoolType
+          if (data.schoolType) {
+            setDetectedSchoolType(data.schoolType)
+            schoolTypeDetected = true
+          }
+          // Infos admin depuis subscription
+          if (data.adminName || data.adminEmail) {
+            setSchoolInfo(prev => ({
+              ...prev,
+              adminName: data.adminName,
+              adminEmail: data.adminEmail
+            }))
+          }
+        }
+
+        // Récupérer le type d'école et infos depuis l'école
+        if (schoolId) {
+          const schoolResponse = await fetch(`/api/schools/${schoolId}`)
+          if (schoolResponse.ok) {
+            const schoolData = await schoolResponse.json()
+            if (schoolData.schoolType && !schoolTypeDetected) {
+              setDetectedSchoolType(schoolData.schoolType)
+            }
+            // Stocker les infos de l'école
+            setSchoolInfo(prev => ({
+              ...prev,
+              name: schoolData.name,
+              email: schoolData.email
+            }))
+          }
+        }
+
+        // Récupérer les infos de l'admin connecté
+        const profileResponse = await fetch('/api/school-admin/profile')
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json()
+          setSchoolInfo(prev => ({
+            ...prev,
+            adminName: profileData.name,
+            adminEmail: profileData.email
+          }))
         }
       } catch (error) {
-        console.error('Erreur chargement subscription:', error)
+        console.error('Erreur chargement données:', error)
       }
     }
 
-    fetchSubscriptionInfo()
-  }, [])
+    fetchData()
+  }, [schoolId])
 
   const handleSelectPlan = async (planId: string, planName: string) => {
     // Vérifier si déjà sur ce plan
@@ -155,12 +206,17 @@ export function PlanSelector({ currentPlan: initialPlan, schoolId }: PlanSelecto
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <CreditCard className="h-4 w-4 text-primary shrink-0" />
               <div>
                 <p className="text-responsive-base sm:text-responsive-lg font-bold">{currentPlan}</p>
                 <p className="text-responsive-xs text-muted-foreground">Plan actuel</p>
               </div>
+              {detectedSchoolType && (
+                <Badge variant="outline" className="text-[10px] sm:text-responsive-xs">
+                  {detectedSchoolType === 'UNIVERSITY' ? '🎓 Université' : '🏫 Lycée'}
+                </Badge>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               {subscriptionInfo?.currentPeriodEnd && (
@@ -207,6 +263,8 @@ export function PlanSelector({ currentPlan: initialPlan, schoolId }: PlanSelecto
       <PricingSection 
         onSelectPlan={handleSelectPlan} 
         currentPlan={currentPlan}
+        schoolType={detectedSchoolType || undefined}
+        schoolInfo={schoolInfo}
       />
     </div>
   )

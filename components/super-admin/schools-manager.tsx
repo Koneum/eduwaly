@@ -281,14 +281,14 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                   <Label htmlFor="schoolType" className="text-responsive-sm">Type d&apos;école</Label>
                   <Select
                     value={formData.schoolType}
-                    onValueChange={(value) => setFormData({ ...formData, schoolType: value })}
+                    onValueChange={(value) => setFormData({ ...formData, schoolType: value, planId: '' })}
                   >
                     <SelectTrigger className="text-responsive-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="UNIVERSITY" className="text-responsive-sm">Université</SelectItem>
-                      <SelectItem value="HIGH_SCHOOL" className="text-responsive-sm">Lycée</SelectItem>
+                      <SelectItem value="UNIVERSITY" className="text-responsive-sm">🏛️ Université</SelectItem>
+                      <SelectItem value="HIGH_SCHOOL" className="text-responsive-sm">🏫 Lycée</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -302,13 +302,25 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
                       <SelectValue placeholder="Sélectionner un plan" />
                     </SelectTrigger>
                     <SelectContent>
-                      {plans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id} className="text-responsive-sm">
-                          {plan.name} - ${plan.price}/{plan.interval}
-                        </SelectItem>
-                      ))}
+                      {plans
+                        .filter(plan => {
+                          // Filtrer les plans selon le type d'école
+                          if (formData.schoolType === 'UNIVERSITY') {
+                            return plan.name.includes('Université')
+                          } else {
+                            return plan.name.includes('Lycée')
+                          }
+                        })
+                        .map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id} className="text-responsive-sm">
+                            {plan.name} - {plan.price.toLocaleString()} FCFA/{plan.interval}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-responsive-xs text-muted-foreground">
+                    Plans filtrés pour {formData.schoolType === 'UNIVERSITY' ? 'Université' : 'Lycée'}
+                  </p>
                 </div>
               </div>
 
@@ -362,95 +374,161 @@ export default function SchoolsManager({ initialSchools, plans }: SchoolsManager
         </Dialog>
       </div>
 
-      {/* Stats rapides */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
+      {/* Stats rapides - Design moderne */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
+        <Card className="relative overflow-hidden border-l-4 border-l-gray-400 dark:border-l-gray-600 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-gray-100 dark:from-gray-800 to-transparent rounded-bl-full" />
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-responsive-sm text-muted-foreground">Total Écoles</p>
-                <p className="text-responsive-2xl font-bold">{schools.length}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Écoles</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-1">{schools.length}</p>
               </div>
-              <School className="h-8 w-8 text-muted-foreground" />
+              <div className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800">
+                <School className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
+        
+        <Card className="relative overflow-hidden border-l-4 border-l-blue-500 dark:border-l-blue-400 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-50 dark:from-blue-900/30 to-transparent rounded-bl-full" />
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-responsive-sm text-muted-foreground">Écoles Actives</p>
-                <p className="text-responsive-2xl font-bold">{schools.filter(s => s.isActive).length}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Universités</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-1">{schools.filter(s => s.schoolType === 'UNIVERSITY').length}</p>
               </div>
-              <School className="h-8 w-8 text-success" />
+              <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                <School className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
+        
+        <Card className="relative overflow-hidden border-l-4 border-l-emerald-500 dark:border-l-emerald-400 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-50 dark:from-emerald-900/30 to-transparent rounded-bl-full" />
+          <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-responsive-sm text-muted-foreground">Total Étudiants</p>
-                <p className="text-responsive-2xl font-bold">
-                  {schools.reduce((sum, s) => sum + s._count.students, 0)}
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Lycées</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-1">{schools.filter(s => s.schoolType === 'HIGH_SCHOOL').length}</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+                <School className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="relative overflow-hidden border-l-4 border-l-amber-500 dark:border-l-amber-400 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-amber-50 dark:from-amber-900/30 to-transparent rounded-bl-full" />
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Étudiants</p>
+                <p className="text-2xl sm:text-3xl font-bold mt-1">
+                  {schools.reduce((sum, s) => sum + s._count.students, 0).toLocaleString()}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-[var(--link)]" />
+              <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/30">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 dark:text-amber-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Liste des écoles */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {schools.map((school) => (
-          <Card key={school.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1">
-                  <Checkbox
-                    checked={selectedSchools.has(school.id)}
-                    onCheckedChange={() => handleSelectSchool(school.id)}
-                  />
-                  <div className="flex-1">
-                    <CardTitle className="text-responsive-base">{school.name}</CardTitle>
-                    <p className="text-responsive-sm text-muted-foreground mt-1">{school.subdomain}</p>
+          <Card 
+            key={school.id} 
+            className={`group relative overflow-hidden bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-l-4 ${
+              school.schoolType === 'UNIVERSITY' 
+                ? 'border-l-blue-500 dark:border-l-blue-400' 
+                : 'border-l-emerald-500 dark:border-l-emerald-400'
+            }`}
+          >
+            {/* Gradient décoratif */}
+            <div className={`absolute top-0 right-0 w-32 h-32 opacity-50 pointer-events-none ${
+              school.schoolType === 'UNIVERSITY'
+                ? 'bg-gradient-to-bl from-blue-100 dark:from-blue-900/20 to-transparent'
+                : 'bg-gradient-to-bl from-emerald-100 dark:from-emerald-900/20 to-transparent'
+            }`} />
+            
+            <CardHeader className="pb-3">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  checked={selectedSchools.has(school.id)}
+                  onCheckedChange={() => handleSelectSchool(school.id)}
+                  className="mt-1"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base font-semibold truncate group-hover:text-primary transition-colors">
+                      {school.name}
+                    </CardTitle>
+                    <Badge 
+                      variant={school.isActive ? 'default' : 'destructive'}
+                      className={school.isActive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0' : ''}
+                    >
+                      {school.isActive ? '● Actif' : '● Inactif'}
+                    </Badge>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1 font-mono">{school.subdomain}</p>
                 </div>
-                <Badge variant={school.isActive ? 'default' : 'destructive'}>
-                  {school.isActive ? 'Actif' : 'Inactif'}
-                </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4">
-              {/* Infos */}
-              <div className="space-y-2 text-responsive-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span>{school._count.students} étudiants</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span>{school._count.enseignants} enseignants</span>
-                </div>
-                {school.subscription && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span className="text-responsive-sm">Plan: {school.subscription.plan.name}</span>
+            
+            <CardContent className="pt-0 space-y-4">
+              {/* Type badge */}
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                school.schoolType === 'UNIVERSITY'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+              }`}>
+                {school.schoolType === 'UNIVERSITY' ? '🏛️' : '🏫'}
+                {school.schoolType === 'UNIVERSITY' ? 'Université' : 'Lycée'}
+              </div>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                  <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <div>
+                    <p className="text-sm font-semibold">{school._count.students}</p>
+                    <p className="text-[10px] text-muted-foreground">Étudiants</p>
                   </div>
-                )}
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                  <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <p className="text-sm font-semibold">{school._count.enseignants}</p>
+                    <p className="text-[10px] text-muted-foreground">Enseignants</p>
+                  </div>
+                </div>
               </div>
 
               {/* Abonnement */}
               {school.subscription && (
-                <div className="pt-3 border-t">
+                <div className="pt-3 border-t border-border/50">
                   <div className="flex items-center justify-between">
-                    <span className="text-responsive-sm text-muted-foreground">Statut</span>
-                    <Badge variant={
-                      school.subscription.status === 'ACTIVE' ? 'default' :
-                      school.subscription.status === 'TRIAL' ? 'secondary' : 'destructive'
-                    }>
-                      {school.subscription.status}
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{school.subscription.plan.name}</span>
+                    </div>
+                    <Badge 
+                      className={`border-0 ${
+                        school.subscription.status === 'ACTIVE' 
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                          : school.subscription.status === 'TRIAL'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}
+                    >
+                      {school.subscription.status === 'ACTIVE' ? '● Actif' : 
+                       school.subscription.status === 'TRIAL' ? '● Essai' : '● Expiré'}
                     </Badge>
                   </div>
                 </div>

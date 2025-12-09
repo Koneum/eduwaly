@@ -42,6 +42,7 @@ interface SchoolDetails {
   email: string
   phone: string | null
   address: string | null
+  schoolType: string
   isActive: boolean
   createdAt: Date
   _count: {

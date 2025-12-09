@@ -207,21 +207,21 @@ Ce plan suit la chaîne prioritaire définie par le client et indique l’état 
 | `EventType` | CONSEIL_CLASSE, REUNION_PARENTS, JOUR_FERIE, VACANCES, EXAMEN, EVENEMENT_SPORTIF, SORTIE_SCOLAIRE, CONFERENCE, AUTRE |
 | `AppointmentStatus` | PENDING, CONFIRMED, CANCELLED, COMPLETED |
 
-### 7.2 Fonctionnalités à implémenter (Phase 2)
+### 7.2 Fonctionnalités Phase 2 (Toutes terminées)
 
 | Priorité | Fonctionnalité | Effort | Statut |
 |----------|---------------|--------|--------|
-| 🔴 P1 | Vue jour emploi du temps | 5h | ⏳ À faire |
-| 🔴 P1 | Devoirs "J'ai terminé" | 3h | ⏳ À faire |
-| 🔴 P1 | Équipe pédagogique (liste profs) | 4h | ⏳ À faire |
-| 🔴 P1 | Menu accordéon sidebar | 4h | ⏳ À faire |
-| 🟠 P2 | Carnet de correspondance (incidents) | 8h | ⏳ À faire |
-| 🟠 P2 | Notes barème variable | 5h | ⏳ À faire |
-| 🟠 P2 | Agenda événements | 6h | ⏳ À faire |
-| 🟠 P2 | RDV parent-prof | 5h | ⏳ À faire |
-| 🟢 P3 | Bulletin de classe | 6h | ⏳ À faire |
-| 🟢 P3 | Sondages | 5h | ⏳ À faire |
-| 🟢 P3 | Prof principal (lycée) | 3h | ⏳ À faire |
+| 🔴 P1 | Vue jour emploi du temps | 5h | ✔️ Terminé (8 déc. 2025) |
+| 🔴 P1 | Devoirs "J'ai terminé" | 3h | ✔️ Terminé (8 déc. 2025) |
+| 🔴 P1 | Équipe pédagogique (liste profs) | 4h | ✔️ Terminé (8 déc. 2025) |
+| 🔴 P1 | Menu accordéon sidebar | 4h | ✔️ Terminé (8 déc. 2025) |
+| 🟠 P2 | Carnet de correspondance (incidents) | 8h | ✔️ Terminé (8 déc. 2025) |
+| 🟠 P2 | Notes barème variable | 5h | ✔️ Terminé (8 déc. 2025) |
+| 🟠 P2 | Agenda événements | 6h | ✔️ Terminé (8 déc. 2025) |
+| 🟠 P2 | RDV parent-prof | 5h | ✔️ Terminé (8 déc. 2025) |
+| 🟢 P3 | Bulletin de classe | 6h | ✔️ Terminé (8 déc. 2025) |
+| 🟢 P3 | Sondages | 5h | ✔️ Terminé (8 déc. 2025) |
+| 🟢 P3 | Prof principal (lycée) | 3h | ✔️ Terminé (8 déc. 2025) |
 
 ### 7.3 Différences Lycée vs Université
 
@@ -234,14 +234,9 @@ Ce plan suit la chaîne prioritaire définie par le client et indique l’état 
 | Parents obligatoires | Non | **Oui** |
 | Compétences | Non | Optionnel |
 
-### 7.4 Prochaine étape
+### 7.4 Statut Phase 2
 
-Après `prisma db push` ou migration, implémenter:
-1. **APIs** pour les nouveaux modèles
-2. **Pages UI** côté étudiant, parent, enseignant
-3. **Dashboard admin** pour la gestion
-
-**Statut global Phase 2**: ⏳ Schéma prêt, APIs et UI à implémenter
+**Statut global Phase 2**: ✅ **TERMINÉ** - Toutes les fonctionnalités implémentées
 
 ---
 
@@ -405,3 +400,243 @@ Après `prisma db push` ou migration, implémenter:
 | 6 | Notes barème variable | ✅ |
 | 7 | Agenda événements | ✅ |
 | 8 | RDV parent-prof | ✅ |
+
+---
+
+## 10. Fonctionnalités P3 - Implémentées (8 décembre 2025)
+
+### 10.1 Prof Principal (Lycée)
+
+**Fichiers créés/modifiés:**
+
+| Fichier | Description |
+|---------|-------------|
+| `app/api/admin/principal-teacher/route.ts` | API GET/PUT pour assigner/désassigner prof principal |
+| `app/api/admin/classes/route.ts` | API GET/POST pour gérer les classes (lycée) |
+| `app/api/school/info/route.ts` | API GET infos école (type, nom, etc.) |
+| `components/admin/principal-teacher-manager.tsx` | Dialog + Badge pour prof principal |
+| `app/admin/[schoolId]/enseignants/page.tsx` | Ajout bouton/badge prof principal |
+
+**Fonctionnalité**: Les administrateurs de lycées peuvent assigner un enseignant comme "Prof Principal" d'une classe. Le badge apparaît sur la fiche enseignant et dans le dialog d'information.
+
+### 10.2 Sondages (Poll System)
+
+**Fichiers créés:**
+
+| Fichier | Description |
+|---------|-------------|
+| `app/api/admin/polls/route.ts` | API GET/POST sondages admin |
+| `app/api/admin/polls/[id]/route.ts` | API GET/PUT/DELETE sondage individuel |
+| `app/api/polls/route.ts` | API GET sondages côté utilisateur |
+| `app/api/polls/vote/route.ts` | API POST/DELETE pour voter |
+| `components/admin/polls-manager.tsx` | Interface complète gestion sondages |
+| `app/admin/[schoolId]/polls/page.tsx` | Page admin sondages |
+| `app/student/[schoolId]/polls/page.tsx` | Page étudiant pour voter |
+| `app/parent/[schoolId]/polls/page.tsx` | Page parent pour voter |
+
+**Fonctionnalité**: 
+- Admin peut créer des sondages avec titre, description, options, dates, ciblage (étudiants/parents/profs)
+- Options: anonyme, choix multiples
+- Étudiants/parents peuvent voter et voir les résultats en temps réel
+- Statistiques détaillées pour l'admin
+
+### 10.3 Bulletin de Classe
+
+**Fichiers créés:**
+
+| Fichier | Description |
+|---------|-------------|
+| `app/api/admin/class-report/route.ts` | API GET notes agrégées par classe/niveau/filière |
+| `components/admin/class-report-manager.tsx` | Interface bulletin de classe avec filtres |
+| `app/admin/[schoolId]/class-report/page.tsx` | Page admin bulletin de classe |
+
+**Fonctionnalité**:
+- Vue agrégée des notes par niveau, filière, module
+- Statistiques: moyenne classe, taux de réussite, plus haute/basse moyenne
+- Statistiques par module avec distribution
+- Export CSV
+- Classement avec mentions (TB, B, AB, P, AJ)
+
+### 10.4 Navigation mise à jour
+
+| Navigation | Lien ajouté |
+|------------|-------------|
+| Admin | Sondages (Communication > Sondages) |
+| Admin | Bulletin de Classe (Évaluations > Bulletin de Classe) |
+| Étudiant | Sondages |
+| Parent | Sondages |
+
+---
+
+## 11. Inventaire Complet de l'Application (8 décembre 2025)
+
+### 11.1 Statistiques Globales
+
+| Métrique | Valeur |
+|----------|--------|
+| **Modèles Prisma** | 50 |
+| **Pages** | 63 |
+| **APIs** | 81+ routes |
+| **Composants Managers** | 27 |
+
+### 11.2 Pages par Rôle
+
+#### Admin École (24 pages)
+| Page | Description |
+|------|-------------|
+| `/admin/[schoolId]` | Dashboard admin |
+| `/admin/[schoolId]/announcements` | Gestion annonces |
+| `/admin/[schoolId]/bulletins` | Bulletins de notes |
+| `/admin/[schoolId]/class-report` | Bulletin de classe |
+| `/admin/[schoolId]/classes` | Gestion classes |
+| `/admin/[schoolId]/emploi/*` | Emplois du temps (CRUD) |
+| `/admin/[schoolId]/enseignants` | Gestion enseignants |
+| `/admin/[schoolId]/filieres` | Gestion filières |
+| `/admin/[schoolId]/finance` | Finance & Paiements |
+| `/admin/[schoolId]/finance-settings` | Prix & Bourses |
+| `/admin/[schoolId]/financial-overview` | Vue financière |
+| `/admin/[schoolId]/messages` | Messagerie |
+| `/admin/[schoolId]/modules` | Gestion modules |
+| `/admin/[schoolId]/polls` | Sondages |
+| `/admin/[schoolId]/receipt-templates` | Templates reçus |
+| `/admin/[schoolId]/reports` | Rapports & Documents |
+| `/admin/[schoolId]/rooms` | Salles de classe |
+| `/admin/[schoolId]/schedule/*` | Emploi du temps |
+| `/admin/[schoolId]/settings` | Paramètres école |
+| `/admin/[schoolId]/settings/grading` | Configuration notes |
+| `/admin/[schoolId]/staff` | Gestion personnel |
+| `/admin/[schoolId]/statistiques` | Statistiques |
+| `/admin/[schoolId]/students` | Gestion étudiants |
+| `/admin/[schoolId]/subscription` | Abonnement |
+| `/admin/[schoolId]/users` | Gestion utilisateurs |
+
+#### Étudiant (11 pages)
+| Page | Description |
+|------|-------------|
+| `/student/[schoolId]` | Dashboard étudiant |
+| `/student/[schoolId]/absences` | Mes absences |
+| `/student/[schoolId]/calendar` | Agenda événements |
+| `/student/[schoolId]/courses` | Mes cours |
+| `/student/[schoolId]/grades` | Mes notes |
+| `/student/[schoolId]/homework` | Devoirs |
+| `/student/[schoolId]/messages` | Messagerie |
+| `/student/[schoolId]/payments` | Scolarité/Paiements |
+| `/student/[schoolId]/polls` | Sondages |
+| `/student/[schoolId]/schedule` | Emploi du temps |
+| `/student/[schoolId]/teachers` | Équipe pédagogique |
+
+#### Parent (9 pages)
+| Page | Description |
+|------|-------------|
+| `/parent/[schoolId]` | Dashboard parent |
+| `/parent/[schoolId]/appointments` | Rendez-vous |
+| `/parent/[schoolId]/children` | Mes enfants |
+| `/parent/[schoolId]/correspondence` | Carnet correspondance |
+| `/parent/[schoolId]/messages` | Messagerie |
+| `/parent/[schoolId]/payments` | Scolarité |
+| `/parent/[schoolId]/polls` | Sondages |
+| `/parent/[schoolId]/schedule` | Emploi du temps |
+| `/parent/[schoolId]/tracking` | Suivi scolaire |
+
+#### Enseignant (13 pages)
+| Page | Description |
+|------|-------------|
+| `/teacher/[schoolId]` | Dashboard enseignant |
+| `/teacher/[schoolId]/absences` | Gestion absences |
+| `/teacher/[schoolId]/announcements` | Annonces |
+| `/teacher/[schoolId]/attendance-management` | Gestion présences |
+| `/teacher/[schoolId]/courses` | Mes cours |
+| `/teacher/[schoolId]/grades` | Gestion notes |
+| `/teacher/[schoolId]/homework` | Gestion devoirs |
+| `/teacher/[schoolId]/homework/[id]` | Détail devoir |
+| `/teacher/[schoolId]/homework-management` | Management devoirs |
+| `/teacher/[schoolId]/messages` | Messagerie |
+| `/teacher/[schoolId]/reports` | Rapports |
+| `/teacher/[schoolId]/schedule` | Emploi du temps |
+| `/teacher/[schoolId]/students` | Mes étudiants |
+
+#### Super Admin (9 pages)
+| Page | Description |
+|------|-------------|
+| `/super-admin` | Dashboard super-admin |
+| `/super-admin/analytics` | Analytiques |
+| `/super-admin/announcements` | Annonces globales |
+| `/super-admin/issues` | Signalements |
+| `/super-admin/messages` | Messagerie |
+| `/super-admin/notifications` | Notifications |
+| `/super-admin/plans` | Gestion plans |
+| `/super-admin/schools` | Gestion écoles |
+| `/super-admin/subscriptions` | Abonnements |
+
+### 11.3 Modèles Prisma (50)
+
+| Catégorie | Modèles |
+|-----------|---------|
+| **Utilisateurs** | User, Session, Account, Verification |
+| **Écoles** | School, Plan, Subscription, Parametre, AnneeUniversitaire, Room, Class |
+| **Académique** | Filiere, Module, EmploiDuTemps, Enseignant |
+| **Étudiants** | Student, Parent, Scholarship |
+| **Évaluations** | Evaluation, GradingPeriod, EvaluationType, Bulletin |
+| **Devoirs** | Homework, Submission |
+| **Présences** | Absence, Attendance, Incident |
+| **Finance** | FeeStructure, StudentPayment, ReceiptTemplate |
+| **Communication** | Conversation, ConversationParticipant, Message, Notification, Announcement |
+| **Sondages** | Poll, PollOption, PollResponse |
+| **Calendrier** | CalendarEvent, Appointment |
+| **Documents** | Document, PDFTemplate |
+| **Permissions** | Permission, UserPermission, UserUploadPermission |
+| **Groupes** | WorkGroup, WorkGroupMember |
+| **Super Admin** | IssueReport, ComparisonRow, PlanComparisonValue |
+
+### 11.4 Composants Managers (27)
+
+| Dossier | Composants |
+|---------|------------|
+| **admin/** | bulletin-templates-manager, class-report-manager, evaluation-types-manager, grading-periods-manager, polls-manager, principal-teacher-manager |
+| **school-admin/** | fee-structures-manager, finance-manager, profile-manager, receipt-templates-manager, rooms-manager, scholarships-manager, school-settings-manager, staff-manager, students-manager, subscription-manager, upgrade-manager, users-manager |
+| **super-admin/** | comparison-table-manager, issues-manager, notifications-manager, plans-manager, schools-manager, subscriptions-manager |
+| **teacher/** | attendance-manager, courses-manager, grades-manager |
+
+### 11.5 APIs Principales
+
+| Catégorie | Routes |
+|-----------|--------|
+| **Auth** | /api/auth/*, /api/auth/get-session, /api/auth/register |
+| **Admin** | /api/admin/announcements, /api/admin/bulletins, /api/admin/class-report, /api/admin/classes, /api/admin/grading, /api/admin/pdf-templates, /api/admin/permissions, /api/admin/polls, /api/admin/principal-teacher, /api/admin/salles, /api/admin/schedule, /api/admin/staff, /api/admin/upload-permissions |
+| **Scolaire** | /api/students/*, /api/enseignants/*, /api/filieres/*, /api/modules/*, /api/evaluations/*, /api/homework/*, /api/absences/* |
+| **Finance** | /api/fee-structures/*, /api/students/payments/*, /api/scholarships/* |
+| **Communication** | /api/messages/*, /api/notifications/*, /api/announcements/* |
+| **Calendrier** | /api/calendar/events/*, /api/appointments/*, /api/schedule/* |
+| **Sondages** | /api/polls/*, /api/admin/polls/* |
+| **Super Admin** | /api/super-admin/plans/*, /api/super-admin/subscriptions/*, /api/super-admin/schools/* |
+| **Enrôlement** | /api/enroll/verify, /api/enroll/create |
+
+---
+
+## ✅ Récapitulatif Global
+
+| Phase | Statut | Détails |
+|-------|--------|---------|
+| **Phase 1 (Permissions)** | ✅ Complète | PermissionButton, PermissionNavItem, vérifications serveur |
+| **Phase 2 (8 fonctionnalités)** | ✅ Complète | Devoirs, Sidebar, Emploi du temps, Équipe péda, Correspondance, Notes, Agenda, RDV |
+| **P3 (3 fonctionnalités)** | ✅ Complète | Prof Principal, Sondages, Bulletin de classe |
+| **Sécurité** | ✅ Complète | Prisma 7, Headers OWASP, Middleware, 0 vulnérabilités |
+| **UI/UX** | ✅ Complète | Responsive, Dark mode, Classes réutilisables |
+
+### Technologies
+
+| Stack | Version/Outils |
+|-------|----------------|
+| **Framework** | Next.js 16.0.7 (App Router) |
+| **Base de données** | PostgreSQL + Prisma 7.1.0 |
+| **Auth** | better-auth 1.4.3+ |
+| **UI** | TailwindCSS 4, shadcn/ui, Lucide Icons |
+| **Paiements** | VitePay (API mobile) |
+| **Storage** | AWS S3 |
+| **PDF** | jsPDF 3.0.4 |
+
+---
+
+**🎉 L'application Schooly est feature-complete pour la version 1.0.**
+
+Dernière mise à jour: 8 décembre 2025

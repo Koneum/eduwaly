@@ -218,7 +218,8 @@ export default async function SettingsPage({ params }: { params: Promise<{ schoo
             user={{
               name: user.name || '',
               email: user.email || '',
-              role: user.role || ''
+              role: user.role || '',
+              jobTitle: user.jobTitle
             }}
           />
         </TabsContent>

@@ -14,15 +14,36 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Mail, Lock, Loader2, Key, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Loader2, Key, Eye, EyeOff, Briefcase, Edit2, Check, X } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface ProfileManagerProps {
   user: {
     name: string
     email: string
     role: string
+    jobTitle?: string | null
   }
 }
+
+// Options de titres prédéfinis
+const JOB_TITLE_OPTIONS = [
+  { value: 'Directeur', label: 'Directeur' },
+  { value: 'Directeur Adjoint', label: 'Directeur Adjoint' },
+  { value: 'Chef de Département', label: 'Chef de Département' },
+  { value: 'Secrétaire Général', label: 'Secrétaire Général' },
+  { value: 'Responsable Pédagogique', label: 'Responsable Pédagogique' },
+  { value: 'Comptable', label: 'Comptable' },
+  { value: 'Surveillant Général', label: 'Surveillant Général' },
+  { value: 'Conseiller Pédagogique', label: 'Conseiller Pédagogique' },
+  { value: 'Autre', label: 'Autre (personnalisé)' },
+]
 
 export default function ProfileManager({ user }: ProfileManagerProps) {
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
@@ -31,6 +52,14 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
   const [step, setStep] = useState<'request' | 'verify'>('request')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isEditingJobTitle, setIsEditingJobTitle] = useState(false)
+  const [jobTitleForm, setJobTitleForm] = useState({
+    jobTitle: user.jobTitle || '',
+    customJobTitle: '',
+  })
+  const [isJobTitleCustom, setIsJobTitleCustom] = useState(
+    user.jobTitle && !JOB_TITLE_OPTIONS.some(opt => opt.value === user.jobTitle)
+  )
 
   // État formulaire email
   const [emailForm, setEmailForm] = useState({
@@ -197,6 +226,40 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
     }
   }
 
+  const handleUpdateJobTitle = async () => {
+    const finalJobTitle = isJobTitleCustom ? jobTitleForm.customJobTitle : jobTitleForm.jobTitle
+    
+    if (!finalJobTitle) {
+      toast.error('Veuillez sélectionner ou entrer un titre')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/school-admin/profile/update-job-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobTitle: finalJobTitle }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la modification')
+      }
+
+      toast.success('Titre modifié avec succès')
+      setIsEditingJobTitle(false)
+      // Reload to update the user data
+      window.location.reload()
+    } catch (error: unknown) {
+      const err = error as Error
+      toast.error(err.message || 'Erreur lors de la modification')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const closeEmailDialog = () => {
     setIsEmailDialogOpen(false)
     setEmailForm({ newEmail: '', code: '' })
@@ -243,6 +306,108 @@ export default function ProfileManager({ user }: ProfileManagerProps) {
               {user.role === 'SCHOOL_ADMIN' ? 'Administrateur École' : user.role}
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Titre / Poste */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-responsive-lg flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            Titre / Poste
+          </CardTitle>
+          <CardDescription className="text-responsive-sm">
+            Votre titre officiel au sein de l&apos;établissement (ex: Chef de Département, Directeur)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 sm:space-y-4">
+          {!isEditingJobTitle ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-responsive-sm text-muted-foreground">Titre actuel</Label>
+                <p className="text-responsive-base font-medium">
+                  {user.jobTitle || 'Non défini'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditingJobTitle(true)}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Modifier
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-responsive-sm">Sélectionnez votre titre</Label>
+                <Select
+                  value={isJobTitleCustom ? 'Autre' : jobTitleForm.jobTitle}
+                  onValueChange={(value) => {
+                    if (value === 'Autre') {
+                      setIsJobTitleCustom(true)
+                      setJobTitleForm({ ...jobTitleForm, jobTitle: '' })
+                    } else {
+                      setIsJobTitleCustom(false)
+                      setJobTitleForm({ ...jobTitleForm, jobTitle: value, customJobTitle: '' })
+                    }
+                  }}
+                >
+                  <SelectTrigger className="text-responsive-sm">
+                    <SelectValue placeholder="Sélectionnez un titre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOB_TITLE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isJobTitleCustom && (
+                <div>
+                  <Label className="text-responsive-sm">Titre personnalisé</Label>
+                  <Input
+                    placeholder="Entrez votre titre"
+                    value={jobTitleForm.customJobTitle}
+                    onChange={(e) => setJobTitleForm({ ...jobTitleForm, customJobTitle: e.target.value })}
+                    className="text-responsive-sm"
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsEditingJobTitle(false)
+                    setJobTitleForm({ jobTitle: user.jobTitle || '', customJobTitle: '' })
+                    setIsJobTitleCustom(user.jobTitle && !JOB_TITLE_OPTIONS.some(opt => opt.value === user.jobTitle))
+                  }}
+                  disabled={loading}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Annuler
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleUpdateJobTitle}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-1" />
+                  )}
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -27,7 +27,8 @@ export async function GET() {
         maxTeachers: true,
         features: true,
         isPopular: true,
-        isActive: true
+        isActive: true,
+        schoolType: true
       }
     })
 

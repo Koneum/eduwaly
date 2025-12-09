@@ -4328,6 +4328,7 @@ export const UserScalarFieldEnum = {
   avatar: 'avatar',
   image: 'image',
   role: 'role',
+  jobTitle: 'jobTitle',
   schoolId: 'schoolId',
   isActive: 'isActive',
   emailVerified: 'emailVerified',
@@ -4525,6 +4526,7 @@ export const PlanScalarFieldEnum = {
   stripePriceId: 'stripePriceId',
   isActive: 'isActive',
   isPopular: 'isPopular',
+  schoolType: 'schoolType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

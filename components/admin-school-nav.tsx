@@ -23,7 +23,8 @@ import {
   ClipboardList,
   FileBarChart,
   UsersRound,
-  BarChart3
+  BarChart3,
+  Vote
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
@@ -92,6 +93,7 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
       items: [
         { title: "Configuration Notation", href: `/admin/${schoolId}/settings/grading`, icon: ClipboardList },
         { title: "Bulletins de Notes", href: `/admin/${schoolId}/bulletins`, icon: FileBarChart },
+        { title: "Bulletin de Classe", href: `/admin/${schoolId}/class-report`, icon: UsersRound },
         { title: "Statistiques", href: `/admin/${schoolId}/statistiques`, icon: BarChart3 },
         { title: "Rapports & Documents", href: `/admin/${schoolId}/reports`, icon: FileText },
       ],
@@ -102,6 +104,7 @@ export function AdminSchoolNav({ schoolId, schoolName, schoolType = 'UNIVERSITY'
       items: [
         { title: "Messages", href: `/admin/${schoolId}/messages`, icon: MessageSquare },
         { title: "Annonces", href: `/admin/${schoolId}/announcements`, icon: Megaphone },
+        { title: "Sondages", href: `/admin/${schoolId}/polls`, icon: Vote },
       ],
     },
     {

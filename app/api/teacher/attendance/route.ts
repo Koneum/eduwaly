@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth-utils'
 import { sendAbsenceNotification } from '@/lib/brevo'
-import { AttendanceStatus } from '@prisma/client'
+import { AttendanceStatus } from '@/lib/generated/prisma/client'
 
 export const dynamic = 'force-dynamic'
 

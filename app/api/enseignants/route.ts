@@ -14,7 +14,7 @@ export async function GET() {
       );
     }
 
-    // ✅ OPTIMISÉ: Retirer emplois include, utiliser _count
+    // Récupérer les enseignants avec leurs emplois du temps
     const enseignants = await prisma.enseignant.findMany({
       where: {
         schoolId: user.schoolId
@@ -41,9 +41,28 @@ export async function GET() {
             isActive: true
           }
         },
-        _count: {
+        emplois: {
           select: {
-            emplois: true
+            id: true,
+            dateDebut: true,
+            dateFin: true,
+            heureDebut: true,
+            heureFin: true,
+            vh: true,
+            salle: true,
+            joursCours: true,
+            module: {
+              select: {
+                id: true,
+                nom: true,
+                type: true,
+                filiere: {
+                  select: {
+                    nom: true
+                  }
+                }
+              }
+            }
           }
         }
       },

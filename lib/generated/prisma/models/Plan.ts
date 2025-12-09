@@ -51,6 +51,7 @@ export type PlanMinAggregateOutputType = {
   stripePriceId: string | null
   isActive: boolean | null
   isPopular: boolean | null
+  schoolType: $Enums.SchoolType | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +69,7 @@ export type PlanMaxAggregateOutputType = {
   stripePriceId: string | null
   isActive: boolean | null
   isPopular: boolean | null
+  schoolType: $Enums.SchoolType | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -85,6 +87,7 @@ export type PlanCountAggregateOutputType = {
   stripePriceId: number
   isActive: number
   isPopular: number
+  schoolType: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -116,6 +119,7 @@ export type PlanMinAggregateInputType = {
   stripePriceId?: true
   isActive?: true
   isPopular?: true
+  schoolType?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -133,6 +137,7 @@ export type PlanMaxAggregateInputType = {
   stripePriceId?: true
   isActive?: true
   isPopular?: true
+  schoolType?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -150,6 +155,7 @@ export type PlanCountAggregateInputType = {
   stripePriceId?: true
   isActive?: true
   isPopular?: true
+  schoolType?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -254,6 +260,7 @@ export type PlanGroupByOutputType = {
   stripePriceId: string | null
   isActive: boolean
   isPopular: boolean
+  schoolType: $Enums.SchoolType
   createdAt: Date
   updatedAt: Date
   _count: PlanCountAggregateOutputType | null
@@ -294,6 +301,7 @@ export type PlanWhereInput = {
   stripePriceId?: Prisma.StringNullableFilter<"Plan"> | string | null
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
+  schoolType?: Prisma.EnumSchoolTypeFilter<"Plan"> | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
@@ -313,6 +321,7 @@ export type PlanOrderByWithRelationInput = {
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
+  schoolType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   subscriptions?: Prisma.SubscriptionOrderByRelationAggregateInput
@@ -335,6 +344,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   stripePriceId?: Prisma.StringNullableFilter<"Plan"> | string | null
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
+  schoolType?: Prisma.EnumSchoolTypeFilter<"Plan"> | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
@@ -354,6 +364,7 @@ export type PlanOrderByWithAggregationInput = {
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
+  schoolType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanCountOrderByAggregateInput
@@ -379,6 +390,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   stripePriceId?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
+  schoolType?: Prisma.EnumSchoolTypeWithAggregatesFilter<"Plan"> | $Enums.SchoolType
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
 }
@@ -396,6 +408,7 @@ export type PlanCreateInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutPlanInput
@@ -415,6 +428,7 @@ export type PlanUncheckedCreateInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutPlanInput
@@ -434,6 +448,7 @@ export type PlanUpdateInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutPlanNestedInput
@@ -453,6 +468,7 @@ export type PlanUncheckedUpdateInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutPlanNestedInput
@@ -472,6 +488,7 @@ export type PlanCreateManyInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -489,6 +506,7 @@ export type PlanUpdateManyMutationInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -506,6 +524,7 @@ export type PlanUncheckedUpdateManyInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -523,6 +542,7 @@ export type PlanCountOrderByAggregateInput = {
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
+  schoolType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -546,6 +566,7 @@ export type PlanMaxOrderByAggregateInput = {
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
+  schoolType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -563,6 +584,7 @@ export type PlanMinOrderByAggregateInput = {
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
+  schoolType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -619,6 +641,7 @@ export type PlanCreateWithoutComparisonValuesInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutPlanInput
@@ -637,6 +660,7 @@ export type PlanUncheckedCreateWithoutComparisonValuesInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutPlanInput
@@ -671,6 +695,7 @@ export type PlanUpdateWithoutComparisonValuesInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutPlanNestedInput
@@ -689,6 +714,7 @@ export type PlanUncheckedUpdateWithoutComparisonValuesInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutPlanNestedInput
@@ -707,6 +733,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   comparisonValues?: Prisma.PlanComparisonValueCreateNestedManyWithoutPlanInput
@@ -725,6 +752,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: $Enums.SchoolType
   createdAt?: Date | string
   updatedAt?: Date | string
   comparisonValues?: Prisma.PlanComparisonValueUncheckedCreateNestedManyWithoutPlanInput
@@ -759,6 +787,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comparisonValues?: Prisma.PlanComparisonValueUpdateManyWithoutPlanNestedInput
@@ -777,6 +806,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comparisonValues?: Prisma.PlanComparisonValueUncheckedUpdateManyWithoutPlanNestedInput
@@ -835,6 +865,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
@@ -855,6 +886,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -872,6 +904,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -889,11 +922,12 @@ export type PlanSelectScalar = {
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
+  schoolType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "description" | "price" | "interval" | "maxStudents" | "maxTeachers" | "features" | "stripePriceId" | "isActive" | "isPopular" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "description" | "price" | "interval" | "maxStudents" | "maxTeachers" | "features" | "stripePriceId" | "isActive" | "isPopular" | "schoolType" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   comparisonValues?: boolean | Prisma.Plan$comparisonValuesArgs<ExtArgs>
@@ -921,6 +955,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     stripePriceId: string | null
     isActive: boolean
     isPopular: boolean
+    schoolType: $Enums.SchoolType
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["plan"]>
@@ -1360,6 +1395,7 @@ export interface PlanFieldRefs {
   readonly stripePriceId: Prisma.FieldRef<"Plan", 'String'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly isPopular: Prisma.FieldRef<"Plan", 'Boolean'>
+  readonly schoolType: Prisma.FieldRef<"Plan", 'SchoolType'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>
 }

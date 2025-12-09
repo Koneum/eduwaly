@@ -32,6 +32,7 @@ export type UserMinAggregateOutputType = {
   avatar: string | null
   image: string | null
   role: $Enums.UserRole | null
+  jobTitle: string | null
   schoolId: string | null
   isActive: boolean | null
   emailVerified: boolean | null
@@ -48,6 +49,7 @@ export type UserMaxAggregateOutputType = {
   avatar: string | null
   image: string | null
   role: $Enums.UserRole | null
+  jobTitle: string | null
   schoolId: string | null
   isActive: boolean | null
   emailVerified: boolean | null
@@ -64,6 +66,7 @@ export type UserCountAggregateOutputType = {
   avatar: number
   image: number
   role: number
+  jobTitle: number
   schoolId: number
   isActive: number
   emailVerified: number
@@ -82,6 +85,7 @@ export type UserMinAggregateInputType = {
   avatar?: true
   image?: true
   role?: true
+  jobTitle?: true
   schoolId?: true
   isActive?: true
   emailVerified?: true
@@ -98,6 +102,7 @@ export type UserMaxAggregateInputType = {
   avatar?: true
   image?: true
   role?: true
+  jobTitle?: true
   schoolId?: true
   isActive?: true
   emailVerified?: true
@@ -114,6 +119,7 @@ export type UserCountAggregateInputType = {
   avatar?: true
   image?: true
   role?: true
+  jobTitle?: true
   schoolId?: true
   isActive?: true
   emailVerified?: true
@@ -203,6 +209,7 @@ export type UserGroupByOutputType = {
   avatar: string | null
   image: string | null
   role: $Enums.UserRole
+  jobTitle: string | null
   schoolId: string | null
   isActive: boolean
   emailVerified: boolean
@@ -240,6 +247,7 @@ export type UserWhereInput = {
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
   image?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  jobTitle?: Prisma.StringNullableFilter<"User"> | string | null
   schoolId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -264,6 +272,7 @@ export type UserOrderByWithRelationInput = {
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  jobTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   schoolId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -291,6 +300,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
   image?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  jobTitle?: Prisma.StringNullableFilter<"User"> | string | null
   schoolId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -315,6 +325,7 @@ export type UserOrderByWithAggregationInput = {
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
+  jobTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   schoolId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -337,6 +348,7 @@ export type UserScalarWhereWithAggregatesInput = {
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
+  jobTitle?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   schoolId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -353,6 +365,7 @@ export type UserCreateInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -376,6 +389,7 @@ export type UserUncheckedCreateInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -399,6 +413,7 @@ export type UserUpdateInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -422,6 +437,7 @@ export type UserUncheckedUpdateInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -445,6 +461,7 @@ export type UserCreateManyInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -461,6 +478,7 @@ export type UserUpdateManyMutationInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -476,6 +494,7 @@ export type UserUncheckedUpdateManyInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -507,6 +526,7 @@ export type UserCountOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   image?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  jobTitle?: Prisma.SortOrder
   schoolId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -523,6 +543,7 @@ export type UserMaxOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   image?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  jobTitle?: Prisma.SortOrder
   schoolId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -539,6 +560,7 @@ export type UserMinOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   image?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  jobTitle?: Prisma.SortOrder
   schoolId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -710,6 +732,7 @@ export type UserCreateWithoutEnseignantInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -732,6 +755,7 @@ export type UserUncheckedCreateWithoutEnseignantInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -770,6 +794,7 @@ export type UserUpdateWithoutEnseignantInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -792,6 +817,7 @@ export type UserUncheckedUpdateWithoutEnseignantInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -814,6 +840,7 @@ export type UserCreateWithoutSchoolInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -836,6 +863,7 @@ export type UserUncheckedCreateWithoutSchoolInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -887,6 +915,7 @@ export type UserScalarWhereInput = {
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
   image?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  jobTitle?: Prisma.StringNullableFilter<"User"> | string | null
   schoolId?: Prisma.StringNullableFilter<"User"> | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -903,6 +932,7 @@ export type UserCreateWithoutStudentInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -925,6 +955,7 @@ export type UserUncheckedCreateWithoutStudentInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -963,6 +994,7 @@ export type UserUpdateWithoutStudentInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -985,6 +1017,7 @@ export type UserUncheckedUpdateWithoutStudentInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1007,6 +1040,7 @@ export type UserCreateWithoutParentInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1029,6 +1063,7 @@ export type UserUncheckedCreateWithoutParentInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -1067,6 +1102,7 @@ export type UserUpdateWithoutParentInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1089,6 +1125,7 @@ export type UserUncheckedUpdateWithoutParentInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1111,6 +1148,7 @@ export type UserCreateWithoutSessionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1133,6 +1171,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -1171,6 +1210,7 @@ export type UserUpdateWithoutSessionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1193,6 +1233,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1215,6 +1256,7 @@ export type UserCreateWithoutAccountsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1237,6 +1279,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -1275,6 +1318,7 @@ export type UserUpdateWithoutAccountsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1297,6 +1341,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1319,6 +1364,7 @@ export type UserCreateWithoutPermissionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1341,6 +1387,7 @@ export type UserUncheckedCreateWithoutPermissionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -1379,6 +1426,7 @@ export type UserUpdateWithoutPermissionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1401,6 +1449,7 @@ export type UserUncheckedUpdateWithoutPermissionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1423,6 +1472,7 @@ export type UserCreateWithoutUploadPermissionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1445,6 +1495,7 @@ export type UserUncheckedCreateWithoutUploadPermissionsInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   schoolId?: string | null
   isActive?: boolean
   emailVerified?: boolean
@@ -1483,6 +1534,7 @@ export type UserUpdateWithoutUploadPermissionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1505,6 +1557,7 @@ export type UserUncheckedUpdateWithoutUploadPermissionsInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   schoolId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1527,6 +1580,7 @@ export type UserCreateManySchoolInput = {
   avatar?: string | null
   image?: string | null
   role: $Enums.UserRole
+  jobTitle?: string | null
   isActive?: boolean
   emailVerified?: boolean
   lastLoginAt?: Date | string | null
@@ -1542,6 +1596,7 @@ export type UserUpdateWithoutSchoolInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1564,6 +1619,7 @@ export type UserUncheckedUpdateWithoutSchoolInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1586,6 +1642,7 @@ export type UserUncheckedUpdateManyWithoutSchoolInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  jobTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1659,6 +1716,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatar?: boolean
   image?: boolean
   role?: boolean
+  jobTitle?: boolean
   schoolId?: boolean
   isActive?: boolean
   emailVerified?: boolean
@@ -1684,6 +1742,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatar?: boolean
   image?: boolean
   role?: boolean
+  jobTitle?: boolean
   schoolId?: boolean
   isActive?: boolean
   emailVerified?: boolean
@@ -1701,6 +1760,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatar?: boolean
   image?: boolean
   role?: boolean
+  jobTitle?: boolean
   schoolId?: boolean
   isActive?: boolean
   emailVerified?: boolean
@@ -1718,6 +1778,7 @@ export type UserSelectScalar = {
   avatar?: boolean
   image?: boolean
   role?: boolean
+  jobTitle?: boolean
   schoolId?: boolean
   isActive?: boolean
   emailVerified?: boolean
@@ -1726,7 +1787,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "name" | "avatar" | "image" | "role" | "schoolId" | "isActive" | "emailVerified" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "name" | "avatar" | "image" | "role" | "jobTitle" | "schoolId" | "isActive" | "emailVerified" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   school?: boolean | Prisma.User$schoolArgs<ExtArgs>
   student?: boolean | Prisma.User$studentArgs<ExtArgs>
@@ -1765,6 +1826,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     avatar: string | null
     image: string | null
     role: $Enums.UserRole
+    jobTitle: string | null
     schoolId: string | null
     isActive: boolean
     emailVerified: boolean
@@ -2209,6 +2271,7 @@ export interface UserFieldRefs {
   readonly avatar: Prisma.FieldRef<"User", 'String'>
   readonly image: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
+  readonly jobTitle: Prisma.FieldRef<"User", 'String'>
   readonly schoolId: Prisma.FieldRef<"User", 'String'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>

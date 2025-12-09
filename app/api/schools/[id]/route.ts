@@ -28,6 +28,7 @@ export async function GET(
         createdAt: true,
         primaryColor: true,
         secondaryColor: true,
+        schoolType: true,
         _count: {
           select: {
             students: true,

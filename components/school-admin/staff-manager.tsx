@@ -45,7 +45,12 @@ interface StaffManagerProps {
   staffMembers: StaffMember[]
   permissions: Permission[]
   schoolId: string
+  schoolType: 'UNIVERSITY' | 'HIGH_SCHOOL'
 }
+
+// Permissions spécifiques par type d'école
+const UNIVERSITY_ONLY_CATEGORIES = ['filieres', 'modules']
+const HIGH_SCHOOL_ONLY_CATEGORIES = ['classes']
 
 interface PermissionState {
   [permissionId: string]: {
@@ -56,8 +61,16 @@ interface PermissionState {
   }
 }
 
-export default function StaffManager({ staffMembers, permissions, schoolId }: StaffManagerProps) {
+export default function StaffManager({ staffMembers, permissions, schoolId, schoolType }: StaffManagerProps) {
   const router = useRouter()
+  
+  // Filtrer les permissions selon le type d'école
+  const filteredPermissions = permissions.filter(perm => {
+    if (schoolType === 'HIGH_SCHOOL' && UNIVERSITY_ONLY_CATEGORIES.includes(perm.category)) return false
+    if (schoolType === 'UNIVERSITY' && HIGH_SCHOOL_ONLY_CATEGORIES.includes(perm.category)) return false
+    return true
+  })
+  
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
@@ -74,8 +87,8 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
 
   const [selectedPermissions, setSelectedPermissions] = useState<PermissionState>({})
 
-  // Grouper les permissions par catégorie et par action
-  const permissionsByCategory = permissions.reduce((acc, perm) => {
+  // Grouper les permissions FILTRÉES par catégorie et par action
+  const permissionsByCategory = filteredPermissions.reduce((acc, perm) => {
     if (!acc[perm.category]) {
       acc[perm.category] = {
         view: null,
@@ -330,18 +343,24 @@ export default function StaffManager({ staffMembers, permissions, schoolId }: St
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'students': return 'Étudiants'
+      case 'students': return schoolType === 'UNIVERSITY' ? 'Étudiants' : 'Élèves'
       case 'staff': return 'Personnel & Staff'
       case 'parents': return 'Parents'
       case 'finance': return 'Finance & Scolarité'
       case 'timetable': return 'Emploi du temps'
-      case 'courses': return 'Cours & Modules'
+      case 'emploi': return 'Emploi du temps'
+      case 'courses': return schoolType === 'UNIVERSITY' ? 'Cours & Modules' : 'Matières'
+      case 'modules': return 'Modules'
+      case 'filieres': return 'Filières'
+      case 'classes': return 'Classes'
       case 'attendance': return 'Présences & Absences'
       case 'homework': return 'Devoirs & Soumissions'
       case 'reporting': return 'Reporting & Bulletins'
       case 'communication': return 'Communication & Messages'
-      case 'settings': return 'Paramètres de l’école'
-      default: return category
+      case 'settings': return 'Paramètres'
+      case 'enseignants': return 'Enseignants'
+      case 'notes': return 'Notes & Évaluations'
+      default: return category.charAt(0).toUpperCase() + category.slice(1)
     }
   }
 

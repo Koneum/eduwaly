@@ -16,6 +16,7 @@ interface Module {
   id: string
   nom: string
   vh: number
+  isUeCommune?: boolean
   filiere: {
     id: string
     nom: string
@@ -64,6 +65,8 @@ interface ScheduleCreatorProps {
   }
   isEditing?: boolean
   onCancel?: () => void
+  externalOpen?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 
@@ -101,37 +104,40 @@ export function ScheduleCreatorV2({
   onSuccess,
   initialData,
   isEditing = false,
-  onCancel
+  onCancel,
+  externalOpen,
+  onOpenChange
 }: ScheduleCreatorProps) {
   const [loading, setLoading] = useState(false)
   const [salles, setSalles] = useState<string[]>([])
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
 
-  console.log('ScheduleCreatorV2 - Props reçues:', { initialData, isEditing, onCancel })
+  // Utiliser externalOpen si fourni, sinon internalOpen
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value)
+    } else {
+      setInternalOpen(value)
+    }
+  }
 
-  // Ouvrir le dialog si on est en mode édition avec onCancel
+  // Ouvrir le dialog UNIQUEMENT si on est en mode édition avec des données initiales
   useEffect(() => {
-    if (onCancel && isEditing && initialData) {
+    if (isEditing && initialData) {
       setOpen(true)
     }
-  }, [onCancel, isEditing, initialData])
-
-  // Ouvrir le dialog si on est en mode création (pas isEditing) avec onCancel
-  useEffect(() => {
-    if (onCancel && !isEditing) {
-      setOpen(true)
-    }
-  }, [onCancel, isEditing])
+  }, [isEditing, initialData])
 
   // Fonction pour ouvrir le dialog en mode création
   const handleOpenDialog = () => {
     setOpen(true)
   }
 
-  // Synchroniser les états du formulaire avec initialData en mode édition
+  // Synchroniser les états du formulaire avec initialData (édition OU duplication)
   useEffect(() => {
-    if (isEditing && initialData) {
-      console.log('InitialData reçu:', initialData)
+    if (initialData) {
+      console.log('InitialData reçu:', initialData, 'isEditing:', isEditing)
       setEnseignantId(initialData.enseignantId || '')
       setFiliereId(initialData.filiereId || '')
       setNiveau(initialData.niveau || '')
@@ -139,7 +145,7 @@ export function ScheduleCreatorV2({
       setSelectedSalle(initialData.salle || '')
       setSelectedJours(initialData.joursCours ? JSON.parse(initialData.joursCours) : [])
     }
-  }, [isEditing, initialData, schoolType])
+  }, [initialData, schoolType, isEditing])
   
   // Form state avec initialisation depuis initialData si en mode édition
   const [enseignantId, setEnseignantId] = useState(initialData?.enseignantId || '')
@@ -162,20 +168,29 @@ export function ScheduleCreatorV2({
   // Gestion des créneaux horaires
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
   
-  // Initialiser timeSlots avec les données d'édition si disponibles
+  // Initialiser timeSlots avec les données d'édition/duplication si disponibles
   useEffect(() => {
-    if (isEditing && initialData) {
+    if (initialData && initialData.moduleId) {
+      // Pour la duplication, heureDebut/heureFin peuvent être vides
+      // On crée quand même le créneau pour pré-remplir le module
       setTimeSlots([{
         id: '1',
         moduleId: initialData.moduleId,
-        heureDebut: initialData.heureDebut,
-        heureFin: initialData.heureFin,
-        vh: initialData.vh
+        heureDebut: initialData.heureDebut || '',
+        heureFin: initialData.heureFin || '',
+        vh: initialData.vh || 1
       }])
-    } else {
+      // Mettre à jour currentSlot aussi
+      setCurrentSlot({
+        moduleId: initialData.moduleId,
+        heureDebut: initialData.heureDebut || '',
+        heureFin: initialData.heureFin || '',
+        vh: initialData.vh || 1
+      })
+    } else if (!initialData) {
       setTimeSlots([])
     }
-  }, [isEditing, initialData])
+  }, [initialData])
 
   // Gestion des salles
   const [salleMode, setSalleMode] = useState<'select' | 'create'>('select')
@@ -218,16 +233,28 @@ export function ScheduleCreatorV2({
     fetchSalles()
   }, [schoolId, isEditing, initialData?.salle])
 
-  // Auto-fill VH when module is selected
+  // State pour tracker si le module sélectionné est une UE Commune
+  const [isCurrentModuleUeCommune, setIsCurrentModuleUeCommune] = useState(false)
+
+  // Auto-fill VH when module is selected et détecter UE Commune
   useEffect(() => {
     if (currentSlot.moduleId) {
       const selectedModule = modules.find(m => m.id === currentSlot.moduleId)
       if (selectedModule) {
         setCurrentSlot(prev => ({ ...prev, vh: selectedModule.vh }))
-        if (selectedModule.filiere && !filiereId) {
+        
+        // Vérifier si c'est une UE Commune
+        setIsCurrentModuleUeCommune(selectedModule.isUeCommune === true)
+        
+        // Pour les UE Communes, vider la filière
+        if (selectedModule.isUeCommune) {
+          setFiliereId('')
+        } else if (selectedModule.filiere && !filiereId) {
           setFiliereId(selectedModule.filiere.id)
         }
       }
+    } else {
+      setIsCurrentModuleUeCommune(false)
     }
   }, [currentSlot.moduleId, modules, filiereId])
 
@@ -260,8 +287,12 @@ export function ScheduleCreatorV2({
   }
 
   const handleSubmit = async () => {
-    // Validation
-    if (!enseignantId || !filiereId || !niveau || !semestre || selectedJours.length === 0) {
+    // Vérifier si le module sélectionné est une UE Commune
+    const selectedModule = timeSlots.length > 0 ? modules.find(m => m.id === timeSlots[0].moduleId) : null
+    const isUeCommune = selectedModule?.isUeCommune === true
+
+    // Validation - filiereId n'est pas requis pour les UE Communes
+    if (!enseignantId || (!isUeCommune && !filiereId) || !niveau || !semestre || selectedJours.length === 0) {
       toast.error('Veuillez remplir tous les champs requis')
       return
     }
@@ -439,21 +470,36 @@ export function ScheduleCreatorV2({
                     </Select>
                   </div>
 
-                  {/* Filière */}
+                  {/* Filière - Optionnel pour UE Communes */}
                   <div>
-                    <Label>Filière / Classe *</Label>
-                    <Select value={filiereId} onValueChange={setFiliereId}>
-                      <SelectTrigger className="bg-card">
-                        <SelectValue placeholder="Sélectionnez une filière" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card">
-                        {filieres.map((fil) => (
-                          <SelectItem key={fil.id} value={fil.id}>
-                            {fil.nom}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>
+                      Filière / Classe {!isCurrentModuleUeCommune && '*'}
+                      {isCurrentModuleUeCommune && (
+                        <span className="ml-2 text-xs text-blue-600 font-normal">
+                          (UE Commune - Toutes filières)
+                        </span>
+                      )}
+                    </Label>
+                    {isCurrentModuleUeCommune ? (
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          📚 Ce module est une <strong>UE Commune</strong>. Il sera affiché pour toutes les filières.
+                        </p>
+                      </div>
+                    ) : (
+                      <Select value={filiereId} onValueChange={setFiliereId}>
+                        <SelectTrigger className="bg-card">
+                          <SelectValue placeholder="Sélectionnez une filière" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card">
+                          {filieres.map((fil) => (
+                            <SelectItem key={fil.id} value={fil.id}>
+                              {fil.nom}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -735,21 +781,36 @@ export function ScheduleCreatorV2({
                       </Select>
                     </div>
 
-                    {/* Filière */}
+                    {/* Filière - Optionnel pour UE Communes */}
                     <div>
-                      <Label>Filière / Classe *</Label>
-                      <Select value={filiereId} onValueChange={setFiliereId}>
-                        <SelectTrigger className="bg-card">
-                          <SelectValue placeholder="Sélectionnez une filière" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card">
-                          {filieres.map((fil) => (
-                            <SelectItem key={fil.id} value={fil.id}>
-                              {fil.nom}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>
+                        Filière / Classe {!isCurrentModuleUeCommune && '*'}
+                        {isCurrentModuleUeCommune && (
+                          <span className="ml-2 text-xs text-blue-600 font-normal">
+                            (UE Commune - Toutes filières)
+                          </span>
+                        )}
+                      </Label>
+                      {isCurrentModuleUeCommune ? (
+                        <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                            📚 Ce module est une <strong>UE Commune</strong>. Il sera affiché pour toutes les filières.
+                          </p>
+                        </div>
+                      ) : (
+                        <Select value={filiereId} onValueChange={setFiliereId}>
+                          <SelectTrigger className="bg-card">
+                            <SelectValue placeholder="Sélectionnez une filière" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card">
+                            {filieres.map((fil) => (
+                              <SelectItem key={fil.id} value={fil.id}>
+                                {fil.nom}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
