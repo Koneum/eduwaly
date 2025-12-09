@@ -633,10 +633,67 @@ Ce plan suit la chaîne prioritaire définie par le client et indique l’état 
 | **UI** | TailwindCSS 4, shadcn/ui, Lucide Icons |
 | **Paiements** | VitePay (API mobile) |
 | **Storage** | AWS S3 |
-| **PDF** | jsPDF 3.0.4 |
+| **PDF** | jsPDF 2.5.2 + jspdf-autotable |
+
+---
+
+## 12. Corrections Build (9 décembre 2025)
+
+### 12.1 Dépendances corrigées
+
+| Problème | Solution |
+|----------|----------|
+| jspdf 3.0.4 incompatible avec jspdf-autotable | Downgrade jspdf à 2.5.2 |
+| @radix-ui/react-radio-group manquant | Ajouté dans package.json + composant créé |
+| AttendanceStatus import incorrect | Corrigé vers @/lib/generated/prisma/client |
+| Fichiers prisma/ et scripts/ dans build TS | Exclus via tsconfig.json |
+| Déclarations jsPDF dupliquées | Unifiées dans tous les fichiers |
+
+### 12.2 Nouvelles fonctionnalités
+
+| Fonctionnalité | Description |
+|---------------|-------------|
+| **Filtre UE Communes** | Option dans le filtre emploi du temps pour afficher uniquement les UE sans filière |
+| **Impression UE Communes** | Bouton d'impression spécifique pour les UE Communes |
+
+---
+
+## 13. Proposition Architecture Feature-Based
+
+> 📄 Voir le plan consolidé complet: `note-d'annalyse/SAAS_PLAN_CONSOLIDE_9DEC2025.md`
+
+### Structure proposée
+
+```
+src/
+├── features/           # Code par domaine métier
+│   ├── admin/
+│   ├── school-admin/
+│   ├── teacher/
+│   ├── student/
+│   ├── parent/
+│   ├── super-admin/
+│   ├── schedule/
+│   ├── communication/
+│   ├── finance/
+│   ├── homework/
+│   ├── polls/
+│   └── reports/
+├── shared/             # Code réutilisable
+│   ├── components/ui/
+│   ├── hooks/
+│   ├── lib/
+│   └── types/
+└── config/             # Configuration
+```
+
+### Script de migration
+```powershell
+.\scripts\migrate-to-feature-architecture.ps1
+```
 
 ---
 
 **🎉 L'application Schooly est feature-complete pour la version 1.0.**
 
-Dernière mise à jour: 8 décembre 2025
+Dernière mise à jour: 9 décembre 2025

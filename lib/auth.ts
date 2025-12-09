@@ -34,11 +34,16 @@ const getBaseURL = () => {
   return baseURL
 }
 
-console.log('🔧 [AUTH CONFIG] Initializing Better Auth with baseURL:', getBaseURL())
+const baseURL = getBaseURL()
+console.log('🔧 [AUTH CONFIG] Initializing Better Auth with baseURL:', baseURL)
 console.log('🔧 [AUTH CONFIG] basePath:', '/api/auth')
+console.log('🔧 [AUTH CONFIG] NODE_ENV:', process.env.NODE_ENV)
+console.log('🔧 [AUTH CONFIG] BETTER_AUTH_URL:', process.env.BETTER_AUTH_URL || 'NOT SET')
+console.log('🔧 [AUTH CONFIG] VERCEL_URL:', process.env.VERCEL_URL || 'NOT SET')
+console.log('🔧 [AUTH CONFIG] Secure cookies:', process.env.NODE_ENV === 'production')
 
 export const auth = betterAuth({
-  baseURL: getBaseURL(),
+  baseURL: baseURL,
   basePath: '/api/auth',
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
@@ -92,7 +97,10 @@ export const auth = betterAuth({
   trustedOrigins: [
     'http://localhost:3000',
     'https://eduwaly.vercel.app',
+    'https://educwaly.com',
     'https://www.educwaly.com',
+    'https://eduwaly.com',
+    'https://www.eduwaly.com',
     'https://master.d32jdsavkxaqiy.amplifyapp.com',
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
   ],
