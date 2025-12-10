@@ -55,6 +55,7 @@ class VitepayClient {
     callbackUrl: string
   ): string {
     const data = `${orderId.toUpperCase()};${amount100};${currencyCode.toUpperCase()};${callbackUrl};${this.apiSecret}`
+    // IMPORTANT: La doc VitePay exige que le hash SHA1 soit en MAJUSCULES
     return crypto.createHash('sha1').update(data.toUpperCase()).digest('hex').toUpperCase()
   }
 

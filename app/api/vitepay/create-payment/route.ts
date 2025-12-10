@@ -6,6 +6,78 @@ import prisma from "@/lib/prisma"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+/**
+ * Extrait une IP valide pour VitePay.
+ * VitePay rejette les IP localhost/privées.
+ * Retourne une IP publique valide du Mali par défaut si aucune IP valide n'est trouvée.
+ */
+function getBuyerIpAddress(request: NextRequest): string {
+  // Essayer x-forwarded-for (proxies, load balancers)
+  const forwardedFor = request.headers.get("x-forwarded-for")
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(',')[0]?.trim()
+    if (firstIp && isValidPublicIp(firstIp)) {
+      return firstIp
+    }
+  }
+  
+  // Essayer x-real-ip
+  const realIp = request.headers.get("x-real-ip")
+  if (realIp && isValidPublicIp(realIp)) {
+    return realIp
+  }
+  
+  // Essayer cf-connecting-ip (Cloudflare)
+  const cfIp = request.headers.get("cf-connecting-ip")
+  if (cfIp && isValidPublicIp(cfIp)) {
+    return cfIp
+  }
+  
+  // IP publique par défaut du Mali (Orange Mali range)
+  return "41.73.244.1"
+}
+
+/**
+ * Vérifie si une IP est une IP publique valide (pas localhost, pas privée, pas IPv6 locale)
+ */
+function isValidPublicIp(ip: string): boolean {
+  // Rejeter les IP localhost et privées
+  if (!ip) return false
+  
+  // Rejeter IPv6 localhost et mapped
+  if (ip.includes('::') || ip.startsWith('::ffff:127') || ip === '::1') {
+    return false
+  }
+  
+  // Rejeter IPv4 localhost et privées
+  if (
+    ip.startsWith('127.') ||
+    ip.startsWith('10.') ||
+    ip.startsWith('172.16.') ||
+    ip.startsWith('172.17.') ||
+    ip.startsWith('172.18.') ||
+    ip.startsWith('172.19.') ||
+    ip.startsWith('172.20.') ||
+    ip.startsWith('172.21.') ||
+    ip.startsWith('172.22.') ||
+    ip.startsWith('172.23.') ||
+    ip.startsWith('172.24.') ||
+    ip.startsWith('172.25.') ||
+    ip.startsWith('172.26.') ||
+    ip.startsWith('172.27.') ||
+    ip.startsWith('172.28.') ||
+    ip.startsWith('172.29.') ||
+    ip.startsWith('172.30.') ||
+    ip.startsWith('172.31.') ||
+    ip.startsWith('192.168.') ||
+    ip === 'localhost'
+  ) {
+    return false
+  }
+  
+  return true
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("🔥 Début création paiement VitePay")
@@ -118,14 +190,17 @@ export async function POST(request: NextRequest) {
     const hash = crypto
       .createHash("sha1")
       .update(hashString.toUpperCase()) // L'intégralité de la chaîne est mise en MAJUSCULES
-      .digest("hex") // VitePay accepte lowercase
+      .digest("hex")
+      .toUpperCase() // IMPORTANT: Le hash SHA1 doit être en MAJUSCULES selon la doc VitePay
 
+    const buyerIp = getBuyerIpAddress(request)
+    
     console.log("🔐 Hash généré:", {
-      hashString,
+      hashString: hashString.toUpperCase(), // Afficher la chaîne réellement hashée
       hash,
       orderId,
-      orderIdUppercase: orderId.toString().toUpperCase(),
-      amount100
+      amount100,
+      buyerIp
     })
 
     // Préparer les données pour VitePay - version exacte comme le projet de référence
@@ -136,7 +211,7 @@ export async function POST(request: NextRequest) {
       "payment[order_id]": orderId.toString(), // Envoyer la version en MAJUSCULES
       "payment[description]": `Abonnement ${plan.name} - ${school.name}`,
       "payment[amount_100]": amount100.toString(),
-      "payment[buyer_ip_adress]": request.headers.get("x-forwarded-for")?.split(',')[0]?.trim() || request.headers.get("x-real-ip") || "41.73.244.1", // IP valide Mali par défaut
+      "payment[buyer_ip_adress]": buyerIp, // IP valide obligatoire
       "payment[return_url]": returnUrl,
       "payment[decline_url]": declineUrl,
       "payment[cancel_url]": cancelUrl,
