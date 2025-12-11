@@ -46,6 +46,8 @@ const PUBLIC_API_ROUTES = [
   '/api/auth',           // Better Auth - TOUJOURS public
   '/api/enroll',         // Inscription étudiants/parents
   '/api/public',         // Routes publiques explicites
+  '/api/payments/callback',  // VitePay callback (serveur-à-serveur)
+  '/api/vitepay/webhook',    // VitePay webhook (serveur-à-serveur)
 ]
 
 // Routes API publiques en lecture seule (GET uniquement)

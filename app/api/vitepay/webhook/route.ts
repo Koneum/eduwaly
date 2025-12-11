@@ -5,6 +5,19 @@ import prisma from '@/lib/prisma'
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+// Handler GET pour tester l'accessibilité
+export async function GET() {
+  console.log("🧪 GET /api/vitepay/webhook - Test d'accessibilité")
+  return new Response(JSON.stringify({ 
+    status: "ok", 
+    message: "VitePay webhook endpoint is accessible",
+    timestamp: new Date().toISOString()
+  }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  })
+}
+
 /**
  * Webhook VitePay - Traite les callbacks serveur-à-serveur
  * Documentation: https://api.vitepay.com/developers section 5

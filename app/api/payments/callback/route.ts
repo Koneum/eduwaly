@@ -5,6 +5,19 @@ import { NextRequest, NextResponse } from "next/server"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+// Handler GET pour tester l'accessibilité du endpoint
+export async function GET() {
+  console.log("🧪 GET /api/payments/callback - Test d'accessibilité")
+  return new Response(JSON.stringify({ 
+    status: "ok", 
+    message: "VitePay callback endpoint is accessible",
+    timestamp: new Date().toISOString()
+  }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  })
+}
+
 /**
  * VitePay Callback Handler (comme Sissan)
  * 
