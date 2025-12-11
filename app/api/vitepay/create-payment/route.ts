@@ -185,8 +185,8 @@ export async function POST(request: NextRequest) {
     // Nettoyer baseUrl (enlever le slash final s'il existe)
     const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
 
-    // URLs de callback
-    const callbackUrl = `${cleanBaseUrl}/api/vitepay/webhook`
+    // URLs de callback (même chemin que Sissan qui fonctionne)
+    const callbackUrl = `${cleanBaseUrl}/api/payments/callback`
     const returnUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=success&order_id=${orderId}`
     const declineUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=declined&order_id=${orderId}`
     const cancelUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`
