@@ -186,24 +186,27 @@ export async function POST(request: NextRequest) {
     const declineUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=declined&order_id=${orderId}`
     const cancelUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`
 
-    // Générer le hash SHA1 selon la doc VitePay
-    // IMPORTANT: Seuls order_id, currency_code et api_secret sont en majuscules
-    // Le callback_url doit rester en minuscules (sensible à la casse)
-    // Format: SHA1("ORDER_ID;amount_100;CURRENCY_CODE;callback_url;API_SECRET")
-    const hashString = `${orderId.toUpperCase()};${amount100};XOF;${callbackUrl};${apiSecret.toUpperCase()}`
+    // Générer le hash SHA1 selon la doc VitePay officielle
+    // Format: SHA1(UPPERCASE("order_id;amount_100;currency_code;callback_url;api_secret"))
+    // 1. Concaténer avec ;
+    // 2. TOUTE la chaîne en MAJUSCULES
+    // 3. Appliquer SHA1
+    const hashString = `${orderId};${amount100};XOF;${callbackUrl};${apiSecret}`
     const hash = crypto
       .createHash("sha1")
-      .update(hashString) // NE PAS mettre toUpperCase() ici car callback_url doit rester intact
+      .update(hashString.toUpperCase()) // TOUTE la chaîne en majuscules selon doc VitePay
       .digest("hex")
-      .toLowerCase() // VitePay attend le hash en minuscules
+      .toLowerCase() // Le résultat SHA1 en minuscules
 
     const buyerIp = getBuyerIpAddress(request)
     
     console.log("🔐 Hash généré:", {
-      hashString, // Afficher la chaîne réellement hashée
+      hashStringOriginal: hashString,
+      hashStringUppercase: hashString.toUpperCase(), // Ce qui est réellement hashé
       hash,
       orderId,
       amount100,
+      callbackUrl,
       buyerIp,
       planId,
       planPrice
