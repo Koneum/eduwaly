@@ -16,16 +16,16 @@ export async function GET(
   try {
     const { id: orderId } = await params
 
-    // Extraire le schoolId de l'orderId (format: SUB_schoolId_timestamp avec underscores)
+    // Extraire le schoolId de l'orderId (format: schoolId_timestamp)
     const orderParts = orderId.split('_')
-    if (orderParts[0] !== 'SUB' || orderParts.length < 3) {
+    if (orderParts.length < 2) {
       return NextResponse.json(
         { error: 'Format order_id invalide' },
         { status: 400 }
       )
     }
 
-    const schoolId = orderParts[1]
+    const schoolId = orderParts[0]
 
     // Vérifier le statut de l'abonnement
     const school = await prisma.school.findUnique({

@@ -157,8 +157,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Générer un ID de commande unique (format: SUB_schoolId_timestamp avec underscores)
-    const orderId = `SUB_${school.id}_${Date.now()}`
+    // Générer un ID de commande unique (format simple cuid comme tinygest)
+    const orderId = `${schoolId}_${Date.now()}`
 
     // Montant en centimes (multiplier par 100)
     // VitePay a un montant minimum (généralement 100 XOF)
