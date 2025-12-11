@@ -186,12 +186,12 @@ export async function POST(request: NextRequest) {
 
     // Générer le hash SHA1 selon la doc VitePay
     // Format: SHA1(UPPERCASE("order_id;amount_100;currency_code;callback_url;api_secret"))
-    const hashString = `${orderId};${amount100};XOF;${callbackUrl};${apiSecret}` // orderId est déjà en majuscules
+    const hashString = `${orderId};${amount100};XOF;${callbackUrl};${apiSecret}`
     const hash = crypto
       .createHash("sha1")
-      .update(hashString.toUpperCase()) // L'intégralité de la chaîne est mise en MAJUSCULES
+      .update(hashString.toUpperCase()) // La chaîne doit être en MAJUSCULES avant le hash
       .digest("hex")
-      .toUpperCase() // IMPORTANT: Le hash SHA1 doit être en MAJUSCULES selon la doc VitePay
+      .toLowerCase() // IMPORTANT: VitePay attend le hash en MINUSCULES !
 
     const buyerIp = getBuyerIpAddress(request)
     

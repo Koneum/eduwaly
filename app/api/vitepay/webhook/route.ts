@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
     const hashString = `${order_id};${amount_100};${currency_code};${apiSecret}`
     const calculatedAuthenticity = crypto
       .createHash("sha1")
-      .update(hashString.toUpperCase()) // order_id et currency_code en majuscules
+      .update(hashString.toUpperCase()) // La chaîne doit être en MAJUSCULES avant le hash
       .digest("hex")
-      .toUpperCase() // Le résultat doit être en majuscules
+      .toLowerCase() // IMPORTANT: VitePay envoie le hash en minuscules !
 
     console.log('🔐 Vérification signature:', {
       received: authenticity,
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
       hashString
     })
 
-    // 2. Comparer la signature calculée à celle transmise par VitePay
-    if (authenticity !== calculatedAuthenticity) {
+    // 2. Comparer la signature calculée à celle transmise par VitePay (case-insensitive)
+    if (authenticity?.toLowerCase() !== calculatedAuthenticity) {
       console.error('❌ Signature invalide')
       return NextResponse.json({ 
         status: '0', 
