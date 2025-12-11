@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, Sparkles, Zap, Crown, ArrowRight, Loader2 } from "lucide-react"
+import { Check, Sparkles, Zap, Crown, ArrowRight, Loader2, Users, GraduationCap } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { cn } from "@/lib/utils"
 
 interface Plan {
   id: string
@@ -40,11 +41,6 @@ function parseFeatures(features: string): string[] {
 export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
-
-  const formatPrice = (price: number, interval: string) => {
-    if (price === 0) return 'Gratuit'
-    return `${price.toLocaleString()} FCFA/${interval === 'MONTHLY' ? 'mois' : 'an'}`
-  }
 
   const getPlanIcon = (name: string) => {
     switch (name.toUpperCase()) {
@@ -102,9 +98,14 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
         throw new Error(data.error || 'Erreur lors de la mise à niveau')
       }
 
-      toast.success('Plan mis à niveau avec succès!')
-      router.refresh()
-      router.push(`/admin/${schoolId}`)
+      // Rediriger vers la page de checkout pour le paiement
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl
+      } else {
+        toast.success('Plan mis à niveau avec succès!')
+        router.refresh()
+        router.push(`/admin/${schoolId}`)
+      }
 
     } catch (error) {
       console.error('Erreur upgrade:', error)
@@ -116,109 +117,116 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
 
   return (
     <div className="space-y-8">
-      {/* Comparaison des plans */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Comparaison des plans - Design amélioré */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {plans.map((plan) => {
           const isCurrent = isCurrentPlan(plan.name)
           const canUpgradeToPlan = canUpgrade(plan.name)
+          const features = parseFeatures(plan.features)
 
           return (
             <Card 
               key={plan.id}
-              className={`relative ${plan.isPopular ? 'border-primary border-2 shadow-lg' : ''} ${isCurrent ? 'bg-accent/50' : ''}`}
+              className={cn(
+                "relative flex flex-col transition-all duration-200 hover:shadow-xl",
+                plan.isPopular && "ring-2 ring-primary shadow-lg scale-[1.02]",
+                isCurrent && "bg-primary/5 border-primary/30"
+              )}
             >
-              {plan.isPopular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                    ⭐ Recommandé
+              {/* Badges en haut */}
+              <div className="absolute -top-3 left-0 right-0 flex justify-center gap-2">
+                {plan.isPopular && (
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md">
+                    ⭐ Populaire
                   </Badge>
-                </div>
-              )}
-
-              {isCurrent && (
-                <div className="absolute -top-3 right-4">
-                  <Badge variant="secondary" className="px-4 py-1">
-                    Plan Actuel
+                )}
+                {isCurrent && (
+                  <Badge variant="secondary" className="bg-primary text-primary-foreground shadow-md">
+                    Votre plan
                   </Badge>
-                </div>
-              )}
+                )}
+              </div>
 
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 mb-2">
+              <CardHeader className="pt-8 pb-4 text-center">
+                {/* Icône */}
+                <div className={cn(
+                  "mx-auto w-14 h-14 rounded-2xl flex items-center justify-center mb-4",
+                  isCurrent ? "bg-primary/20" : "bg-muted"
+                )}>
                   {getPlanIcon(plan.name)}
-                  <CardTitle className="text-2xl">{plan.displayName}</CardTitle>
                 </div>
-                <CardDescription className="text-sm">
+                
+                <CardTitle className="text-xl font-bold">{plan.displayName}</CardTitle>
+                <CardDescription className="text-xs min-h-[40px]">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-6">
-                {/* Prix */}
-                <div>
-                  <div className="text-4xl font-bold text-primary">
+              <CardContent className="flex-1 space-y-4">
+                {/* Prix - Design compact */}
+                <div className="text-center py-4 rounded-xl bg-muted/50">
+                  <div className="text-3xl font-bold text-primary">
                     {plan.price === 0 ? 'Gratuit' : `${plan.price.toLocaleString()}`}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {plan.price === 0 ? '30 jours d\'essai' : `FCFA / ${plan.interval === 'MONTHLY' ? 'mois' : 'an'}`}
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {plan.price === 0 ? '30 jours d\'essai' : `FCFA/${plan.interval === 'MONTHLY' ? 'mois' : 'an'}`}
                   </div>
                 </div>
 
-                {/* Limites */}
-                <div className="space-y-2 pb-4 border-b">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Étudiants</span>
-                    <span className="font-semibold">
-                      {plan.maxStudents === -1 ? 'Illimité' : plan.maxStudents}
-                    </span>
+                {/* Limites - Design compact avec icônes */}
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                    <GraduationCap className="h-4 w-4 mx-auto text-blue-600 mb-1" />
+                    <div className="text-sm font-bold">
+                      {plan.maxStudents === -1 ? '∞' : plan.maxStudents}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Étudiants</div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Enseignants</span>
-                    <span className="font-semibold">
-                      {plan.maxTeachers === -1 ? 'Illimité' : plan.maxTeachers}
-                    </span>
+                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30">
+                    <Users className="h-4 w-4 mx-auto text-emerald-600 mb-1" />
+                    <div className="text-sm font-bold">
+                      {plan.maxTeachers === -1 ? '∞' : plan.maxTeachers}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Enseignants</div>
                   </div>
                 </div>
 
-                {/* Fonctionnalités */}
-                <div className="space-y-3">
-                  <div className="text-sm font-semibold">Fonctionnalités incluses:</div>
-                  <ul className="space-y-2">
-                    {parseFeatures(plan.features).slice(0, 6).map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                    {parseFeatures(plan.features).length > 6 && (
-                      <li className="text-xs text-muted-foreground pl-6">
-                        +{parseFeatures(plan.features).length - 6} autres fonctionnalités...
-                      </li>
-                    )}
-                  </ul>
+                {/* Fonctionnalités - Liste compacte */}
+                <div className="space-y-2">
+                  {features.slice(0, 5).map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-xs">
+                      <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </div>
+                  ))}
+                  {features.length > 5 && (
+                    <div className="text-[10px] text-muted-foreground pl-5">
+                      +{features.length - 5} autres...
+                    </div>
+                  )}
                 </div>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="pt-4">
                 {isCurrent ? (
-                  <Button disabled className="w-full" variant="secondary">
+                  <Button disabled className="w-full h-11" variant="secondary">
                     <Check className="mr-2 h-4 w-4" />
-                    Plan Actuel
+                    Plan actuel
                   </Button>
                 ) : canUpgradeToPlan ? (
                   <Button 
                     onClick={() => handleUpgrade(plan.id, plan.name)}
                     disabled={loading !== null}
-                    className="w-full"
+                    className="w-full h-11 bg-gradient-to-r from-primary to-primary/80"
                   >
                     {loading === plan.id ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Mise à niveau...
+                        Chargement...
                       </>
                     ) : (
                       <>
-                        Choisir ce plan
+                        Passer à ce plan
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </>
                     )}
@@ -227,24 +235,21 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
                   <Button 
                     onClick={() => handleUpgrade(plan.id, plan.name)}
                     disabled={loading !== null}
-                    className="w-full"
+                    className="w-full h-11"
                     variant="outline"
                   >
                     {loading === plan.id ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Changement...
+                        Chargement...
                       </>
                     ) : (
-                      <>
-                        Rétrograder vers ce plan
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
+                      'Rétrograder'
                     )}
                   </Button>
                 ) : (
-                  <Button disabled className="w-full" variant="outline">
-                    Non disponible
+                  <Button disabled className="w-full h-11" variant="ghost">
+                    Contactez-nous
                   </Button>
                 )}
               </CardFooter>

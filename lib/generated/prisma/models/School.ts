@@ -52,6 +52,7 @@ export type SchoolMinAggregateOutputType = {
   maxTeachers: number | null
   isActive: boolean | null
   schoolType: $Enums.SchoolType | null
+  modulesOverride: string | null
   gradingSystem: $Enums.GradingSystem | null
   gradingFormula: string | null
   subscriptionId: string | null
@@ -75,6 +76,7 @@ export type SchoolMaxAggregateOutputType = {
   maxTeachers: number | null
   isActive: boolean | null
   schoolType: $Enums.SchoolType | null
+  modulesOverride: string | null
   gradingSystem: $Enums.GradingSystem | null
   gradingFormula: string | null
   subscriptionId: string | null
@@ -98,6 +100,7 @@ export type SchoolCountAggregateOutputType = {
   maxTeachers: number
   isActive: number
   schoolType: number
+  modulesOverride: number
   gradingSystem: number
   gradingFormula: number
   subscriptionId: number
@@ -133,6 +136,7 @@ export type SchoolMinAggregateInputType = {
   maxTeachers?: true
   isActive?: true
   schoolType?: true
+  modulesOverride?: true
   gradingSystem?: true
   gradingFormula?: true
   subscriptionId?: true
@@ -156,6 +160,7 @@ export type SchoolMaxAggregateInputType = {
   maxTeachers?: true
   isActive?: true
   schoolType?: true
+  modulesOverride?: true
   gradingSystem?: true
   gradingFormula?: true
   subscriptionId?: true
@@ -179,6 +184,7 @@ export type SchoolCountAggregateInputType = {
   maxTeachers?: true
   isActive?: true
   schoolType?: true
+  modulesOverride?: true
   gradingSystem?: true
   gradingFormula?: true
   subscriptionId?: true
@@ -289,6 +295,7 @@ export type SchoolGroupByOutputType = {
   maxTeachers: number
   isActive: boolean
   schoolType: $Enums.SchoolType
+  modulesOverride: string | null
   gradingSystem: $Enums.GradingSystem
   gradingFormula: string | null
   subscriptionId: string | null
@@ -335,6 +342,7 @@ export type SchoolWhereInput = {
   maxTeachers?: Prisma.IntFilter<"School"> | number
   isActive?: Prisma.BoolFilter<"School"> | boolean
   schoolType?: Prisma.EnumSchoolTypeFilter<"School"> | $Enums.SchoolType
+  modulesOverride?: Prisma.StringNullableFilter<"School"> | string | null
   gradingSystem?: Prisma.EnumGradingSystemFilter<"School"> | $Enums.GradingSystem
   gradingFormula?: Prisma.StringNullableFilter<"School"> | string | null
   subscriptionId?: Prisma.StringNullableFilter<"School"> | string | null
@@ -384,6 +392,7 @@ export type SchoolOrderByWithRelationInput = {
   maxTeachers?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   schoolType?: Prisma.SortOrder
+  modulesOverride?: Prisma.SortOrderInput | Prisma.SortOrder
   gradingSystem?: Prisma.SortOrder
   gradingFormula?: Prisma.SortOrderInput | Prisma.SortOrder
   subscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -437,6 +446,7 @@ export type SchoolWhereUniqueInput = Prisma.AtLeast<{
   maxTeachers?: Prisma.IntFilter<"School"> | number
   isActive?: Prisma.BoolFilter<"School"> | boolean
   schoolType?: Prisma.EnumSchoolTypeFilter<"School"> | $Enums.SchoolType
+  modulesOverride?: Prisma.StringNullableFilter<"School"> | string | null
   gradingSystem?: Prisma.EnumGradingSystemFilter<"School"> | $Enums.GradingSystem
   gradingFormula?: Prisma.StringNullableFilter<"School"> | string | null
   createdAt?: Prisma.DateTimeFilter<"School"> | Date | string
@@ -485,6 +495,7 @@ export type SchoolOrderByWithAggregationInput = {
   maxTeachers?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   schoolType?: Prisma.SortOrder
+  modulesOverride?: Prisma.SortOrderInput | Prisma.SortOrder
   gradingSystem?: Prisma.SortOrder
   gradingFormula?: Prisma.SortOrderInput | Prisma.SortOrder
   subscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -516,6 +527,7 @@ export type SchoolScalarWhereWithAggregatesInput = {
   maxTeachers?: Prisma.IntWithAggregatesFilter<"School"> | number
   isActive?: Prisma.BoolWithAggregatesFilter<"School"> | boolean
   schoolType?: Prisma.EnumSchoolTypeWithAggregatesFilter<"School"> | $Enums.SchoolType
+  modulesOverride?: Prisma.StringNullableWithAggregatesFilter<"School"> | string | null
   gradingSystem?: Prisma.EnumGradingSystemWithAggregatesFilter<"School"> | $Enums.GradingSystem
   gradingFormula?: Prisma.StringNullableWithAggregatesFilter<"School"> | string | null
   subscriptionId?: Prisma.StringNullableWithAggregatesFilter<"School"> | string | null
@@ -539,6 +551,7 @@ export type SchoolCreateInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -588,6 +601,7 @@ export type SchoolUncheckedCreateInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -637,6 +651,7 @@ export type SchoolUpdateInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -686,6 +701,7 @@ export type SchoolUncheckedUpdateInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -735,6 +751,7 @@ export type SchoolCreateManyInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -758,6 +775,7 @@ export type SchoolUpdateManyMutationInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -781,6 +799,7 @@ export type SchoolUncheckedUpdateManyInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -809,6 +828,7 @@ export type SchoolCountOrderByAggregateInput = {
   maxTeachers?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   schoolType?: Prisma.SortOrder
+  modulesOverride?: Prisma.SortOrder
   gradingSystem?: Prisma.SortOrder
   gradingFormula?: Prisma.SortOrder
   subscriptionId?: Prisma.SortOrder
@@ -837,6 +857,7 @@ export type SchoolMaxOrderByAggregateInput = {
   maxTeachers?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   schoolType?: Prisma.SortOrder
+  modulesOverride?: Prisma.SortOrder
   gradingSystem?: Prisma.SortOrder
   gradingFormula?: Prisma.SortOrder
   subscriptionId?: Prisma.SortOrder
@@ -860,6 +881,7 @@ export type SchoolMinOrderByAggregateInput = {
   maxTeachers?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   schoolType?: Prisma.SortOrder
+  modulesOverride?: Prisma.SortOrder
   gradingSystem?: Prisma.SortOrder
   gradingFormula?: Prisma.SortOrder
   subscriptionId?: Prisma.SortOrder
@@ -1269,6 +1291,7 @@ export type SchoolCreateWithoutFilieresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1317,6 +1340,7 @@ export type SchoolUncheckedCreateWithoutFilieresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1381,6 +1405,7 @@ export type SchoolUpdateWithoutFilieresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1429,6 +1454,7 @@ export type SchoolUncheckedUpdateWithoutFilieresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1477,6 +1503,7 @@ export type SchoolCreateWithoutModulesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1525,6 +1552,7 @@ export type SchoolUncheckedCreateWithoutModulesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1589,6 +1617,7 @@ export type SchoolUpdateWithoutModulesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1637,6 +1666,7 @@ export type SchoolUncheckedUpdateWithoutModulesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1685,6 +1715,7 @@ export type SchoolCreateWithoutEmploisInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1733,6 +1764,7 @@ export type SchoolUncheckedCreateWithoutEmploisInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1797,6 +1829,7 @@ export type SchoolUpdateWithoutEmploisInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1845,6 +1878,7 @@ export type SchoolUncheckedUpdateWithoutEmploisInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1893,6 +1927,7 @@ export type SchoolCreateWithoutEnseignantsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -1941,6 +1976,7 @@ export type SchoolUncheckedCreateWithoutEnseignantsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2005,6 +2041,7 @@ export type SchoolUpdateWithoutEnseignantsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2053,6 +2090,7 @@ export type SchoolUncheckedUpdateWithoutEnseignantsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2101,6 +2139,7 @@ export type SchoolCreateWithoutParametresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2149,6 +2188,7 @@ export type SchoolUncheckedCreateWithoutParametresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2213,6 +2253,7 @@ export type SchoolUpdateWithoutParametresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2261,6 +2302,7 @@ export type SchoolUncheckedUpdateWithoutParametresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2309,6 +2351,7 @@ export type SchoolCreateWithoutAnneesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2357,6 +2400,7 @@ export type SchoolUncheckedCreateWithoutAnneesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2421,6 +2465,7 @@ export type SchoolUpdateWithoutAnneesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2469,6 +2514,7 @@ export type SchoolUncheckedUpdateWithoutAnneesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2517,6 +2563,7 @@ export type SchoolCreateWithoutUsersInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2565,6 +2612,7 @@ export type SchoolUncheckedCreateWithoutUsersInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2629,6 +2677,7 @@ export type SchoolUpdateWithoutUsersInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2677,6 +2726,7 @@ export type SchoolUncheckedUpdateWithoutUsersInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2725,6 +2775,7 @@ export type SchoolCreateWithoutStudentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2773,6 +2824,7 @@ export type SchoolUncheckedCreateWithoutStudentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2837,6 +2889,7 @@ export type SchoolUpdateWithoutStudentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2885,6 +2938,7 @@ export type SchoolUncheckedUpdateWithoutStudentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2933,6 +2987,7 @@ export type SchoolCreateWithoutFeeStructuresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -2981,6 +3036,7 @@ export type SchoolUncheckedCreateWithoutFeeStructuresInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3045,6 +3101,7 @@ export type SchoolUpdateWithoutFeeStructuresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3093,6 +3150,7 @@ export type SchoolUncheckedUpdateWithoutFeeStructuresInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3141,6 +3199,7 @@ export type SchoolCreateWithoutScholarshipsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3189,6 +3248,7 @@ export type SchoolUncheckedCreateWithoutScholarshipsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3253,6 +3313,7 @@ export type SchoolUpdateWithoutScholarshipsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3301,6 +3362,7 @@ export type SchoolUncheckedUpdateWithoutScholarshipsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3349,6 +3411,7 @@ export type SchoolCreateWithoutSubscriptionInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3397,6 +3460,7 @@ export type SchoolUncheckedCreateWithoutSubscriptionInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3461,6 +3525,7 @@ export type SchoolUpdateWithoutSubscriptionInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3509,6 +3574,7 @@ export type SchoolUncheckedUpdateWithoutSubscriptionInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3557,6 +3623,7 @@ export type SchoolCreateWithoutIssueReportsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3605,6 +3672,7 @@ export type SchoolUncheckedCreateWithoutIssueReportsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3669,6 +3737,7 @@ export type SchoolUpdateWithoutIssueReportsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3717,6 +3786,7 @@ export type SchoolUncheckedUpdateWithoutIssueReportsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3765,6 +3835,7 @@ export type SchoolCreateWithoutAnnouncementsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3813,6 +3884,7 @@ export type SchoolUncheckedCreateWithoutAnnouncementsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -3877,6 +3949,7 @@ export type SchoolUpdateWithoutAnnouncementsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3925,6 +3998,7 @@ export type SchoolUncheckedUpdateWithoutAnnouncementsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3973,6 +4047,7 @@ export type SchoolCreateWithoutRoomsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4021,6 +4096,7 @@ export type SchoolUncheckedCreateWithoutRoomsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4085,6 +4161,7 @@ export type SchoolUpdateWithoutRoomsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4133,6 +4210,7 @@ export type SchoolUncheckedUpdateWithoutRoomsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4181,6 +4259,7 @@ export type SchoolCreateWithoutClassesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4229,6 +4308,7 @@ export type SchoolUncheckedCreateWithoutClassesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4293,6 +4373,7 @@ export type SchoolUpdateWithoutClassesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4341,6 +4422,7 @@ export type SchoolUncheckedUpdateWithoutClassesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4389,6 +4471,7 @@ export type SchoolCreateWithoutDocumentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4437,6 +4520,7 @@ export type SchoolUncheckedCreateWithoutDocumentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4501,6 +4585,7 @@ export type SchoolUpdateWithoutDocumentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4549,6 +4634,7 @@ export type SchoolUncheckedUpdateWithoutDocumentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4597,6 +4683,7 @@ export type SchoolCreateWithoutWorkGroupsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4645,6 +4732,7 @@ export type SchoolUncheckedCreateWithoutWorkGroupsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4709,6 +4797,7 @@ export type SchoolUpdateWithoutWorkGroupsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4757,6 +4846,7 @@ export type SchoolUncheckedUpdateWithoutWorkGroupsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4805,6 +4895,7 @@ export type SchoolCreateWithoutGradingPeriodsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4853,6 +4944,7 @@ export type SchoolUncheckedCreateWithoutGradingPeriodsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -4917,6 +5009,7 @@ export type SchoolUpdateWithoutGradingPeriodsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4965,6 +5058,7 @@ export type SchoolUncheckedUpdateWithoutGradingPeriodsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5013,6 +5107,7 @@ export type SchoolCreateWithoutEvaluationTypesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5061,6 +5156,7 @@ export type SchoolUncheckedCreateWithoutEvaluationTypesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5125,6 +5221,7 @@ export type SchoolUpdateWithoutEvaluationTypesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5173,6 +5270,7 @@ export type SchoolUncheckedUpdateWithoutEvaluationTypesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5221,6 +5319,7 @@ export type SchoolCreateWithoutReceiptTemplatesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5269,6 +5368,7 @@ export type SchoolUncheckedCreateWithoutReceiptTemplatesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5333,6 +5433,7 @@ export type SchoolUpdateWithoutReceiptTemplatesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5381,6 +5482,7 @@ export type SchoolUncheckedUpdateWithoutReceiptTemplatesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5429,6 +5531,7 @@ export type SchoolCreateWithoutPdfTemplatesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5477,6 +5580,7 @@ export type SchoolUncheckedCreateWithoutPdfTemplatesInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5541,6 +5645,7 @@ export type SchoolUpdateWithoutPdfTemplatesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5589,6 +5694,7 @@ export type SchoolUncheckedUpdateWithoutPdfTemplatesInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5637,6 +5743,7 @@ export type SchoolCreateWithoutBulletinsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5685,6 +5792,7 @@ export type SchoolUncheckedCreateWithoutBulletinsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5749,6 +5857,7 @@ export type SchoolUpdateWithoutBulletinsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5797,6 +5906,7 @@ export type SchoolUncheckedUpdateWithoutBulletinsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5845,6 +5955,7 @@ export type SchoolCreateWithoutIncidentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5893,6 +6004,7 @@ export type SchoolUncheckedCreateWithoutIncidentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -5957,6 +6069,7 @@ export type SchoolUpdateWithoutIncidentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6005,6 +6118,7 @@ export type SchoolUncheckedUpdateWithoutIncidentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6053,6 +6167,7 @@ export type SchoolCreateWithoutCalendarEventsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6101,6 +6216,7 @@ export type SchoolUncheckedCreateWithoutCalendarEventsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6165,6 +6281,7 @@ export type SchoolUpdateWithoutCalendarEventsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6213,6 +6330,7 @@ export type SchoolUncheckedUpdateWithoutCalendarEventsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6261,6 +6379,7 @@ export type SchoolCreateWithoutAppointmentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6309,6 +6428,7 @@ export type SchoolUncheckedCreateWithoutAppointmentsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6373,6 +6493,7 @@ export type SchoolUpdateWithoutAppointmentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6421,6 +6542,7 @@ export type SchoolUncheckedUpdateWithoutAppointmentsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6469,6 +6591,7 @@ export type SchoolCreateWithoutPollsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6517,6 +6640,7 @@ export type SchoolUncheckedCreateWithoutPollsInput = {
   maxTeachers?: number
   isActive?: boolean
   schoolType?: $Enums.SchoolType
+  modulesOverride?: string | null
   gradingSystem?: $Enums.GradingSystem
   gradingFormula?: string | null
   subscriptionId?: string | null
@@ -6581,6 +6705,7 @@ export type SchoolUpdateWithoutPollsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6629,6 +6754,7 @@ export type SchoolUncheckedUpdateWithoutPollsInput = {
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   schoolType?: Prisma.EnumSchoolTypeFieldUpdateOperationsInput | $Enums.SchoolType
+  modulesOverride?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradingSystem?: Prisma.EnumGradingSystemFieldUpdateOperationsInput | $Enums.GradingSystem
   gradingFormula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6915,6 +7041,7 @@ export type SchoolSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   maxTeachers?: boolean
   isActive?: boolean
   schoolType?: boolean
+  modulesOverride?: boolean
   gradingSystem?: boolean
   gradingFormula?: boolean
   subscriptionId?: boolean
@@ -6965,6 +7092,7 @@ export type SchoolSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   maxTeachers?: boolean
   isActive?: boolean
   schoolType?: boolean
+  modulesOverride?: boolean
   gradingSystem?: boolean
   gradingFormula?: boolean
   subscriptionId?: boolean
@@ -6988,6 +7116,7 @@ export type SchoolSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   maxTeachers?: boolean
   isActive?: boolean
   schoolType?: boolean
+  modulesOverride?: boolean
   gradingSystem?: boolean
   gradingFormula?: boolean
   subscriptionId?: boolean
@@ -7011,6 +7140,7 @@ export type SchoolSelectScalar = {
   maxTeachers?: boolean
   isActive?: boolean
   schoolType?: boolean
+  modulesOverride?: boolean
   gradingSystem?: boolean
   gradingFormula?: boolean
   subscriptionId?: boolean
@@ -7018,7 +7148,7 @@ export type SchoolSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SchoolOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "subdomain" | "shortName" | "logo" | "stamp" | "address" | "phone" | "email" | "primaryColor" | "secondaryColor" | "maxStudents" | "maxTeachers" | "isActive" | "schoolType" | "gradingSystem" | "gradingFormula" | "subscriptionId" | "createdAt" | "updatedAt", ExtArgs["result"]["school"]>
+export type SchoolOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "subdomain" | "shortName" | "logo" | "stamp" | "address" | "phone" | "email" | "primaryColor" | "secondaryColor" | "maxStudents" | "maxTeachers" | "isActive" | "schoolType" | "modulesOverride" | "gradingSystem" | "gradingFormula" | "subscriptionId" | "createdAt" | "updatedAt", ExtArgs["result"]["school"]>
 export type SchoolInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscription?: boolean | Prisma.School$subscriptionArgs<ExtArgs>
   users?: boolean | Prisma.School$usersArgs<ExtArgs>
@@ -7097,6 +7227,7 @@ export type $SchoolPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     maxTeachers: number
     isActive: boolean
     schoolType: $Enums.SchoolType
+    modulesOverride: string | null
     gradingSystem: $Enums.GradingSystem
     gradingFormula: string | null
     subscriptionId: string | null
@@ -7566,6 +7697,7 @@ export interface SchoolFieldRefs {
   readonly maxTeachers: Prisma.FieldRef<"School", 'Int'>
   readonly isActive: Prisma.FieldRef<"School", 'Boolean'>
   readonly schoolType: Prisma.FieldRef<"School", 'SchoolType'>
+  readonly modulesOverride: Prisma.FieldRef<"School", 'String'>
   readonly gradingSystem: Prisma.FieldRef<"School", 'GradingSystem'>
   readonly gradingFormula: Prisma.FieldRef<"School", 'String'>
   readonly subscriptionId: Prisma.FieldRef<"School", 'String'>

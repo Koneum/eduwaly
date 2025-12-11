@@ -109,6 +109,13 @@ async function main() {
   // ========================================
   console.log('💳 Création des plans...')
 
+  // Modules par niveau de plan
+  const MODULES_ESSAI = ['etudiants', 'enseignants', 'emploiDuTemps', 'notes']
+  const MODULES_STARTER = [...MODULES_ESSAI, 'messagerie', 'vieScolaire']
+  const MODULES_BASIC = [...MODULES_STARTER, 'devoirs', 'documents']
+  const MODULES_PREMIUM = [...MODULES_BASIC, 'facturation', 'rapports']
+  const MODULES_CUSTOM = [...MODULES_PREMIUM, 'rolesPerso', 'multiEtablissement', 'apiAccess', 'supportPrioritaire']
+
   // ============ PLANS LYCÉE (4 + Custom) ============
   const lyceeEssai = await prisma.plan.create({
     data: {
@@ -119,12 +126,14 @@ async function main() {
       maxStudents: 50,
       maxTeachers: 5,
       features: JSON.stringify([
-        'Gestion élèves & parents',
-        'Emplois du temps',
-        'Notes & bulletins',
-        'Carnet de correspondance',
-        'Prof principal'
+        'Jusqu\'à 50 élèves',
+        'Jusqu\'à 5 enseignants',
+        'Étudiants (Liste, Inscriptions, Filières, Groupes)',
+        'Enseignants (Liste, Emplois assignés)',
+        'Emploi du temps (Planning, Salles, Années)',
+        'Notes & Évaluations (Saisie, Bulletins, Périodes)'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_ESSAI),
       isActive: true,
     },
   })
@@ -138,11 +147,14 @@ async function main() {
       maxStudents: 200,
       maxTeachers: 15,
       features: JSON.stringify([
-        'Tout Essai Gratuit',
-        'Messagerie interne',
-        'Agenda événements',
+        'Jusqu\'à 200 élèves',
+        'Jusqu\'à 15 enseignants',
+        'Tous modules Essai Gratuit',
+        'Messagerie (Annonces, Sondages)',
+        'Vie scolaire (Absences, Incidents, Agenda, RDV parents)',
         'Support email'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_STARTER),
       isActive: true,
     },
   })
@@ -156,12 +168,14 @@ async function main() {
       maxStudents: 500,
       maxTeachers: 35,
       features: JSON.stringify([
-        'Tout Starter',
-        'RDV parent-prof',
-        'Sondages',
-        'Devoirs en ligne',
+        'Jusqu\'à 500 élèves',
+        'Jusqu\'à 35 enseignants',
+        'Tous modules Starter',
+        'Devoirs (Liste, Soumissions)',
+        'Documents (Ressources, Templates PDF)',
         'Support chat'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_BASIC),
       isActive: true,
     },
   })
@@ -175,14 +189,17 @@ async function main() {
       maxStudents: 1000,
       maxTeachers: 60,
       features: JSON.stringify([
-        'Tout Basic',
-        'Gestion financière avancée',
-        'Bourses & réductions',
-        'Rapports statistiques',
+        'Jusqu\'à 1000 élèves',
+        'Jusqu\'à 60 enseignants',
+        'Tous modules Basic',
+        'Facturation (Paiements, Frais, Bourses)',
+        'Rapports (Statistiques, Export)',
         'Paiement mobile (OrangeMoney/MoovMoney)',
         'Support prioritaire 24/7'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_PREMIUM),
       isActive: true,
+      isPopular: true,
     },
   })
 
@@ -190,20 +207,22 @@ async function main() {
     data: {
       name: 'Lycée - Sur Mesure',
       description: 'Plan personnalisé pour très grands lycées',
-      price: 0, // Prix sur devis
+      price: 0,
       interval: 'monthly',
-      maxStudents: -1, // Illimité
+      maxStudents: -1,
       maxTeachers: -1,
       features: JSON.stringify([
-        'Tout Premium',
         'Élèves illimités',
         'Enseignants illimités',
+        'Tous modules Premium',
+        'Rôles personnalisés',
         'Multi-établissements',
-        'Personnalisation complète',
+        'Accès API',
+        'Support prioritaire 24/7',
         'Formation sur site',
-        'Gestionnaire de compte dédié',
-        'Prix sur devis'
+        'Gestionnaire de compte dédié'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_CUSTOM),
       isActive: true,
     },
   })
@@ -218,13 +237,16 @@ async function main() {
       maxStudents: 100,
       maxTeachers: 10,
       features: JSON.stringify([
-        'Gestion étudiants',
-        'Modules & filières',
-        'Emplois du temps jour/soir',
-        'Notes & évaluations',
-        'Barème variable (/20, /100...)'
+        'Jusqu\'à 100 étudiants',
+        'Jusqu\'à 10 enseignants',
+        'Étudiants (Liste, Inscriptions, Filières, Groupes)',
+        'Enseignants (Liste, Emplois assignés)',
+        'Emploi du temps (Planning, Salles, Années)',
+        'Notes & Évaluations (Saisie, Bulletins, Périodes)'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_ESSAI),
       isActive: true,
+      schoolType: 'UNIVERSITY',
     },
   })
 
@@ -237,12 +259,16 @@ async function main() {
       maxStudents: 300,
       maxTeachers: 20,
       features: JSON.stringify([
-        'Tout Essai Gratuit',
-        'Messagerie interne',
-        'Agenda événements',
+        'Jusqu\'à 300 étudiants',
+        'Jusqu\'à 20 enseignants',
+        'Tous modules Essai Gratuit',
+        'Messagerie (Annonces, Sondages)',
+        'Vie scolaire (Absences, Incidents, Agenda)',
         'Support email'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_STARTER),
       isActive: true,
+      schoolType: 'UNIVERSITY',
     },
   })
 
@@ -255,13 +281,16 @@ async function main() {
       maxStudents: 800,
       maxTeachers: 50,
       features: JSON.stringify([
-        'Tout Starter',
-        'Devoirs & soumissions',
-        'Sondages',
-        'Bulletins de classe',
+        'Jusqu\'à 800 étudiants',
+        'Jusqu\'à 50 enseignants',
+        'Tous modules Starter',
+        'Devoirs (Liste, Soumissions)',
+        'Documents (Ressources, Templates PDF)',
         'Support chat'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_BASIC),
       isActive: true,
+      schoolType: 'UNIVERSITY',
     },
   })
 
@@ -274,15 +303,18 @@ async function main() {
       maxStudents: 2000,
       maxTeachers: 100,
       features: JSON.stringify([
-        'Tout Basic',
-        'Gestion financière avancée',
-        'Bourses & réductions',
-        'Rapports & analytics',
+        'Jusqu\'à 2000 étudiants',
+        'Jusqu\'à 100 enseignants',
+        'Tous modules Basic',
+        'Facturation (Paiements, Frais, Bourses)',
+        'Rapports (Statistiques, Export)',
         'Paiement mobile (OrangeMoney/MoovMoney)',
-        'API & intégrations',
         'Support prioritaire 24/7'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_PREMIUM),
       isActive: true,
+      isPopular: true,
+      schoolType: 'UNIVERSITY',
     },
   })
 
@@ -290,22 +322,24 @@ async function main() {
     data: {
       name: 'Université - Sur Mesure',
       description: 'Plan personnalisé pour très grandes universités',
-      price: 0, // Prix sur devis
+      price: 0,
       interval: 'monthly',
-      maxStudents: -1, // Illimité
+      maxStudents: -1,
       maxTeachers: -1,
       features: JSON.stringify([
-        'Tout Premium',
         'Étudiants illimités',
         'Enseignants illimités',
+        'Tous modules Premium',
+        'Rôles personnalisés',
         'Multi-campus',
-        'Personnalisation complète',
+        'Accès API',
+        'Support prioritaire 24/7',
         'Formation sur site',
-        'Gestionnaire de compte dédié',
-        'API dédiée',
-        'Prix sur devis'
+        'Gestionnaire de compte dédié'
       ]),
+      modulesIncluded: JSON.stringify(MODULES_CUSTOM),
       isActive: true,
+      schoolType: 'UNIVERSITY',
     },
   })
 

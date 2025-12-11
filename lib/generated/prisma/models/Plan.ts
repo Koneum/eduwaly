@@ -48,6 +48,7 @@ export type PlanMinAggregateOutputType = {
   maxStudents: number | null
   maxTeachers: number | null
   features: string | null
+  modulesIncluded: string | null
   stripePriceId: string | null
   isActive: boolean | null
   isPopular: boolean | null
@@ -66,6 +67,7 @@ export type PlanMaxAggregateOutputType = {
   maxStudents: number | null
   maxTeachers: number | null
   features: string | null
+  modulesIncluded: string | null
   stripePriceId: string | null
   isActive: boolean | null
   isPopular: boolean | null
@@ -84,6 +86,7 @@ export type PlanCountAggregateOutputType = {
   maxStudents: number
   maxTeachers: number
   features: number
+  modulesIncluded: number
   stripePriceId: number
   isActive: number
   isPopular: number
@@ -116,6 +119,7 @@ export type PlanMinAggregateInputType = {
   maxStudents?: true
   maxTeachers?: true
   features?: true
+  modulesIncluded?: true
   stripePriceId?: true
   isActive?: true
   isPopular?: true
@@ -134,6 +138,7 @@ export type PlanMaxAggregateInputType = {
   maxStudents?: true
   maxTeachers?: true
   features?: true
+  modulesIncluded?: true
   stripePriceId?: true
   isActive?: true
   isPopular?: true
@@ -152,6 +157,7 @@ export type PlanCountAggregateInputType = {
   maxStudents?: true
   maxTeachers?: true
   features?: true
+  modulesIncluded?: true
   stripePriceId?: true
   isActive?: true
   isPopular?: true
@@ -257,6 +263,7 @@ export type PlanGroupByOutputType = {
   maxStudents: number
   maxTeachers: number
   features: string
+  modulesIncluded: string
   stripePriceId: string | null
   isActive: boolean
   isPopular: boolean
@@ -298,6 +305,7 @@ export type PlanWhereInput = {
   maxStudents?: Prisma.IntFilter<"Plan"> | number
   maxTeachers?: Prisma.IntFilter<"Plan"> | number
   features?: Prisma.StringFilter<"Plan"> | string
+  modulesIncluded?: Prisma.StringFilter<"Plan"> | string
   stripePriceId?: Prisma.StringNullableFilter<"Plan"> | string | null
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
@@ -318,6 +326,7 @@ export type PlanOrderByWithRelationInput = {
   maxStudents?: Prisma.SortOrder
   maxTeachers?: Prisma.SortOrder
   features?: Prisma.SortOrder
+  modulesIncluded?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
@@ -341,6 +350,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   maxStudents?: Prisma.IntFilter<"Plan"> | number
   maxTeachers?: Prisma.IntFilter<"Plan"> | number
   features?: Prisma.StringFilter<"Plan"> | string
+  modulesIncluded?: Prisma.StringFilter<"Plan"> | string
   stripePriceId?: Prisma.StringNullableFilter<"Plan"> | string | null
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
@@ -361,6 +371,7 @@ export type PlanOrderByWithAggregationInput = {
   maxStudents?: Prisma.SortOrder
   maxTeachers?: Prisma.SortOrder
   features?: Prisma.SortOrder
+  modulesIncluded?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
@@ -387,6 +398,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   maxStudents?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   maxTeachers?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   features?: Prisma.StringWithAggregatesFilter<"Plan"> | string
+  modulesIncluded?: Prisma.StringWithAggregatesFilter<"Plan"> | string
   stripePriceId?: Prisma.StringNullableWithAggregatesFilter<"Plan"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   isPopular?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
@@ -405,6 +417,7 @@ export type PlanCreateInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -425,6 +438,7 @@ export type PlanUncheckedCreateInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -445,6 +459,7 @@ export type PlanUpdateInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -465,6 +480,7 @@ export type PlanUncheckedUpdateInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -485,6 +501,7 @@ export type PlanCreateManyInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -503,6 +520,7 @@ export type PlanUpdateManyMutationInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -521,6 +539,7 @@ export type PlanUncheckedUpdateManyInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -539,6 +558,7 @@ export type PlanCountOrderByAggregateInput = {
   maxStudents?: Prisma.SortOrder
   maxTeachers?: Prisma.SortOrder
   features?: Prisma.SortOrder
+  modulesIncluded?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
@@ -563,6 +583,7 @@ export type PlanMaxOrderByAggregateInput = {
   maxStudents?: Prisma.SortOrder
   maxTeachers?: Prisma.SortOrder
   features?: Prisma.SortOrder
+  modulesIncluded?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
@@ -581,6 +602,7 @@ export type PlanMinOrderByAggregateInput = {
   maxStudents?: Prisma.SortOrder
   maxTeachers?: Prisma.SortOrder
   features?: Prisma.SortOrder
+  modulesIncluded?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isPopular?: Prisma.SortOrder
@@ -638,6 +660,7 @@ export type PlanCreateWithoutComparisonValuesInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -657,6 +680,7 @@ export type PlanUncheckedCreateWithoutComparisonValuesInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -692,6 +716,7 @@ export type PlanUpdateWithoutComparisonValuesInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -711,6 +736,7 @@ export type PlanUncheckedUpdateWithoutComparisonValuesInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -730,6 +756,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -749,6 +776,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   maxStudents: number
   maxTeachers: number
   features?: string
+  modulesIncluded?: string
   stripePriceId?: string | null
   isActive?: boolean
   isPopular?: boolean
@@ -784,6 +812,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -803,6 +832,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   maxStudents?: Prisma.IntFieldUpdateOperationsInput | number
   maxTeachers?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.StringFieldUpdateOperationsInput | string
+  modulesIncluded?: Prisma.StringFieldUpdateOperationsInput | string
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -862,6 +892,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   maxStudents?: boolean
   maxTeachers?: boolean
   features?: boolean
+  modulesIncluded?: boolean
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
@@ -883,6 +914,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   maxStudents?: boolean
   maxTeachers?: boolean
   features?: boolean
+  modulesIncluded?: boolean
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
@@ -901,6 +933,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   maxStudents?: boolean
   maxTeachers?: boolean
   features?: boolean
+  modulesIncluded?: boolean
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
@@ -919,6 +952,7 @@ export type PlanSelectScalar = {
   maxStudents?: boolean
   maxTeachers?: boolean
   features?: boolean
+  modulesIncluded?: boolean
   stripePriceId?: boolean
   isActive?: boolean
   isPopular?: boolean
@@ -927,7 +961,7 @@ export type PlanSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "description" | "price" | "interval" | "maxStudents" | "maxTeachers" | "features" | "stripePriceId" | "isActive" | "isPopular" | "schoolType" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "displayName" | "description" | "price" | "interval" | "maxStudents" | "maxTeachers" | "features" | "modulesIncluded" | "stripePriceId" | "isActive" | "isPopular" | "schoolType" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   comparisonValues?: boolean | Prisma.Plan$comparisonValuesArgs<ExtArgs>
@@ -952,6 +986,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     maxStudents: number
     maxTeachers: number
     features: string
+    modulesIncluded: string
     stripePriceId: string | null
     isActive: boolean
     isPopular: boolean
@@ -1392,6 +1427,7 @@ export interface PlanFieldRefs {
   readonly maxStudents: Prisma.FieldRef<"Plan", 'Int'>
   readonly maxTeachers: Prisma.FieldRef<"Plan", 'Int'>
   readonly features: Prisma.FieldRef<"Plan", 'String'>
+  readonly modulesIncluded: Prisma.FieldRef<"Plan", 'String'>
   readonly stripePriceId: Prisma.FieldRef<"Plan", 'String'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly isPopular: Prisma.FieldRef<"Plan", 'Boolean'>

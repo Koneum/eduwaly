@@ -24,7 +24,8 @@ export default async function PlansPage() {
     ...plan,
     price: Number(plan.price),
     description: plan.description ?? null,
-    features: typeof plan.features === 'string' ? plan.features : JSON.stringify(plan.features)
+    features: typeof plan.features === 'string' ? plan.features : JSON.stringify(plan.features),
+    modulesIncluded: plan.modulesIncluded ?? null
   }))
 
   // Plans pour le tableau comparatif (avec prix et interval)
