@@ -51,23 +51,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Format: SHA1("order_id;amount_100;currency_code;api_secret")
-    // Doc VitePay: order_id en majuscules (si non numérique), currency_code en majuscules
-    // Le résultat SHA1 doit être en MAJUSCULES selon la doc
-    const hashString = `${order_id};${amount_100};${currency_code};${apiSecret}`
+    // IMPORTANT (comme tinygest): order_id en majuscules SI non numérique, currency_code en majuscules
+    // Mais PAS l'api_secret en majuscules !
+    const orderIdForHash = isNaN(Number(order_id)) ? order_id.toUpperCase() : order_id
+    const currencyCodeUpper = (currency_code || 'XOF').toUpperCase()
+    
+    const hashString = `${orderIdForHash};${amount_100};${currencyCodeUpper};${apiSecret}`
     const calculatedAuthenticity = crypto
       .createHash("sha1")
-      .update(hashString.toUpperCase()) // Toute la chaîne en majuscules
+      .update(hashString) // PAS de toUpperCase() sur toute la chaîne !
       .digest("hex")
-      .toUpperCase() // Doc VitePay: résultat SHA1 en MAJUSCULES pour callback
+      .toUpperCase() // Résultat SHA1 en majuscules
 
     console.log('🔐 Vérification signature:', {
       received: authenticity,
       calculated: calculatedAuthenticity,
-      hashStringUppercase: hashString.toUpperCase(),
+      hashString: `${orderIdForHash};${amount_100};${currencyCodeUpper};***`,
       match: authenticity?.toUpperCase() === calculatedAuthenticity
     })
 
-    // 2. Comparer la signature (case-insensitive pour être sûr)
+    // 2. Comparer la signature (case-insensitive)
     if (authenticity?.toUpperCase() !== calculatedAuthenticity) {
       console.error('❌ Signature invalide')
       return NextResponse.json({ 
