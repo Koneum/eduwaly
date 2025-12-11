@@ -157,8 +157,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Générer un ID de commande unique
-    const orderId = `SUB-${school.id}-${Date.now()}`.toUpperCase() // Nouveau : Mettre orderId en majuscules immédiatement
+    // Générer un ID de commande unique (format: SUB_schoolId_timestamp avec underscores)
+    const orderId = `SUB_${school.id}_${Date.now()}`
 
     // Montant en centimes (multiplier par 100)
     // VitePay a un montant minimum (généralement 100 XOF)
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     // Générer le hash SHA1 selon la doc VitePay
     // Format: SHA1(UPPERCASE("order_id;amount_100;currency_code;callback_url;api_secret"))
-    const hashString = `${orderId};${amount100};XOF;${callbackUrl};${apiSecret}`
+    const hashString = `${orderId.toUpperCase()};${amount100};XOF;${callbackUrl};${apiSecret}`
     const hash = crypto
       .createHash("sha1")
       .update(hashString.toUpperCase()) // La chaîne doit être en MAJUSCULES avant le hash
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
       "payment[language_code]": "fr",
       "payment[currency_code]": "XOF",
       "payment[country_code]": "ML",
-      "payment[order_id]": orderId.toString(), // Envoyer la version en MAJUSCULES
+      "payment[order_id]": orderId.toString(), // Envoyer tel quel (pas en majuscules)
       "payment[description]": `Abonnement ${plan.name} - ${school.name}`,
       "payment[amount_100]": amount100.toString(),
       "payment[buyer_ip_adress]": buyerIp, // IP valide obligatoire

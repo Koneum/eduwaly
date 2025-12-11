@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Vérifier que le numéro de commande est valide
-    if (!order_id || !order_id.startsWith('SUB-')) {
+    if (!order_id || !order_id.startsWith('SUB_')) {
       console.error('❌ Order ID invalide:', order_id)
       return NextResponse.json({ 
         status: '0', 
@@ -82,8 +82,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Extraire schoolId depuis order_id (format: SUB-{schoolId}-{timestamp})
-    const orderParts = order_id.split('-')
+    // Extraire schoolId depuis order_id (format: SUB_schoolId_timestamp avec underscores)
+    const orderParts = order_id.split('_')
     const schoolId = orderParts[1]
     
     if (!schoolId) {

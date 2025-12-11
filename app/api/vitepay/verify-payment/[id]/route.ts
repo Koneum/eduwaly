@@ -16,8 +16,8 @@ export async function GET(
   try {
     const { id: orderId } = await params
 
-    // Extraire le schoolId de l'orderId (format: SUB-{schoolId}-{timestamp})
-    const orderParts = orderId.split('-')
+    // Extraire le schoolId de l'orderId (format: SUB_schoolId_timestamp avec underscores)
+    const orderParts = orderId.split('_')
     if (orderParts[0] !== 'SUB' || orderParts.length < 3) {
       return NextResponse.json(
         { error: 'Format order_id invalide' },
