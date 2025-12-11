@@ -31,7 +31,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { ThemeToggle } from "./theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
-import NotificationCenter from "./notifications/NotificationCenter"
+import NotificationCenter from "@/components/notifications/NotificationCenter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { NavAccordion, NavSimpleItem, type NavGroup, type NavItem } from "./nav-accordion"
 

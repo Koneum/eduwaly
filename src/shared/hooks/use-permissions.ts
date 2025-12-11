@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "./auth-context"
+import { useAuth } from "@/lib/auth-context"
 import { useEffect, useState } from "react"
 
 interface UserPermission {

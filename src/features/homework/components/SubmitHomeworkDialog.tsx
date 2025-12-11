@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Upload, Loader2, FileText } from 'lucide-react'
-import { useToast } from '../ui/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 
 
 interface SubmitHomeworkDialogProps {
