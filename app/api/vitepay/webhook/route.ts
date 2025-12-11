@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Vérifier que le numéro de commande est valide
+    // Format attendu: schoolId_planId_timestamp
     if (!order_id || !order_id.includes('_')) {
       console.error('❌ Order ID invalide:', order_id)
       return NextResponse.json({ 
@@ -82,9 +83,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Extraire schoolId depuis order_id (format: schoolId_timestamp)
+    // Extraire schoolId et planId depuis order_id (format: schoolId_planId_timestamp)
     const orderParts = order_id.split('_')
     const schoolId = orderParts[0]
+    const planId = orderParts.length >= 2 ? orderParts[1] : null
+    
+    console.log('📦 Extraction order_id:', { schoolId, planId, orderParts })
     
     if (!schoolId) {
       console.error('❌ School ID extrait invalide')
@@ -103,10 +107,14 @@ export async function POST(request: NextRequest) {
     if (isSuccess) {
       // Paiement réussi - Activer/mettre à jour l'abonnement
       try {
-        const school = await prisma.school.findUnique({
-          where: { id: schoolId },
-          include: { subscription: true }
-        })
+        // Récupérer l'école et le plan
+        const [school, plan] = await Promise.all([
+          prisma.school.findUnique({
+            where: { id: schoolId },
+            include: { subscription: { include: { plan: true } } }
+          }),
+          planId ? prisma.plan.findUnique({ where: { id: planId } }) : null
+        ])
 
         if (!school) {
           console.error('❌ École non trouvée:', schoolId)
@@ -116,39 +124,107 @@ export async function POST(request: NextRequest) {
           }, { status: 404 })
         }
 
-        // Calculer la nouvelle période (30 jours)
+        // Utiliser le plan extrait de l'order_id ou un plan par défaut
+        const targetPlanId = planId || plan?.id || school.subscription?.planId
+        if (!targetPlanId) {
+          console.error('❌ Plan non trouvé:', planId)
+          return NextResponse.json({ 
+            status: '0', 
+            message: 'Plan non trouvé' 
+          }, { status: 404 })
+        }
+
+        // Récupérer les infos du plan pour les limites
+        const targetPlan = plan || await prisma.plan.findUnique({ where: { id: targetPlanId } })
+        
+        console.log('📋 Plan cible:', { 
+          planId: targetPlanId, 
+          planName: targetPlan?.name,
+          currentPlan: school.subscription?.plan?.name
+        })
+
+        // Calculer la nouvelle période
         const now = new Date()
-        const newPeriodEnd = new Date(now)
-        newPeriodEnd.setDate(newPeriodEnd.getDate() + 30)
+        let newPeriodStart = now
+        let newPeriodEnd = new Date(now)
+        
+        // Si abonnement existant et encore actif, prolonger depuis la fin actuelle
+        if (school.subscription && school.subscription.status === 'ACTIVE') {
+          const currentEnd = new Date(school.subscription.currentPeriodEnd)
+          if (currentEnd > now) {
+            // Prolonger depuis la fin de la période actuelle
+            newPeriodStart = currentEnd
+            newPeriodEnd = new Date(currentEnd)
+          }
+        }
+        
+        // Ajouter 30 jours (ou selon l'intervalle du plan)
+        const daysToAdd = targetPlan?.interval === 'yearly' ? 365 : 30
+        newPeriodEnd.setDate(newPeriodEnd.getDate() + daysToAdd)
 
         if (school.subscription) {
-          // Mettre à jour l'abonnement existant
+          // Mettre à jour l'abonnement existant (renouvellement ou changement de plan)
           await prisma.subscription.update({
             where: { id: school.subscription.id },
             data: {
+              planId: targetPlanId, // Mettre à jour le plan (upgrade/downgrade)
               status: 'ACTIVE',
+              currentPeriodStart: newPeriodStart,
               currentPeriodEnd: newPeriodEnd,
+              canceledAt: null, // Réactiver si était annulé
               updatedAt: now
             }
           })
-          console.log('✅ Abonnement mis à jour pour école:', schoolId)
+          
+          // Mettre à jour les limites de l'école selon le nouveau plan
+          if (targetPlan) {
+            await prisma.school.update({
+              where: { id: schoolId },
+              data: {
+                maxStudents: targetPlan.maxStudents,
+                maxTeachers: targetPlan.maxTeachers
+              }
+            })
+          }
+          
+          console.log('✅ Abonnement mis à jour:', {
+            schoolId,
+            planId: targetPlanId,
+            newPeriodEnd,
+            isUpgrade: school.subscription.planId !== targetPlanId
+          })
         } else {
           // Créer un nouvel abonnement
-          await prisma.subscription.create({
+          const newSubscription = await prisma.subscription.create({
             data: {
               schoolId: schoolId,
+              planId: targetPlanId,
               status: 'ACTIVE',
-              currentPeriodStart: now, // Date de début de période
-              currentPeriodEnd: newPeriodEnd,
-              planId: 'cmiddzrbh00027dfmcw9rdxoa', // Plan TEST par défaut
-              createdAt: now,
-              updatedAt: now
+              currentPeriodStart: now,
+              currentPeriodEnd: newPeriodEnd
             }
           })
-          console.log('✅ Nouvel abonnement créé pour école:', schoolId)
+          
+          // Mettre à jour les limites de l'école
+          if (targetPlan) {
+            await prisma.school.update({
+              where: { id: schoolId },
+              data: {
+                maxStudents: targetPlan.maxStudents,
+                maxTeachers: targetPlan.maxTeachers,
+                subscriptionId: newSubscription.id
+              }
+            })
+          }
+          
+          console.log('✅ Nouvel abonnement créé:', {
+            schoolId,
+            planId: targetPlanId,
+            subscriptionId: newSubscription.id
+          })
         }
 
-        // 5. Retourner la réponse de confirmation à VitePay
+        // Retourner la réponse de confirmation à VitePay
         return NextResponse.json({ status: '1' })
 
       } catch (dbError) {

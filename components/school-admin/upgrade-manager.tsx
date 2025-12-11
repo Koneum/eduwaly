@@ -71,14 +71,16 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
     return targetIndex > currentIndex
   }
 
+  const canDowngrade = (planName: string) => {
+    const planOrder = ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE']
+    const currentIndex = planOrder.indexOf(currentPlan.toUpperCase())
+    const targetIndex = planOrder.indexOf(planName.toUpperCase())
+    return targetIndex < currentIndex
+  }
+
   const handleUpgrade = async (planId: string, planName: string) => {
     if (isCurrentPlan(planName)) {
       toast.info('Vous êtes déjà sur ce plan')
-      return
-    }
-
-    if (!canUpgrade(planName)) {
-      toast.error('Vous ne pouvez pas rétrograder vers ce plan')
       return
     }
 
@@ -221,9 +223,28 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
                       </>
                     )}
                   </Button>
+                ) : canDowngrade(plan.name) ? (
+                  <Button 
+                    onClick={() => handleUpgrade(plan.id, plan.name)}
+                    disabled={loading !== null}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    {loading === plan.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Changement...
+                      </>
+                    ) : (
+                      <>
+                        Rétrograder vers ce plan
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
                 ) : (
                   <Button disabled className="w-full" variant="outline">
-                    Plan Inférieur
+                    Non disponible
                   </Button>
                 )}
               </CardFooter>

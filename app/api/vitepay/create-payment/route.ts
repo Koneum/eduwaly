@@ -157,8 +157,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Générer un ID de commande unique (format simple cuid comme tinygest)
-    const orderId = `${schoolId}_${Date.now()}`
+    // Générer un ID de commande unique avec planId pour le récupérer dans le webhook
+    // Format: schoolId_planId_timestamp
+    const orderId = `${schoolId}_${planId}_${Date.now()}`
 
     // Montant en centimes (multiplier par 100)
     // VitePay a un montant minimum (généralement 100 XOF)
@@ -173,6 +174,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    // IMPORTANT: amount_100 = montant × 100 (en centimes)
     const amount100 = Math.round(planPrice * 100)
 
     // Nettoyer baseUrl (enlever le slash final s'il existe)
@@ -185,22 +187,26 @@ export async function POST(request: NextRequest) {
     const cancelUrl = `${cleanBaseUrl}/admin/${schoolId}/subscription?status=cancelled&order_id=${orderId}`
 
     // Générer le hash SHA1 selon la doc VitePay
-    // Format: SHA1(UPPERCASE("order_id;amount_100;currency_code;callback_url;api_secret"))
-    const hashString = `${orderId.toUpperCase()};${amount100};XOF;${callbackUrl};${apiSecret}`
+    // IMPORTANT: Seuls order_id, currency_code et api_secret sont en majuscules
+    // Le callback_url doit rester en minuscules (sensible à la casse)
+    // Format: SHA1("ORDER_ID;amount_100;CURRENCY_CODE;callback_url;API_SECRET")
+    const hashString = `${orderId.toUpperCase()};${amount100};XOF;${callbackUrl};${apiSecret.toUpperCase()}`
     const hash = crypto
       .createHash("sha1")
-      .update(hashString.toUpperCase()) // La chaîne doit être en MAJUSCULES avant le hash
+      .update(hashString) // NE PAS mettre toUpperCase() ici car callback_url doit rester intact
       .digest("hex")
-      .toLowerCase() // IMPORTANT: VitePay attend le hash en MINUSCULES !
+      .toLowerCase() // VitePay attend le hash en minuscules
 
     const buyerIp = getBuyerIpAddress(request)
     
     console.log("🔐 Hash généré:", {
-      hashString: hashString.toUpperCase(), // Afficher la chaîne réellement hashée
+      hashString, // Afficher la chaîne réellement hashée
       hash,
       orderId,
       amount100,
-      buyerIp
+      buyerIp,
+      planId,
+      planPrice
     })
 
     // Préparer les données pour VitePay - version exacte comme le projet de référence
