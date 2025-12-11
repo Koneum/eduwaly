@@ -41,6 +41,24 @@ function parseFeatures(features: string): string[] {
 export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
+
+  // Calcul du prix annuel avec 5% de réduction
+  const getAnnualPrice = (monthlyPrice: number) => {
+    if (monthlyPrice === 0) return 0
+    const yearlyTotal = monthlyPrice * 12
+    const discount = yearlyTotal * 0.05 // 5% de réduction
+    return Math.round(yearlyTotal - discount)
+  }
+
+  // Prix affiché selon la période
+  const getDisplayPrice = (price: number) => {
+    if (price === 0) return 'Gratuit'
+    if (billingPeriod === 'yearly') {
+      return getAnnualPrice(price).toLocaleString()
+    }
+    return price.toLocaleString()
+  }
 
   const getPlanIcon = (name: string) => {
     switch (name.toUpperCase()) {
@@ -117,6 +135,31 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
 
   return (
     <div className="space-y-8">
+      {/* Onglets Mensuel / Annuel */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted">
+          <Button
+            variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setBillingPeriod('monthly')}
+            className="rounded-lg"
+          >
+            Mensuel
+          </Button>
+          <Button
+            variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setBillingPeriod('yearly')}
+            className="rounded-lg relative"
+          >
+            Annuel
+            <Badge className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
+              -5%
+            </Badge>
+          </Button>
+        </div>
+      </div>
+
       {/* Comparaison des plans - Design amélioré */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {plans.map((plan) => {
@@ -166,10 +209,15 @@ export function UpgradeManager({ plans, currentPlan, schoolId }: UpgradeManagerP
                 {/* Prix - Design compact */}
                 <div className="text-center py-4 rounded-xl bg-muted/50">
                   <div className="text-3xl font-bold text-primary">
-                    {plan.price === 0 ? 'Gratuit' : `${plan.price.toLocaleString()}`}
+                    {getDisplayPrice(plan.price)}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {plan.price === 0 ? '30 jours d\'essai' : `FCFA/${plan.interval === 'MONTHLY' ? 'mois' : 'an'}`}
+                    {plan.price === 0 ? '30 jours d\'essai' : `FCFA/${billingPeriod === 'yearly' ? 'an' : 'mois'}`}
+                    {billingPeriod === 'yearly' && plan.price > 0 && (
+                      <span className="block text-[10px] line-through opacity-60 mt-0.5">
+                        {(plan.price * 12).toLocaleString()} FCFA/an
+                      </span>
+                    )}
                   </div>
                 </div>
 

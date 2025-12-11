@@ -60,9 +60,26 @@ export function PricingSection({ onSelectPlan, currentPlan, schoolType, schoolIn
   const [plans, setPlans] = useState<Plan[]>([])
   const [comparisonRows, setComparisonRows] = useState<ComparisonRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
 
   // Type effectif (fallback sur UNIVERSITY si non défini)
   const effectiveType = schoolType || 'UNIVERSITY'
+
+  // Calcul du prix annuel avec 5% de réduction
+  const getAnnualPrice = (monthlyPrice: number) => {
+    if (monthlyPrice === 0) return 0
+    const yearlyTotal = monthlyPrice * 12
+    const discount = yearlyTotal * 0.05
+    return Math.round(yearlyTotal - discount)
+  }
+
+  const getDisplayPrice = (price: number) => {
+    if (price === 0) return '0'
+    if (billingPeriod === 'yearly') {
+      return getAnnualPrice(price).toLocaleString()
+    }
+    return price.toLocaleString()
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,8 +107,10 @@ export function PricingSection({ onSelectPlan, currentPlan, schoolType, schoolIn
     fetchData()
   }, [])
 
-  // Filtrer les plans selon le type de structure
-  const filteredPlans = plans.filter(p => p.schoolType === effectiveType)
+  // Filtrer les plans selon le type de structure (avec fallback si aucun plan ne correspond)
+  const filteredPlans = plans.filter(p => p.schoolType === effectiveType).length > 0
+    ? plans.filter(p => p.schoolType === effectiveType)
+    : plans.filter(p => p.isActive)
   
   // Filtrer les lignes de comparaison selon le type
   const filteredComparisonRows = comparisonRows.filter(row => {
@@ -143,13 +162,43 @@ export function PricingSection({ onSelectPlan, currentPlan, schoolType, schoolIn
           <p className="text-muted-foreground">
             Plans pour {effectiveType === 'UNIVERSITY' ? 'Université' : 'Lycée'}
           </p>
+          
+          {/* Sélecteur Mensuel / Annuel */}
+          <div className="flex justify-center pt-2">
+            <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted">
+              <Button
+                variant={billingPeriod === 'monthly' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setBillingPeriod('monthly')}
+                className="rounded-lg"
+              >
+                Mensuel
+              </Button>
+              <Button
+                variant={billingPeriod === 'yearly' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setBillingPeriod('yearly')}
+                className="rounded-lg relative"
+              >
+                Annuel
+                <Badge className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
+                  -5%
+                </Badge>
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Plans Grid - Filtré automatiquement selon le type */}
         <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-12 justify-items-center max-w-5xl mx-auto">
-          {filteredPlans.filter(p => !p.name.includes('custom')).map((plan) => {
+          {filteredPlans.length === 0 && (
+            <div className="col-span-full text-center py-8 text-muted-foreground">
+              Aucun plan disponible. Veuillez réessayer plus tard.
+            </div>
+          )}
+          {filteredPlans.filter(p => !p.name.toLowerCase().includes('custom')).map((plan) => {
             const features = parseFeatures(plan.features)
-            const priceDisplay = `${Number(plan.price).toLocaleString()}`
+            const priceDisplay = getDisplayPrice(plan.price)
             const isPopular = plan.isPopular
             const isCurrent = currentPlan === plan.name
             
@@ -190,9 +239,14 @@ export function PricingSection({ onSelectPlan, currentPlan, schoolType, schoolIn
                   <div className="flex items-baseline gap-1 mb-1">
                     <span className="text-3xl font-bold">{priceDisplay}</span>
                     <span className="text-sm text-muted-foreground">FCFA</span>
-                    <span className="text-sm text-muted-foreground">/{plan.interval === 'MONTHLY' ? 'mois' : 'an'}</span>
+                    <span className="text-sm text-muted-foreground">/{billingPeriod === 'yearly' ? 'an' : 'mois'}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Facturé {plan.interval === 'MONTHLY' ? 'mensuellement' : 'annuellement'}</p>
+                  {billingPeriod === 'yearly' && plan.price > 0 && (
+                    <p className="text-xs text-muted-foreground line-through">
+                      {(plan.price * 12).toLocaleString()} FCFA/an
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">Facturé {billingPeriod === 'yearly' ? 'annuellement' : 'mensuellement'}</p>
                 </div>
 
                 {/* Features */}

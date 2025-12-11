@@ -1,23 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import PlansManager from "@/components/super-admin/plans-manager"
+import PlansManager, { Plan } from "@/components/super-admin/plans-manager"
 import ComparisonTableManager from "@/components/super-admin/comparison-table-manager"
-
-interface Plan {
-  id: string
-  name: string
-  displayName: string
-  price: number
-  interval: string
-  description: string | null
-  features: string | string[] | null
-  modulesIncluded: string | string[] | null
-  maxStudents: number
-  maxTeachers: number
-  isActive: boolean
-  isPopular: boolean
-}
 
 interface SimplePlan {
   id: string
@@ -34,8 +19,8 @@ interface PlansClientWrapperProps {
 }
 
 export default function PlansClientWrapper({ initialPlans, simplePlans, activeTab }: PlansClientWrapperProps) {
-  const [plans, setPlans] = useState(initialPlans)
-  const [simplePlansState, setSimplePlansState] = useState(simplePlans)
+  const [plans, setPlans] = useState<Plan[]>(initialPlans)
+  const [simplePlansState, setSimplePlansState] = useState<SimplePlan[]>(simplePlans)
 
   // Fonction pour recharger les plans
   const handlePlansUpdate = async () => {

@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 // Types pour les modules
 type ModuleKey = keyof typeof MODULE_STRUCTURE
 
-interface Plan {
+export interface Plan {
   id: string
   name: string
   displayName: string
