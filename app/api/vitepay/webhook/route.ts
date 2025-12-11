@@ -51,21 +51,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Format: SHA1("order_id;amount_100;currency_code;api_secret")
+    // Doc VitePay: order_id en majuscules (si non numérique), currency_code en majuscules
+    // Le résultat SHA1 doit être en MAJUSCULES selon la doc
     const hashString = `${order_id};${amount_100};${currency_code};${apiSecret}`
     const calculatedAuthenticity = crypto
       .createHash("sha1")
-      .update(hashString.toUpperCase()) // La chaîne doit être en MAJUSCULES avant le hash
+      .update(hashString.toUpperCase()) // Toute la chaîne en majuscules
       .digest("hex")
-      .toLowerCase() // IMPORTANT: VitePay envoie le hash en minuscules !
+      .toUpperCase() // Doc VitePay: résultat SHA1 en MAJUSCULES pour callback
 
     console.log('🔐 Vérification signature:', {
       received: authenticity,
       calculated: calculatedAuthenticity,
-      hashString
+      hashStringUppercase: hashString.toUpperCase(),
+      match: authenticity?.toUpperCase() === calculatedAuthenticity
     })
 
-    // 2. Comparer la signature calculée à celle transmise par VitePay (case-insensitive)
-    if (authenticity?.toLowerCase() !== calculatedAuthenticity) {
+    // 2. Comparer la signature (case-insensitive pour être sûr)
+    if (authenticity?.toUpperCase() !== calculatedAuthenticity) {
       console.error('❌ Signature invalide')
       return NextResponse.json({ 
         status: '0', 
@@ -74,8 +77,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Vérifier que le numéro de commande est valide
-    // Format attendu: SUB_schoolIdShort_planIdShort_timestamp
-    if (!order_id || !order_id.startsWith('SUB_')) {
+    // Format attendu: SUB_schoolIdShort_planIdShort_timestamp (peut être en majuscules)
+    const orderIdUpper = order_id.toUpperCase()
+    if (!orderIdUpper.startsWith('SUB_')) {
       console.error('❌ Order ID invalide (doit commencer par SUB_):', order_id)
       return NextResponse.json({ 
         status: '0', 
@@ -84,12 +88,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Extraire les IDs courts depuis order_id (format: SUB_schoolIdShort_planIdShort_timestamp)
+    // IMPORTANT: Les CUIDs Prisma sont en minuscules, donc on convertit en lowercase
     const orderParts = order_id.split('_')
     // orderParts[0] = 'SUB', [1] = schoolIdShort (8 chars), [2] = planIdShort (8 chars), [3] = timestamp
-    const schoolIdShort = orderParts[1]
-    const planIdShort = orderParts[2]
+    const schoolIdShort = orderParts[1]?.toLowerCase() // Convertir en minuscules pour matcher les CUIDs
+    const planIdShort = orderParts[2]?.toLowerCase()
     
-    console.log('📦 Extraction order_id:', { schoolIdShort, planIdShort, orderParts })
+    console.log('📦 Extraction order_id:', { 
+      orderIdOriginal: order_id,
+      schoolIdShort, 
+      planIdShort, 
+      orderParts 
+    })
     
     if (!schoolIdShort) {
       console.error('❌ School ID extrait invalide')
@@ -109,15 +119,19 @@ export async function POST(request: NextRequest) {
       // Paiement réussi - Activer/mettre à jour l'abonnement
       try {
         // Rechercher l'école par les 8 derniers caractères de son ID
+        console.log('🔍 Recherche école avec suffix:', schoolIdShort)
         const school = await prisma.school.findFirst({
           where: { id: { endsWith: schoolIdShort } },
           include: { subscription: { include: { plan: true } } }
         })
+        console.log('🏫 École trouvée:', school ? { id: school.id, name: school.name } : null)
         
         // Rechercher le plan par les 8 derniers caractères de son ID
+        console.log('🔍 Recherche plan avec suffix:', planIdShort)
         const plan = planIdShort ? await prisma.plan.findFirst({
           where: { id: { endsWith: planIdShort } }
         }) : null
+        console.log('📋 Plan trouvé:', plan ? { id: plan.id, name: plan.name } : null)
 
         if (!school) {
           console.error('❌ École non trouvée avec suffix:', schoolIdShort)
@@ -243,10 +257,12 @@ export async function POST(request: NextRequest) {
       
       // Mettre à jour le statut si abonnement existe
       try {
+        // schoolIdShort est déjà en minuscules (converti plus haut)
         const failedSchool = await prisma.school.findFirst({
           where: { id: { endsWith: schoolIdShort } },
           include: { subscription: true }
         })
+        console.log('🔍 Recherche école (échec):', { schoolIdShort, found: !!failedSchool })
 
         if (failedSchool?.subscription) {
           await prisma.subscription.update({
