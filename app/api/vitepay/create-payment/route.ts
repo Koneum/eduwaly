@@ -157,9 +157,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Générer un ID de commande unique avec planId pour le récupérer dans le webhook
-    // Format: schoolId_planId_timestamp
-    const orderId = `${schoolId}_${planId}_${Date.now()}`
+    // Générer un ID de commande unique mais COURT (VitePay a une limite)
+    // Format: SUB_schoolIdShort_planIdShort_timestamp
+    // On utilise les 8 derniers caractères des IDs pour garder l'order_id court
+    const schoolIdShort = schoolId.slice(-8)
+    const planIdShort = planId.slice(-8)
+    const orderId = `SUB_${schoolIdShort}_${planIdShort}_${Date.now()}`
+    
+    console.log("📦 Order ID généré:", { orderId, schoolIdShort, planIdShort, fullSchoolId: schoolId, fullPlanId: planId })
 
     // Montant en centimes (multiplier par 100)
     // VitePay a un montant minimum (généralement 100 XOF)

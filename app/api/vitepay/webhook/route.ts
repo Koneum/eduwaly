@@ -74,23 +74,24 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Vérifier que le numéro de commande est valide
-    // Format attendu: schoolId_planId_timestamp
-    if (!order_id || !order_id.includes('_')) {
-      console.error('❌ Order ID invalide:', order_id)
+    // Format attendu: SUB_schoolIdShort_planIdShort_timestamp
+    if (!order_id || !order_id.startsWith('SUB_')) {
+      console.error('❌ Order ID invalide (doit commencer par SUB_):', order_id)
       return NextResponse.json({ 
         status: '0', 
         message: 'Order ID invalide' 
       }, { status: 400 })
     }
 
-    // Extraire schoolId et planId depuis order_id (format: schoolId_planId_timestamp)
+    // Extraire les IDs courts depuis order_id (format: SUB_schoolIdShort_planIdShort_timestamp)
     const orderParts = order_id.split('_')
-    const schoolId = orderParts[0]
-    const planId = orderParts.length >= 2 ? orderParts[1] : null
+    // orderParts[0] = 'SUB', [1] = schoolIdShort (8 chars), [2] = planIdShort (8 chars), [3] = timestamp
+    const schoolIdShort = orderParts[1]
+    const planIdShort = orderParts[2]
     
-    console.log('📦 Extraction order_id:', { schoolId, planId, orderParts })
+    console.log('📦 Extraction order_id:', { schoolIdShort, planIdShort, orderParts })
     
-    if (!schoolId) {
+    if (!schoolIdShort) {
       console.error('❌ School ID extrait invalide')
       return NextResponse.json({ 
         status: '0', 
@@ -102,32 +103,34 @@ export async function POST(request: NextRequest) {
     const isSuccess = success === '1'
     const isFailure = failure === '1'
 
-    console.log('🎯 Traitement paiement:', { schoolId, isSuccess, isFailure })
+    console.log('🎯 Traitement paiement:', { schoolIdShort, planIdShort, isSuccess, isFailure })
 
     if (isSuccess) {
       // Paiement réussi - Activer/mettre à jour l'abonnement
       try {
-        // Récupérer l'école et le plan
-        const [school, plan] = await Promise.all([
-          prisma.school.findUnique({
-            where: { id: schoolId },
-            include: { subscription: { include: { plan: true } } }
-          }),
-          planId ? prisma.plan.findUnique({ where: { id: planId } }) : null
-        ])
+        // Rechercher l'école par les 8 derniers caractères de son ID
+        const school = await prisma.school.findFirst({
+          where: { id: { endsWith: schoolIdShort } },
+          include: { subscription: { include: { plan: true } } }
+        })
+        
+        // Rechercher le plan par les 8 derniers caractères de son ID
+        const plan = planIdShort ? await prisma.plan.findFirst({
+          where: { id: { endsWith: planIdShort } }
+        }) : null
 
         if (!school) {
-          console.error('❌ École non trouvée:', schoolId)
+          console.error('❌ École non trouvée avec suffix:', schoolIdShort)
           return NextResponse.json({ 
             status: '0', 
             message: 'École non trouvée' 
           }, { status: 404 })
         }
 
-        // Utiliser le plan extrait de l'order_id ou un plan par défaut
-        const targetPlanId = planId || plan?.id || school.subscription?.planId
+        // Utiliser le plan trouvé ou le plan actuel de l'école
+        const targetPlanId = plan?.id || school.subscription?.planId
         if (!targetPlanId) {
-          console.error('❌ Plan non trouvé:', planId)
+          console.error('❌ Plan non trouvé avec suffix:', planIdShort)
           return NextResponse.json({ 
             status: '0', 
             message: 'Plan non trouvé' 
@@ -179,7 +182,7 @@ export async function POST(request: NextRequest) {
           // Mettre à jour les limites de l'école selon le nouveau plan
           if (targetPlan) {
             await prisma.school.update({
-              where: { id: schoolId },
+              where: { id: school.id },
               data: {
                 maxStudents: targetPlan.maxStudents,
                 maxTeachers: targetPlan.maxTeachers
@@ -188,7 +191,7 @@ export async function POST(request: NextRequest) {
           }
           
           console.log('✅ Abonnement mis à jour:', {
-            schoolId,
+            schoolId: school.id,
             planId: targetPlanId,
             newPeriodEnd,
             isUpgrade: school.subscription.planId !== targetPlanId
@@ -197,7 +200,7 @@ export async function POST(request: NextRequest) {
           // Créer un nouvel abonnement
           const newSubscription = await prisma.subscription.create({
             data: {
-              schoolId: schoolId,
+              schoolId: school.id,
               planId: targetPlanId,
               status: 'ACTIVE',
               currentPeriodStart: now,
@@ -208,7 +211,7 @@ export async function POST(request: NextRequest) {
           // Mettre à jour les limites de l'école
           if (targetPlan) {
             await prisma.school.update({
-              where: { id: schoolId },
+              where: { id: school.id },
               data: {
                 maxStudents: targetPlan.maxStudents,
                 maxTeachers: targetPlan.maxTeachers,
@@ -218,7 +221,7 @@ export async function POST(request: NextRequest) {
           }
           
           console.log('✅ Nouvel abonnement créé:', {
-            schoolId,
+            schoolId: school.id,
             planId: targetPlanId,
             subscriptionId: newSubscription.id
           })
@@ -240,14 +243,14 @@ export async function POST(request: NextRequest) {
       
       // Mettre à jour le statut si abonnement existe
       try {
-        const school = await prisma.school.findUnique({
-          where: { id: schoolId },
+        const failedSchool = await prisma.school.findFirst({
+          where: { id: { endsWith: schoolIdShort } },
           include: { subscription: true }
         })
 
-        if (school?.subscription) {
+        if (failedSchool?.subscription) {
           await prisma.subscription.update({
-            where: { id: school.subscription.id },
+            where: { id: failedSchool.subscription.id },
             data: {
               status: 'CANCELED', // Corrigé: CANCELED au lieu de CANCELLED
               updatedAt: new Date()
