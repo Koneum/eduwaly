@@ -12,6 +12,7 @@ interface Plan {
   interval: string
   description: string | null
   features: string | string[] | null
+  modulesIncluded: string | string[] | null
   maxStudents: number
   maxTeachers: number
   isActive: boolean

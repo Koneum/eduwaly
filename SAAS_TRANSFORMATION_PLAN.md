@@ -696,4 +696,24 @@ src/
 
 **🎉 L'application Schooly est feature-complete pour la version 1.0.**
 
-Dernière mise à jour: 9 décembre 2025
+---
+
+## 14. Corrections Build (12 décembre 2025)
+
+### 14.1 Erreur TypeScript corrigée
+
+| Fichier | Problème | Solution |
+|---------|----------|----------|
+| `src/features/super-admin/components/plans-client-wrapper.tsx` | Type `Plan` incomplet (propriété `modulesIncluded` manquante) | Ajout de `modulesIncluded: string \| string[] \| null` dans l'interface `Plan` |
+
+### 14.2 Résultat Build
+
+- **Prisma Client**: 7.1.0 ✅
+- **Next.js**: 16.0.8 (Turbopack) ✅
+- **Compilation**: Succès en ~53s
+- **TypeScript**: 0 erreur ✅
+- **Routes générées**: 189 (statiques + dynamiques)
+
+---
+
+Dernière mise à jour: 12 décembre 2025
