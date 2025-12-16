@@ -71,7 +71,7 @@ export async function GET() {
       prisma.subscription.count({ where: { createdAt: { gte: startOfSemester }, status: 'ACTIVE' } }),
       prisma.subscription.count({ where: { createdAt: { gte: startOfYear }, status: 'ACTIVE' } }),
       // Désabonnements
-      prisma.subscription.count({ where: { status: 'CANCELLED' } }),
+      prisma.subscription.count({ where: { status: 'CANCELED' } }),
       // Utilisateurs actifs
       prisma.enseignant.count({ where: { updatedAt: { gte: last30Days } } }),
       prisma.parent.count({ where: { updatedAt: { gte: last30Days } } }),
