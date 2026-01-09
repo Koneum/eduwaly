@@ -51,17 +51,8 @@ export async function POST(
       student.school.name
     )
 
-    const schoolsBaseDomain = process.env.NEXT_PUBLIC_SCHOOLS_BASE_DOMAIN || 'educwaly.com'
-    const rawSigle = (student.school.shortName || student.school.subdomain || '').trim()
-    const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const host = request.headers.get('host') || ''
-    const isLocal = host.includes('localhost')
-      || defaultAppUrl.includes('localhost')
-      || schoolsBaseDomain.includes('localhost')
-
-    const enrollmentUrl = !isLocal && rawSigle
-      ? `https://${rawSigle.toLowerCase()}.${schoolsBaseDomain}/enroll`
-      : `${defaultAppUrl}/enroll`
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://educwaly.com'
+    const enrollmentUrl = `${baseUrl}/enroll?school=${student.schoolId}`
 
     // Préparer le contenu de l'email
     const emailContent = {

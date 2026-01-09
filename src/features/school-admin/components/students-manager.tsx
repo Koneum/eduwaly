@@ -176,13 +176,8 @@ export default function StudentsManager({ students, schoolId, schoolType, filier
   const [importFile, setImportFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
 
-  const schoolsBaseDomain = process.env.NEXT_PUBLIC_SCHOOLS_BASE_DOMAIN || 'educwaly.com'
-  const rawSigle = (schoolShortName || schoolSubdomain || '').trim()
-  const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const isLocal = defaultAppUrl.includes('localhost') || schoolsBaseDomain.includes('localhost')
-  const enrollmentUrl = !isLocal && rawSigle
-    ? `https://${rawSigle.toLowerCase()}.${schoolsBaseDomain}/enroll`
-    : `${defaultAppUrl}/enroll`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://educwaly.com'
+  const enrollmentUrl = `${baseUrl}/enroll?school=${schoolId}`
 
   // Fonction pour vérifier si un frais est complètement payé
   const isFeeFullyPaid = (student: Student, feeId: string): boolean => {

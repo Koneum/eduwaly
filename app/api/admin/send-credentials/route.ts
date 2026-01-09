@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Préparer les données pour l'email
-    const enrollmentUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/enroll?code=${student.enrollmentId}`
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://educwaly.com'
+    const enrollmentUrl = `${baseUrl}/enroll?school=${student.schoolId}`
     
     // Envoyer l'email via Brevo
     const emailResult = await sendEnrollmentCredentials(

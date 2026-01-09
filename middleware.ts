@@ -79,6 +79,33 @@ export async function middleware(request: NextRequest) {
   const method = request.method
 
   // ====================================================
+  // 0. Gérer les requêtes OPTIONS (CORS preflight)
+  // ====================================================
+  if (method === 'OPTIONS') {
+    const origin = request.headers.get('origin') || ''
+    const allowedOrigins = [
+      'https://educwaly.com',
+      'https://www.educwaly.com',
+      'https://eduwaly.vercel.app',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ]
+    
+    const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
+    
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': corsOrigin,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+      },
+    })
+  }
+
+  // ====================================================
   // 1. Ajouter les headers de sécurité à TOUTES les réponses
   // ====================================================
   const response = NextResponse.next()
