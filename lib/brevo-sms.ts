@@ -63,7 +63,7 @@ export async function sendSms(params: BrevoSmsParams): Promise<BrevoSmsResponse>
     const normalizedPhone = normalizePhoneNumber(params.to)
     console.log(`[BREVO SMS] Envoi vers: ${normalizedPhone}`)
 
-    const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+    const response = await fetch('https://api.brevo.com/v3/transactionalSMS/send', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
@@ -75,6 +75,7 @@ export async function sendSms(params: BrevoSmsParams): Promise<BrevoSmsResponse>
         recipient: normalizedPhone,
         content: params.content,
         type: 'transactional',
+        unicodeEnabled: true,
       }),
     })
 
