@@ -187,25 +187,42 @@ export default function FilieresPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer cette ${schoolType === 'UNIVERSITY' ? 'filière' : 'classe'} ?`)) return;
+  const handleDelete = async (id: string, cascade: boolean = false) => {
+    const entityName = schoolType === 'UNIVERSITY' ? 'filière' : 'classe';
+    
+    if (!cascade && !confirm(`Êtes-vous sûr de vouloir supprimer cette ${entityName} ?`)) return;
 
     try {
-      const response = await fetch(`/api/filieres/${id}`, {
+      const url = cascade ? `/api/filieres/${id}?cascade=true` : `/api/filieres/${id}`;
+      const response = await fetch(url, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Si la filière a des dépendances et peut être supprimée en cascade
+        if (data.canCascade) {
+          const confirmCascade = confirm(
+            `${data.error}\n\nVoulez-vous supprimer cette ${entityName} avec tous ses modules et emplois du temps associés ?`
+          );
+          if (confirmCascade) {
+            return handleDelete(id, true);
+          }
+          return;
+        }
+        throw new Error(data.error || 'Erreur lors de la suppression');
+      }
 
       setFilieres(filieres.filter(f => f.id !== id));
       toast({
         title: "Succès",
-        description: `${schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'} supprimée avec succès`
+        description: `${schoolType === 'UNIVERSITY' ? 'Filière' : 'Classe'} supprimée avec succès${data.cascade ? ' (avec ses dépendances)' : ''}`
       });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: "Erreur lors de la suppression",
         description: error instanceof Error ? error.message : "Une erreur est survenue"
       });
       console.error('Error:', error);

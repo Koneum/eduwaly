@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
     const studentId = searchParams.get('studentId')
     const date = searchParams.get('date')
 
-    const where: Record<string, unknown> = {}
+    // Filtrer par école (sauf SUPER_ADMIN)
+    const where: Record<string, unknown> = user.role === 'SUPER_ADMIN' 
+      ? {} 
+      : { student: { schoolId: user.schoolId } }
     
     if (studentId) where.studentId = studentId
     if (date) where.date = new Date(date)
@@ -67,7 +70,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser()
-    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN')) {
+    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -76,6 +79,15 @@ export async function POST(request: NextRequest) {
 
     if (!studentId || !date) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
+    }
+
+    // Vérifier que l'étudiant appartient à l'école de l'utilisateur
+    const student = await prisma.student.findUnique({ where: { id: studentId } })
+    if (!student) {
+      return NextResponse.json({ error: 'Étudiant non trouvé' }, { status: 404 })
+    }
+    if (user.role !== 'SUPER_ADMIN' && student.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     const absence = await prisma.absence.create({
@@ -107,7 +119,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await getAuthUser()
-    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN')) {
+    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -116,6 +128,18 @@ export async function PUT(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+    }
+
+    // Vérifier que l'absence appartient à l'école
+    const existingAbsence = await prisma.absence.findUnique({
+      where: { id },
+      include: { student: true }
+    })
+    if (!existingAbsence) {
+      return NextResponse.json({ error: 'Absence non trouvée' }, { status: 404 })
+    }
+    if (user.role !== 'SUPER_ADMIN' && existingAbsence.student.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     const absence = await prisma.absence.update({
@@ -137,7 +161,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await getAuthUser()
-    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN')) {
+    if (!user || (user.role !== 'TEACHER' && user.role !== 'SCHOOL_ADMIN' && user.role !== 'SUPER_ADMIN')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -146,6 +170,18 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+    }
+
+    // Vérifier que l'absence appartient à l'école
+    const absence = await prisma.absence.findUnique({
+      where: { id },
+      include: { student: true }
+    })
+    if (!absence) {
+      return NextResponse.json({ error: 'Absence non trouvée' }, { status: 404 })
+    }
+    if (user.role !== 'SUPER_ADMIN' && absence.student.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     await prisma.absence.delete({

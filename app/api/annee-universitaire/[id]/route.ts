@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth-utils';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -39,6 +45,11 @@ export async function GET(
       );
     }
 
+    // Vérifier l'accès par schoolId
+    if (user.role !== 'SUPER_ADMIN' && anneeUniversitaire.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
+    }
+
     return NextResponse.json(anneeUniversitaire);
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'année universitaire:', error);
@@ -54,6 +65,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const resolvedParams = await Promise.resolve(params);
     const id = resolvedParams.id;
     const data = await request.json();
@@ -63,6 +79,15 @@ export async function PUT(
         { error: 'ID de l\'année universitaire manquant' },
         { status: 400 }
       );
+    }
+
+    // Vérifier que l'année existe et appartient à l'école
+    const existingAnnee = await prisma.anneeUniversitaire.findUnique({ where: { id } });
+    if (!existingAnnee) {
+      return NextResponse.json({ error: 'Année non trouvée' }, { status: 404 });
+    }
+    if (user.role !== 'SUPER_ADMIN' && existingAnnee.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
     }
 
     // Vérifier les champs requis
@@ -102,19 +127,18 @@ export async function PUT(
       );
     }
 
-    // Vérifier si l'année existe déjà pour un autre ID
+    // Vérifier si l'année existe déjà DANS CETTE ÉCOLE
     const anneeExistante = await prisma.anneeUniversitaire.findFirst({
       where: {
-        AND: [
-          { annee: data.annee },
-          { id: { not: id } }
-        ]
+        annee: data.annee,
+        schoolId: existingAnnee.schoolId,
+        id: { not: id }
       }
     });
 
     if (anneeExistante) {
       return NextResponse.json(
-        { error: 'Cette année universitaire existe déjà' },
+        { error: 'Cette année universitaire existe déjà dans votre établissement' },
         { status: 400 }
       );
     }
@@ -143,6 +167,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -165,6 +194,11 @@ export async function DELETE(
         { error: 'Année universitaire non trouvée' },
         { status: 404 }
       );
+    }
+
+    // Vérifier l'accès par schoolId
+    if (user.role !== 'SUPER_ADMIN' && anneeUniversitaire.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
     }
 
     if (anneeUniversitaire.emplois.length > 0) {

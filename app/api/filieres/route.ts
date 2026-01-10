@@ -1,10 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth-utils';
 
 export async function GET() {
   try {
-    // ✅ OPTIMISÉ: Liste légère avec _count au lieu de charger toutes les relations
+    const user = await getAuthUser();
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
+    // Filtrer par schoolId de l'utilisateur (sauf SUPER_ADMIN qui voit tout)
+    const whereClause = user.role === 'SUPER_ADMIN' 
+      ? {} 
+      : { schoolId: user.schoolId! };
+
     const filieres = await prisma.filiere.findMany({
+      where: whereClause,
       select: {
         id: true,
         nom: true,
@@ -34,40 +46,64 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const user = await getAuthUser();
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
 
-    // Vérifier que le nom et schoolId sont présents
-    if (!data.nom || !data.schoolId) {
+    const data = await request.json();
+    console.log('[FILIERES POST] Data reçue:', data);
+    console.log('[FILIERES POST] User schoolId:', user.schoolId);
+
+    // Utiliser le schoolId de l'utilisateur si non fourni
+    const schoolId = data.schoolId || user.schoolId;
+
+    if (!data.nom) {
       return NextResponse.json(
-        { error: 'Le nom de la filière et l\'école sont requis' },
+        { error: 'Le nom de la filière est requis' },
         { status: 400 }
       );
     }
 
-    // Vérifier si la filière existe déjà
+    if (!schoolId) {
+      return NextResponse.json(
+        { error: 'Aucune école associée à votre compte' },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier que l'utilisateur a accès à cette école
+    if (user.role !== 'SUPER_ADMIN' && user.schoolId !== schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé à cette école' }, { status: 403 });
+    }
+
+    // Vérifier si la filière existe déjà DANS CETTE ÉCOLE
     const existingFiliere = await prisma.filiere.findFirst({
       where: {
-        nom: data.nom
+        nom: data.nom,
+        schoolId: schoolId
       }
     });
 
     if (existingFiliere) {
+      console.log('[FILIERES POST] Filière existante trouvée:', existingFiliere);
       return NextResponse.json(
-        { error: 'Cette filière existe déjà' },
+        { error: `La filière "${data.nom}" existe déjà dans votre établissement` },
         { status: 400 }
       );
     }
 
-    // Créer la nouvelle filière
     const filiere = await prisma.filiere.create({
       data: {
         nom: data.nom,
-        schoolId: data.schoolId,
+        schoolId: schoolId,
       }
     });
 
+    console.log('[FILIERES POST] Filière créée:', filiere);
     return NextResponse.json(filiere);
   } catch (error) {
     console.error('Erreur lors de la création de la filière:', error);

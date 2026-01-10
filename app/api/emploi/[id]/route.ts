@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth-utils";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const { id } = await context.params;
 
     const emploi = await prisma.emploiDuTemps.findUnique({
@@ -29,6 +35,11 @@ export async function GET(
       );
     }
 
+    // Vérifier l'accès par schoolId
+    if (user.role !== 'SUPER_ADMIN' && emploi.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
+
     return NextResponse.json(emploi);
   } catch (error) {
     console.error("Error:", error);
@@ -44,8 +55,22 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const { id } = await context.params;
     const data = await request.json();
+
+    // Vérifier que l'emploi existe et appartient à l'école de l'utilisateur
+    const existingEmploi = await prisma.emploiDuTemps.findUnique({ where: { id } });
+    if (!existingEmploi) {
+      return NextResponse.json({ error: "Emploi non trouvé" }, { status: 404 });
+    }
+    if (user.role !== 'SUPER_ADMIN' && existingEmploi.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
 
     // Vérifier les champs requis
     const requiredFields = {
@@ -244,7 +269,21 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const { id } = await context.params;
+
+    // Vérifier que l'emploi existe et appartient à l'école
+    const emploi = await prisma.emploiDuTemps.findUnique({ where: { id } });
+    if (!emploi) {
+      return NextResponse.json({ error: "Emploi non trouvé" }, { status: 404 });
+    }
+    if (user.role !== 'SUPER_ADMIN' && emploi.schoolId !== user.schoolId) {
+      return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
+    }
 
     await prisma.emploiDuTemps.delete({
       where: { id },

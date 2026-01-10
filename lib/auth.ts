@@ -82,6 +82,10 @@ export const auth = betterAuth({
         type: 'string',
         required: false,
       },
+      jobTitle: {
+        type: 'string',
+        required: false,
+      },
     },
   },
   session: {

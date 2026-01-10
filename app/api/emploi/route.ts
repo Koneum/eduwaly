@@ -1,19 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUser } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const url = new URL(request.url);
     const isRecent = url.searchParams.get('recent') === 'true';
-    const schoolId = url.searchParams.get('schoolId');
+    const schoolIdParam = url.searchParams.get('schoolId');
 
-  // Si schoolId est fourni, filtrer par école
-  const whereClause: { schoolId?: string; anneeUnivId?: string } = {};
+    // Utiliser le schoolId de l'utilisateur (SUPER_ADMIN peut voir tout)
+    const schoolId = user.role === 'SUPER_ADMIN' ? schoolIdParam : user.schoolId;
+
+    const whereClause: { schoolId?: string; anneeUnivId?: string } = {};
     
     if (schoolId) {
       whereClause.schoolId = schoolId;
-    } else {
-      // Récupérer l'année universitaire en cours si pas de schoolId
+    } else if (user.role === 'SUPER_ADMIN' && !schoolIdParam) {
+      // SUPER_ADMIN sans schoolId spécifié - récupérer par année
       const anneeUniv = await prisma.anneeUniversitaire.findFirst({
         orderBy: { createdAt: 'desc' }
       });
@@ -120,7 +128,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+
     const data = await request.json();
+    const schoolId = data.schoolId || user.schoolId;
+
+    // Vérifier l'accès à l'école
+    if (user.role !== 'SUPER_ADMIN' && user.schoolId !== schoolId) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
+    }
 
     // Vérifier les champs requis
     const requiredFields = {
@@ -236,10 +255,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Vérifier que schoolId est fourni
-    if (!data.schoolId) {
+    // Vérifier que schoolId est disponible
+    if (!schoolId) {
       return NextResponse.json(
-        { error: 'Le schoolId est requis' },
+        { error: 'Aucune école associée' },
         { status: 400 }
       );
     }
@@ -247,7 +266,7 @@ export async function POST(request: NextRequest) {
     // Créer l'emploi du temps
     const emploi = await prisma.emploiDuTemps.create({
       data: {
-        schoolId: data.schoolId,
+        schoolId: schoolId,
         moduleId: data.moduleId,
         enseignantId: data.enseignantId,
         filiereId: moduleRecord.filiereId,
